@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"bytes"
 	"net/http"
 	"strings"
 
-	"github.com/yuin/goldmark"
 	"golang.org/x/crypto/bcrypt"
 	"myapp/internal/db"
 	sess "myapp/internal/session"
@@ -17,7 +15,9 @@ type AdminHandler struct {
 }
 
 func (h *AdminHandler) LoginPage(w http.ResponseWriter, r *http.Request) {
-	pages.Login("").Render(r.Context(), w)
+	if err := pages.Login("").Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func (h *AdminHandler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +26,9 @@ func (h *AdminHandler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.Q.GetUserByEmail(r.Context(), email)
 	if err != nil || bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)) != nil {
-		pages.Login("Invalid credentials.").Render(r.Context(), w)
+		if err := pages.Login("Invalid credentials.").Render(r.Context(), w); err != nil {
+			http.Error(w, "Failed to render page", http.StatusInternalServerError)
+		}
 		return
 	}
 	sess.SetUserID(w, r, user.ID) //nolint:errcheck
@@ -39,7 +41,9 @@ func (h *AdminHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	pages.Dashboard(leads).Render(r.Context(), w)
+	if err := pages.Dashboard(leads).Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func (h *AdminHandler) Logout(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +52,9 @@ func (h *AdminHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) BlogNewPage(w http.ResponseWriter, r *http.Request) {
-	pages.BlogEditor(db.BlogPost{}, false).Render(r.Context(), w)
+	if err := pages.BlogEditor(db.BlogPost{}, false).Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func (h *AdminHandler) BlogCreate(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +67,9 @@ func (h *AdminHandler) BlogCreate(w http.ResponseWriter, r *http.Request) {
 		Body:     r.FormValue("body"),
 	}
 	if err := h.Q.CreateBlogPost(r.Context(), params); err != nil {
-		pages.BlogEditor(db.BlogPost{Slug: params.Slug, Title: params.Title, Summary: params.Summary, Category: params.Category, Date: params.Date, Body: params.Body}, false).Render(r.Context(), w)
+		if err := pages.BlogEditor(db.BlogPost{Slug: params.Slug, Title: params.Title, Summary: params.Summary, Category: params.Category, Date: params.Date, Body: params.Body}, false).Render(r.Context(), w); err != nil {
+			http.Error(w, "Failed to render page", http.StatusInternalServerError)
+		}
 		return
 	}
 	http.Redirect(w, r, "/blog", http.StatusSeeOther)
@@ -74,7 +82,9 @@ func (h *AdminHandler) BlogEditPage(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	pages.BlogEditor(post, true).Render(r.Context(), w)
+	if err := pages.BlogEditor(post, true).Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func (h *AdminHandler) BlogUpdate(w http.ResponseWriter, r *http.Request) {
@@ -92,10 +102,4 @@ func (h *AdminHandler) BlogUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/blog", http.StatusSeeOther)
-}
-
-func renderMarkdown(src string) string {
-	var buf bytes.Buffer
-	goldmark.Convert([]byte(src), &buf) //nolint:errcheck
-	return buf.String()
 }

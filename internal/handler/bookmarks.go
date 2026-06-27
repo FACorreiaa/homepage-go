@@ -17,7 +17,9 @@ type BookmarksHandler struct {
 }
 
 func (h *BookmarksHandler) List(w http.ResponseWriter, r *http.Request) {
-	pages.Bookmarks(h.Index.Sidebar, len(h.Index.Files)).Render(r.Context(), w)
+	if err := pages.Bookmarks(h.Index.Sidebar, len(h.Index.Files)).Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func (h *BookmarksHandler) Show(w http.ResponseWriter, r *http.Request) {
@@ -43,10 +45,15 @@ func (h *BookmarksHandler) Show(w http.ResponseWriter, r *http.Request) {
 	resolved := service.ResolveWikilinks(cleaned)
 
 	var buf bytes.Buffer
-	goldmark.Convert([]byte(resolved), &buf) //nolint:errcheck
+	if err := goldmark.Convert([]byte(resolved), &buf); err != nil {
+		http.Error(w, "render error", http.StatusInternalServerError)
+		return
+	}
 
 	isHTMX := r.Header.Get("HX-Request") == "true"
-	pages.BookmarkPost(found.Name, found.Category, buf.String(), h.Index.Sidebar, slug, isHTMX).Render(r.Context(), w)
+	if err := pages.BookmarkPost(found.Name, found.Category, buf.String(), h.Index.Sidebar, slug, isHTMX).Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func (h *BookmarksHandler) GraphData(w http.ResponseWriter, r *http.Request) {

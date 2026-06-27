@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/google/uuid"
 	htmx "github.com/angelofallars/htmx-go"
+	"github.com/google/uuid"
 	"myapp/internal/db"
 	"myapp/internal/service"
 	"myapp/ui/pages"
@@ -21,15 +21,22 @@ type ProposalHandler struct {
 }
 
 func (h *ProposalHandler) Form(w http.ResponseWriter, r *http.Request) {
-	pages.Proposal("", "").Render(r.Context(), w)
+	if err := pages.Proposal("", "").Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func (h *ProposalHandler) Submit(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
 
 	// Honeypot
 	if r.FormValue("website") != "" {
-		pages.ProposalSuccess().Render(r.Context(), w)
+		if err := pages.ProposalSuccess().Render(r.Context(), w); err != nil {
+			http.Error(w, "Failed to render page", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -40,17 +47,25 @@ func (h *ProposalHandler) Submit(w http.ResponseWriter, r *http.Request) {
 
 	if name == "" || email == "" || projectType == "" || details == "" {
 		if htmx.IsHTMX(r) {
-			pages.ProposalResult("", "Please fill out all required fields.").Render(r.Context(), w)
+			if err := pages.ProposalResult("", "Please fill out all required fields.").Render(r.Context(), w); err != nil {
+				http.Error(w, "Failed to render page", http.StatusInternalServerError)
+			}
 		} else {
-			pages.Proposal("", "Please fill out all required fields.").Render(r.Context(), w)
+			if err := pages.Proposal("", "Please fill out all required fields.").Render(r.Context(), w); err != nil {
+				http.Error(w, "Failed to render page", http.StatusInternalServerError)
+			}
 		}
 		return
 	}
 	if !emailRe.MatchString(email) {
 		if htmx.IsHTMX(r) {
-			pages.ProposalResult("", "Please enter a valid email address.").Render(r.Context(), w)
+			if err := pages.ProposalResult("", "Please enter a valid email address.").Render(r.Context(), w); err != nil {
+				http.Error(w, "Failed to render page", http.StatusInternalServerError)
+			}
 		} else {
-			pages.Proposal("", "Please enter a valid email address.").Render(r.Context(), w)
+			if err := pages.Proposal("", "Please enter a valid email address.").Render(r.Context(), w); err != nil {
+				http.Error(w, "Failed to render page", http.StatusInternalServerError)
+			}
 		}
 		return
 	}
@@ -75,8 +90,12 @@ func (h *ProposalHandler) Submit(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if htmx.IsHTMX(r) {
-		pages.ProposalSuccess().Render(r.Context(), w)
+		if err := pages.ProposalSuccess().Render(r.Context(), w); err != nil {
+			http.Error(w, "Failed to render page", http.StatusInternalServerError)
+		}
 	} else {
-		pages.Proposal("success", "").Render(r.Context(), w)
+		if err := pages.Proposal("success", "").Render(r.Context(), w); err != nil {
+			http.Error(w, "Failed to render page", http.StatusInternalServerError)
+		}
 	}
 }

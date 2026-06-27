@@ -23,7 +23,9 @@ func (h *BlogHandler) List(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	pages.BlogList(posts, h.Tracker.Snapshot()).Render(r.Context(), w)
+	if err := pages.BlogList(posts, h.Tracker.Snapshot()).Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func (h *BlogHandler) Post(w http.ResponseWriter, r *http.Request) {
@@ -38,5 +40,7 @@ func (h *BlogHandler) Post(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "render error", http.StatusInternalServerError)
 		return
 	}
-	pages.BlogPost(post, buf.String()).Render(r.Context(), w)
+	if err := pages.BlogPost(post, buf.String()).Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }

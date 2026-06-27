@@ -7,5 +7,7 @@ import (
 )
 
 func Stack(w http.ResponseWriter, r *http.Request) {
-	pages.Stack().Render(r.Context(), w)
+	if err := pages.Stack().Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }

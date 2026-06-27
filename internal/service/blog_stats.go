@@ -144,7 +144,11 @@ func (t *BlogTracker) lookupAndAddCountryCode(ip string) {
 	if err != nil {
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.disabled = true
+		}
+	}()
 
 	var decoded struct {
 		Status      string `json:"status"`

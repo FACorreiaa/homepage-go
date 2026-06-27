@@ -12,7 +12,9 @@ import (
 func TestOpenAndSchema(t *testing.T) {
 	conn, err := db.Open(":memory:")
 	require.NoError(t, err)
-	defer conn.Close()
+	t.Cleanup(func() {
+		require.NoError(t, conn.Close())
+	})
 
 	tables := []string{"client_users", "proposal_leads", "blog_posts"}
 	for _, tbl := range tables {
@@ -27,7 +29,9 @@ func TestOpenAndSchema(t *testing.T) {
 func TestSeedAdminUser(t *testing.T) {
 	conn, err := db.Open(":memory:")
 	require.NoError(t, err)
-	defer conn.Close()
+	t.Cleanup(func() {
+		require.NoError(t, conn.Close())
+	})
 
 	q := db.New(conn)
 	ctx := context.Background()

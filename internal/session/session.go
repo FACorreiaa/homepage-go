@@ -7,8 +7,10 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-const sessionName = "fc_session"
-const userIDKey = "user_id"
+const (
+	sessionName = "fc_session"
+	userIDKey   = "user_id"
+)
 
 var store *sessions.CookieStore
 

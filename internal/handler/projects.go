@@ -8,10 +8,10 @@ import (
 )
 
 var trustItems = []model.TrustItem{
-	{"GL", "4+", "Countries"},
-	{"PR", "15+", "Projects Delivered"},
-	{"YR", "7+", "Years Experience"},
-	{"TK", "10+", "Technologies"},
+	{Icon: "GL", Value: "4+", Label: "Countries"},
+	{Icon: "PR", Value: "15+", Label: "Projects Delivered"},
+	{Icon: "YR", Value: "7+", Label: "Years Experience"},
+	{Icon: "TK", Value: "10+", Label: "Technologies"},
 }
 
 var allProjects = []model.ProjectItem{
@@ -47,9 +47,17 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 			Project:     p,
 			Tagline:     "A focused investing workspace for portfolios, watchlists, targets, and market context.",
 			LongDesc:    []string{"Norviq is a personal investing workspace for active investors who want research, holdings, and decisions in one calm, fast app.", "The iOS client is built natively in SwiftUI with Swift Charts, secured by MFA, Face ID, and an app-lock layer."},
-			Features:    []model.DetailFeature{{"Portfolio clarity", "Track holdings, cost basis, and allocation in real time."}, {"Research workspace", "Watchlists, stock insights, valuation editor, projections, and notes."}, {"Security first", "MFA, Face ID, app-lock with security code, encrypted token storage."}},
+			Features: []model.DetailFeature{
+				{Title: "Portfolio clarity", Body: "Track holdings, cost basis, and allocation in real time."},
+				{Title: "Research workspace", Body: "Watchlists, stock insights, valuation editor, projections, and notes."},
+				{Title: "Security first", Body: "MFA, Face ID, app-lock with security code, encrypted token storage."},
+			},
 			TechStack:   []string{"SwiftUI", "Swift Charts", "Vapor", "PostgreSQL", "Redis", "Docker", "RevenueCat"},
-			SocialLinks: []model.DetailLink{{"Instagram", "https://instagram.com/norviqplan"}, {"X (Twitter)", "https://x.com/NorviqPlanner"}, {"Discord", "https://discord.gg/3QVkas3rH"}},
+			SocialLinks: []model.DetailLink{
+				{Label: "Instagram", URL: "https://instagram.com/norviqplan"},
+				{Label: "X (Twitter)", URL: "https://x.com/NorviqPlanner"},
+				{Label: "Discord", URL: "https://discord.gg/3QVkas3rH"},
+			},
 			BackendNote: "Powered by api.norviqa.io",
 		}
 	case "luminavault":
@@ -57,7 +65,11 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 			Project:     p,
 			Tagline:     "Your second brain, self-hosted. Private, AI-powered memory layer you actually own.",
 			LongDesc:    []string{"LuminaVault is a self-improving memory layer for researchers and analysts who want a living second brain they truly own.", "One tap with kb-compile turns raw inputs into a smart, searchable wiki."},
-			Features:    []model.DetailFeature{{"Effortless capture", "Screenshots, photos, Apple Maps, HealthKit — all saved as clean Markdown."}, {"kb-compile engine", "Turns raw notes into a queryable knowledge base with pgvector semantic search."}, {"100% yours", "Self-hosted via Docker. Per-tenant vault, JWT auth, BYO LLM key."}},
+			Features: []model.DetailFeature{
+				{Title: "Effortless capture", Body: "Screenshots, photos, Apple Maps, HealthKit — all saved as clean Markdown."},
+				{Title: "kb-compile engine", Body: "Turns raw notes into a queryable knowledge base with pgvector semantic search."},
+				{Title: "100% yours", Body: "Self-hosted via Docker. Per-tenant vault, JWT auth, BYO LLM key."},
+			},
 			TechStack:   []string{"SwiftUI", "SwiftData", "Vision OCR", "Swift 6", "Hummingbird 2", "PostgreSQL", "pgvector", "Docker"},
 			BackendNote: "Self-hosted on your own VPS.",
 			BannerAsset: "/assets/static/projects/luminavault-banner.jpg",
@@ -68,7 +80,9 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 }
 
 func ProjectsList(w http.ResponseWriter, r *http.Request) {
-	pages.Projects(trustItems, allProjects).Render(r.Context(), w)
+	if err := pages.Projects(trustItems, allProjects).Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func ProjectDetail(w http.ResponseWriter, r *http.Request) {
@@ -79,8 +93,12 @@ func ProjectDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if p.Slug == "luminavault" {
-		pages.ProjectLuminavault(p).Render(r.Context(), w)
+		if err := pages.ProjectLuminavault(p).Render(r.Context(), w); err != nil {
+			http.Error(w, "Failed to render page", http.StatusInternalServerError)
+		}
 		return
 	}
-	pages.ProjectDetail(detailFor(p)).Render(r.Context(), w)
+	if err := pages.ProjectDetail(detailFor(p)).Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }

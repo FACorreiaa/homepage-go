@@ -9,7 +9,9 @@ import (
 )
 
 func Play(w http.ResponseWriter, r *http.Request) {
-	pages.Play().Render(r.Context(), w)
+	if err := pages.Play().Render(r.Context(), w); err != nil {
+		http.Error(w, "Failed to render page", http.StatusInternalServerError)
+	}
 }
 
 func BookCall(w http.ResponseWriter, r *http.Request) {

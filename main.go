@@ -31,7 +31,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	q := db.New(conn)
 	ctx := context.Background()
@@ -104,7 +108,9 @@ func main() {
 	// 404
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		pages.ErrorPage(404, "Page Not Found").Render(r.Context(), w)
+		if err := pages.ErrorPage(404, "Page Not Found").Render(r.Context(), w); err != nil {
+			http.Error(w, "Failed to render page", http.StatusInternalServerError)
+		}
 	})
 
 	fmt.Println("Server is running on http://localhost:8090")
