@@ -1,0 +1,54 @@
+package pages
+
+import "myapp/ui/layouts"
+
+templ About() {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "About | FC Software Studio", ActivePage: "about"}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32">
+				<div class="mx-auto max-w-6xl text-center">
+					<h1 class="hero-title font-semibold">
+						I turn ambiguous product work
+						<span class="inline-type-image" style="background-image:url('https://picsum.photos/seed/fernando-engineering-studio/360/160')"></span>
+						into shipped software.
+					</h1>
+					<p class="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted-foreground">I am Fernando Correia, a software engineer based in Portugal building FC Software Studio around senior backend, web, and iOS product engineering.</p>
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 py-24 md:py-40" data-motion="pinned-split">
+				<div class="grid gap-12 lg:grid-cols-[0.38fr_0.62fr]">
+					<div data-motion-pin>
+						<h2 class="section-title font-semibold">Operating principles.</h2>
+						<p class="mt-6 text-lg leading-8 text-muted-foreground">The work is pragmatic: understand the system, shape the smallest useful path, then ship with a bias for maintainability.</p>
+					</div>
+					<div class="grid grid-flow-dense gap-px overflow-hidden rounded-lg bg-border md:grid-cols-2" data-motion-track>
+						for _, v := range [][]string{{"Collaboration","Complex systems get better when product, engineering, and operations stay close."},{"Problem shaping","The first useful deliverable is often a sharper definition of the problem."},{"Modern delivery","Go, Swift, HTMX, Docker, and Postgres are chosen when they reduce operational drag."},{"Finish quality","Polish is not decoration. It is clarity, latency, reliability, and fewer rough edges."}} {
+							<div class="bg-card p-8">
+								<h3 class="text-2xl font-semibold">{ v[0] }</h3>
+								<p class="mt-4 text-sm leading-6 text-muted-foreground">{ v[1] }</p>
+							</div>
+						}
+					</div>
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 pb-32 md:pb-48">
+				<div class="grid gap-px overflow-hidden rounded-lg bg-border md:grid-cols-4">
+					for _, s := range [][]string{{"7+","Years Experience"},{"15+","Projects Delivered"},{"10+","Core Technologies"},{"4","Countries"}} {
+						<div class="bg-background p-8 text-center">
+							<div class="text-5xl font-semibold">{ s[0] }</div>
+							<div class="mt-2 text-sm text-muted-foreground">{ s[1] }</div>
+						</div>
+					}
+				</div>
+				<div class="mt-14 grid gap-4 md:grid-cols-3">
+					for _, c := range [][]string{{"Phone","+351 937042328","tel:+351937042328"},{"Email","fernandocorreia316@gmail.com","mailto:fernandocorreia316@gmail.com"},{"GitHub","github.com/FACorreiaa","https://github.com/FACorreiaa"}} {
+						<a href={ templ.SafeURL(c[2]) } class="public-card group rounded-lg p-6 transition-colors hover:bg-accent/45">
+							<p class="text-sm text-muted-foreground">{ c[0] }</p>
+							<p class="mt-2 font-semibold group-hover:underline">{ c[1] }</p>
+						</a>
+					}
+				</div>
+			</section>
+		</div>
+	}
+}

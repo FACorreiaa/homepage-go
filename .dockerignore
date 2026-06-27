@@ -1,0 +1,11 @@
+.git
+.env
+app.db
+blog_stats.json
+vault
+*.sqlite
+*.sqlite3
+*.db
+*_templ.go
+assets/css/output.css
+assets/css/sources.generated.css

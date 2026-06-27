@@ -1,0 +1,58 @@
+package pages
+
+import (
+	"myapp/internal/db"
+	"myapp/internal/service"
+	"myapp/ui/layouts"
+	"strconv"
+)
+
+templ BlogList(posts []db.ListBlogPostsRow, stats service.BlogStatsSnapshot) {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "Blog | FC Software Studio", ActivePage: "blog", Description: "Exploring software architecture, iOS development, and the journey of building a solo engineering studio."}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32">
+				<div class="mx-auto max-w-6xl text-center">
+					<h1 class="hero-title font-semibold">
+						Notes from the studio
+						<span class="inline-type-image" style="background-image:url('https://picsum.photos/seed/software-writing-desk/360/160')"></span>
+						and the systems behind it.
+					</h1>
+					<p class="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted-foreground">Architecture, iOS development, backend scale, solo product work, and the details that make software feel finished.</p>
+					if stats.TotalViews > 0 {
+						<div class="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
+							<span class="rounded-full border border-border px-3 py-1">{ strconv.Itoa(stats.TotalViews) } views</span>
+							for _, f := range stats.Flags {
+								<span class="rounded-full border border-border px-3 py-1">{ f.Code } · { strconv.Itoa(f.Count) }</span>
+							}
+						</div>
+					}
+				</div>
+			</section>
+			<section class="mx-auto max-w-6xl px-4 pb-32 md:pb-48">
+				<div class="grid grid-flow-dense gap-px overflow-hidden rounded-lg bg-border md:grid-cols-12">
+					for i, p := range posts {
+						<a href={ templ.SafeURL("/blog/" + p.Slug) } class={ blogCardClass(i) }>
+							<div class="mb-8 flex items-center justify-between gap-4 text-xs text-muted-foreground">
+								<span>{ p.Category }</span>
+								<span>{ p.Date }</span>
+							</div>
+							<h2 class="text-2xl font-semibold transition-colors group-hover:text-muted-foreground md:text-3xl">{ p.Title }</h2>
+							<p class="mt-5 text-sm leading-6 text-muted-foreground">{ p.Summary }</p>
+						</a>
+					}
+				</div>
+			</section>
+		</div>
+	}
+}
+
+func blogCardClass(i int) string {
+	base := "group bg-card p-7 transition-colors hover:bg-accent/45 md:p-9 "
+	if i == 0 {
+		return base + "md:col-span-7"
+	}
+	if i == 1 {
+		return base + "md:col-span-5"
+	}
+	return base + "md:col-span-6"
+}

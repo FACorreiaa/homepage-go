@@ -1,0 +1,115 @@
+package pages
+
+import "myapp/ui/layouts"
+
+templ Play() {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "Play Snake | FC Software Studio", ActivePage: "play"}) {
+		<div class="flex flex-col items-center justify-center min-h-[80vh] py-12 px-4">
+			<div class="text-center mb-8">
+				<span class="text-xs font-semibold uppercase tracking-widest text-primary mb-2 block">Mini-Game</span>
+				<h1 class="text-4xl md:text-5xl font-bold mb-2">Classic <span class="text-primary">Snake</span></h1>
+				<p class="text-muted-foreground">Use arrow keys or swipe on mobile.</p>
+			</div>
+			<div class="p-6 rounded-3xl border border-border bg-card shadow-xl">
+				<div class="flex justify-between items-center mb-4">
+					<div class="font-bold">Score: <span id="score" class="text-primary">0</span></div>
+					<div class="text-sm text-muted-foreground">High Score: <span id="highScore">0</span></div>
+				</div>
+				<div class="relative border-2 border-border rounded-xl overflow-hidden" style="width:400px;max-width:100%">
+					<canvas id="gameCanvas" width="400" height="400" class="block w-full h-auto bg-card"></canvas>
+					<div id="gameOverlay" class="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-10">
+						<h2 id="overlayTitle" class="text-3xl font-bold mb-2">Ready?</h2>
+						<p id="overlayText" class="text-muted-foreground mb-6">Press Start to play.</p>
+						<button id="startBtn" type="button" class="px-8 py-3 text-lg rounded-md bg-primary text-primary-foreground font-medium" style="touch-action:manipulation">Start Game</button>
+					</div>
+				</div>
+				<div class="mt-6 md:hidden grid grid-cols-3 gap-2 max-w-[200px] mx-auto opacity-80">
+					<div class="col-start-2"><button id="btnUp" type="button" class="w-full aspect-square bg-muted rounded-lg flex items-center justify-center" style="touch-action:manipulation">↑</button></div>
+					<div class="col-start-1 col-end-4 grid grid-cols-3 gap-2">
+						<button id="btnLeft" type="button" class="aspect-square bg-muted rounded-lg flex items-center justify-center" style="touch-action:manipulation">←</button>
+						<button id="btnDown" type="button" class="aspect-square bg-muted rounded-lg flex items-center justify-center" style="touch-action:manipulation">↓</button>
+						<button id="btnRight" type="button" class="aspect-square bg-muted rounded-lg flex items-center justify-center" style="touch-action:manipulation">→</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				const canvas = document.getElementById('gameCanvas');
+				const ctx = canvas.getContext('2d');
+				const scoreEl = document.getElementById('score');
+				const highScoreEl = document.getElementById('highScore');
+				const overlay = document.getElementById('gameOverlay');
+				const overlayTitle = document.getElementById('overlayTitle');
+				const overlayText = document.getElementById('overlayText');
+				const startBtn = document.getElementById('startBtn');
+				const gridSize = 20;
+				const tileX = canvas.width / gridSize, tileY = canvas.height / gridSize;
+				let snake, vx, vy, foodX, foodY, score, highScore, loop, active, speed;
+				highScore = localStorage.getItem('snakeHighScore') || 0;
+				highScoreEl.textContent = highScore;
+				function init() {
+					snake = [{x:10,y:10},{x:10,y:11},{x:10,y:12}];
+					vx=0; vy=-1; score=0; speed=10; active=true;
+					scoreEl.textContent=0;
+					placeFood();
+					overlay.classList.add('hidden');
+					if (loop) clearInterval(loop);
+					loop = setInterval(tick, 1000/speed);
+				}
+				function tick() {
+					if (!active) return;
+					let hx=snake[0].x+vx, hy=snake[0].y+vy;
+					if (hx<0||hx>=tileX||hy<0||hy>=tileY||snake.some(s=>s.x===hx&&s.y===hy)) { end(); return; }
+					snake.unshift({x:hx,y:hy});
+					if (hx===foodX&&hy===foodY) {
+						score+=10; scoreEl.textContent=score;
+						if (score%50===0&&speed<25){speed+=2;clearInterval(loop);loop=setInterval(tick,1000/speed);}
+						placeFood();
+					} else snake.pop();
+					draw();
+				}
+				function draw() {
+					ctx.clearRect(0,0,canvas.width,canvas.height);
+					ctx.fillStyle='#ef4444'; ctx.shadowBlur=10; ctx.shadowColor='#ef4444';
+					ctx.beginPath(); ctx.arc(foodX*gridSize+gridSize/2,foodY*gridSize+gridSize/2,gridSize/2.5,0,Math.PI*2); ctx.fill();
+					ctx.shadowBlur=0;
+					for (let i=0;i<snake.length;i++){
+						ctx.fillStyle=i===0?'#2563eb':'#3b82f6';
+						ctx.beginPath(); ctx.roundRect(snake[i].x*gridSize+1,snake[i].y*gridSize+1,gridSize-2,gridSize-2,4); ctx.fill();
+					}
+				}
+				function placeFood() {
+					foodX=Math.floor(Math.random()*tileX); foodY=Math.floor(Math.random()*tileY);
+					if (snake.some(s=>s.x===foodX&&s.y===foodY)) placeFood();
+				}
+				function end() {
+					active=false; clearInterval(loop);
+					if (score>highScore){highScore=score;localStorage.setItem('snakeHighScore',highScore);highScoreEl.textContent=highScore;}
+					draw();
+					ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+					overlay.classList.remove('hidden');
+					overlayTitle.textContent='Game Over!'; overlayText.textContent=`You scored ${score} points.`; startBtn.textContent='Play Again';
+				}
+				document.addEventListener('keydown',e=>{
+					if (!active&&e.code==='Space'){e.preventDefault();init();return;}
+					if (!active) return;
+					if (e.key==='ArrowUp'&&vy!==1){vx=0;vy=-1;e.preventDefault();}
+					else if (e.key==='ArrowDown'&&vy!==-1){vx=0;vy=1;e.preventDefault();}
+					else if (e.key==='ArrowLeft'&&vx!==1){vx=-1;vy=0;e.preventDefault();}
+					else if (e.key==='ArrowRight'&&vx!==-1){vx=1;vy=0;e.preventDefault();}
+				});
+				function bindBtn(id,nx,ny){
+					let t=0;
+					document.getElementById(id).addEventListener('touchend',e=>{e.preventDefault();t=Date.now();if(active){if(nx!==0&&vx===-nx)return;if(ny!==0&&vy===-ny)return;vx=nx;vy=ny;}},{passive:false});
+					document.getElementById(id).addEventListener('click',e=>{if(Date.now()-t<500){e.preventDefault();return;}if(active){if(nx!==0&&vx===-nx)return;if(ny!==0&&vy===-ny)return;vx=nx;vy=ny;}});
+				}
+				let t=0;
+				startBtn.addEventListener('touchend',e=>{e.preventDefault();t=Date.now();init();},{passive:false});
+				startBtn.addEventListener('click',e=>{if(Date.now()-t<500){e.preventDefault();return;}init();});
+				bindBtn('btnUp',0,-1); bindBtn('btnDown',0,1); bindBtn('btnLeft',-1,0); bindBtn('btnRight',1,0);
+				draw();
+			});
+		</script>
+	}
+}

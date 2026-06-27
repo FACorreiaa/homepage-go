@@ -1,0 +1,27 @@
+x-shared_environment: &shared_environment
+  GO_ENV: production
+  DATABASE_PATH: /var/lib/facorreia-site/studio.sqlite
+  BLOG_STATS_PATH: /var/lib/facorreia-site/blog_stats.json
+  VAULT_PATH: /app/vault
+  SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production-32-chars!!}
+  ADMIN_EMAIL: ${ADMIN_EMAIL:-fernandocorreia316@gmail.com}
+  ADMIN_PASSWORD: ${ADMIN_PASSWORD:-StudioAdmin123!}
+  DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+  CALENDLY_URL: ${CALENDLY_URL:-https://calendly.com/fernandocorreia316}
+
+services:
+  app:
+    image: facorreia-site-go:latest
+    build:
+      context: .
+    environment:
+      <<: *shared_environment
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - studio_data:/var/lib/facorreia-site
+      - ${HOST_VAULT_PATH:-./vault}:/app/vault:ro
+
+volumes:
+  studio_data:

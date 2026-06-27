@@ -1,0 +1,24 @@
+ticker,shares,live_price,currency,mkt_val,note
+AMD,20.2915,337.11,USD,6840.47,large-cap tech
+GOOGL,11.641,349.94,USD,4073.65,large-cap tech
+ZETA,200.378,17.81,USD,3568.73,mid-cap MarTech
+OSCR,178.9193,17.93,USD,3208.02,mid-cap health-tech
+HIMS,109.5708,26.33,USD,2885.0,mid-cap telehealth
+AMZN,11.4169,263.04,USD,3003.1,large-cap tech/retail
+ASTS,30.0032,69.85,USD,2095.72,small-cap space
+SOFI,112.6557,15.525,USD,1748.98,fintech
+ADUR,130.0497,11.77,USD,1530.68,micro-cap (CAD)
+TE,259.736,4.89,USD,1270.11,small-cap telecom
+NFLX,12.0,92.12,USD,1105.44,large-cap streaming
+ONDS,104.524,9.49,USD,991.93,micro-cap
+UBER,14.4919,74.47,USD,1079.21,large-cap mobility
+NVO,25.0,40.29,USD,1007.25,large-cap pharma
+KRKNF,153.3175,5.565,USD,853.21,pink-sheet
+A6I,220.0,3.285,USD,722.7,frankfurt-listed
+ABCL,231.534,3.82,USD,884.46,biotech
+CELH,8.3949,32.66,USD,274.18,speculative — new position
+RDW,17.107,8.6,USD,147.12,space infra — active position
+OUST,0.0,0.0,USD,,lidar — planned 1%
+SMR,0.0,0.0,USD,,SMR nuclear — planned 1%
+ELF,0.0,0.0,USD,,beauty — planned 1%
+_TOTAL_,,,,37289.96,

@@ -1,0 +1,76 @@
+package pages
+
+import "myapp/ui/layouts"
+
+type techItem struct {
+	Name        string
+	Proficiency string
+	IconURL     string
+}
+
+type techSection struct {
+	Title string
+	Mark  string
+	Items []techItem
+}
+
+templ Stack() {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "Stack | FC Software Studio", ActivePage: "stack"}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32">
+				<div class="mx-auto max-w-6xl text-center">
+					<h1 class="hero-title font-semibold">
+						The stack is boring
+						<span class="inline-type-image" style="background-image:url('https://picsum.photos/seed/code-terminal-stack/360/160')"></span>
+						where it should be.
+					</h1>
+					<p class="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted-foreground">A practical set of tools for production apps: Go services, native Swift interfaces, PostgreSQL-backed systems, Docker deployment, and focused web frontends.</p>
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 pb-32 md:pb-48">
+				<div class="grid grid-flow-dense gap-px overflow-hidden rounded-lg bg-border md:grid-cols-12">
+					for i, sec := range []techSection{
+						{"Backend Development","BE",[]techItem{{"Go","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/go/go-original.svg"},{"Vapor","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/swift/swift-original.svg"},{"Hummingbird","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/swift/swift-original.svg"},{"C#","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/csharp/csharp-original.svg"},{"TypeScript","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg"}}},
+						{"Mobile Development","MO",[]techItem{{"SwiftUI","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/swift/swift-original.svg"},{"React Native","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg"}}},
+						{"Frontend Development","FE",[]techItem{{"React","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg"},{"Angular","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/angularjs/angularjs-original.svg"},{"HTML5","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg"},{"CSS3","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-original.svg"},{"Tailwind CSS","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg"}}},
+						{"Databases","DB",[]techItem{{"PostgreSQL","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg"},{"MSSQL","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/microsoftsqlserver/microsoftsqlserver-original.svg"},{"MongoDB","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg"},{"Redis","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg"}}},
+						{"Cloud and APIs","CA",[]techItem{{"REST","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/networkx/networkx-original.svg"},{"gRPC","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/grpc/grpc-original.svg"},{"GraphQL","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/graphql/graphql-plain.svg"},{"Linux","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg"}}},
+						{"DevOps and Tools","DO",[]techItem{{"Docker","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg"},{"Git","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg"},{"GitHub","Expert","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg"},{"GitLab","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/gitlab/gitlab-original.svg"},{"Figma","Strong","https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/figma/figma-original.svg"}}},
+					} {
+						<div class={ stackSectionClass(i) } data-reveal>
+							<div class="mb-7 flex items-center justify-between gap-4">
+								<h2 class="text-2xl font-semibold">{ sec.Title }</h2>
+								<span class="grid h-10 w-10 place-items-center rounded-full border border-border font-mono text-xs text-muted-foreground">{ sec.Mark }</span>
+							</div>
+							<div class="space-y-4">
+								for _, item := range sec.Items {
+									<div class="flex items-center justify-between gap-4">
+										<div class="flex items-center gap-3">
+											<img src={ item.IconURL } alt={ item.Name } width="24" height="24" loading="lazy"/>
+											<span class="text-sm font-medium">{ item.Name }</span>
+										</div>
+										<span class="text-xs text-muted-foreground">{ item.Proficiency }</span>
+									</div>
+								}
+							</div>
+						</div>
+					}
+				</div>
+			</section>
+		</div>
+	}
+}
+
+func stackSectionClass(i int) string {
+	base := "bg-card p-7 md:p-9 "
+	switch i {
+	case 0:
+		return base + "md:col-span-7"
+	case 1:
+		return base + "md:col-span-5"
+	case 2, 3, 4, 5:
+		return base + "md:col-span-6"
+	default:
+		return base + "md:col-span-6"
+	}
+}

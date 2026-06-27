@@ -1,0 +1,72 @@
+package pages
+
+import (
+	"myapp/internal/db"
+	"myapp/ui/layouts"
+	"strconv"
+)
+
+templ Dashboard(leads []db.ProposalLead) {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "Dashboard | FC Software Studio", ActivePage: "admin"}) {
+		<div class="container mx-auto max-w-5xl px-4 py-12">
+			<div class="flex items-center justify-between mb-8">
+				<h1 class="text-2xl font-bold">Admin Dashboard</h1>
+				<div class="flex gap-2">
+					<a href="/admin/blog/new" class="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm">New Post</a>
+					<form method="POST" action="/admin/logout">
+						<button type="submit" class="px-4 py-2 rounded-md border border-border text-sm hover:bg-accent">Logout</button>
+					</form>
+				</div>
+			</div>
+			<div class="mb-4">
+				<h2 class="text-lg font-semibold mb-4">Proposal Leads ({ strconv.Itoa(len(leads)) })</h2>
+				if len(leads) == 0 {
+					<p class="text-muted-foreground text-sm">No leads yet.</p>
+				} else {
+					<div class="overflow-x-auto rounded-xl border border-border">
+						<table class="w-full text-sm">
+							<thead class="bg-muted">
+								<tr>
+									for _, h := range []string{"Name","Email","Type","Budget","Timeline","Date"} {
+										<th class="px-4 py-3 text-left font-medium text-muted-foreground">{ h }</th>
+									}
+								</tr>
+							</thead>
+							<tbody class="divide-y divide-border">
+								for _, l := range leads {
+									<tr class="hover:bg-muted/50">
+										<td class="px-4 py-3 font-medium">{ l.Name }</td>
+										<td class="px-4 py-3 text-muted-foreground">{ l.Email }</td>
+										<td class="px-4 py-3">{ l.ProjectType }</td>
+										<td class="px-4 py-3 text-muted-foreground">
+											if l.Budget.Valid {
+												{ l.Budget.String }
+											} else {
+												{ "—" }
+											}
+										</td>
+										<td class="px-4 py-3 text-muted-foreground">
+											if l.Timeline.Valid {
+												{ l.Timeline.String }
+											} else {
+												{ "—" }
+											}
+										</td>
+										<td class="px-4 py-3 text-muted-foreground">{ shortDate(l.CreatedAt) }</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+func shortDate(value string) string {
+	if len(value) < 10 {
+		return value
+	}
+	return value[:10]
+}

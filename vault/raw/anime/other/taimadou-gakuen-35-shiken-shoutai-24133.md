@@ -1,0 +1,28 @@
+---
+mal_id: 24133
+title: Taimadou Gakuen 35 Shiken Shoutai
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 12
+media_type: tv
+genres: ["Action", "Ecchi", "Fantasy", "Harem", "Military", "Romance", "Urban Fantasy"]
+studios: ["SILVER LINK."]
+mal_rating: 6.8
+mal_rank: 6334
+airing_season: 
+start_date: 2015-10-08
+end_date: 2015-12-24
+mal_url: https://myanimelist.net/anime/24133
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:14.082906Z
+---
+
+# Taimadou Gakuen 35 Shiken Shoutai
+
+In a world plagued by magical dangers and threats, there exist special warriors—known as Inquisitors—who are tasked with non-violently preventing these threats and nefarious actions. The Anti-Magic Academy is a specialized school built to educate and train these Inquisitors, which splits its students into small squads in order to train them to work together. Among these talented squads is the 35th Test Platoon, also known as the "Small Fry Platoon" due to its low ranking and incompetent members. 
+
+However, everything changes when Ouka Ootori, a powerful yet rebellious former Inquisitor, is forced into joining due to her tendency to break rules and committing a serious violation: the killing of a witch. Tempers flare upon her arrival, as she clashes with their clumsy captain Takeru Kusanagi and argues with the rest of the squad over her views on witches. This eclectic group has a long way to go if they wish to succeed and climb the ranks at the Anti-Magic Academy: they must first set aside their differences and come to work together as a team.
+
+[Written by MAL Rewrite]

@@ -1,0 +1,20 @@
+---
+source: arxiv
+ingested_at: 2026-05-26T09:17:30Z
+type: note
+status: uncompiled
+category: AI
+subcategory: arxiv
+title: StakeBench: Evaluating Language Understanding Grounded in Market Commitment
+arxiv_id: 2605.26074
+---
+
+## StakeBench: Evaluating Language Understanding Grounded in Market Commitment
+
+**Authors:** Yunhua Pei, Jingyu Hu, Yiwei Shi, Hongnan Ma et al.
+**Published:** 2026-05-25
+**Categories:** cs.CL, cs.AI, q-fin.GN
+**URL:** https://arxiv.org/abs/2605.26074v1
+
+### Abstract
+Existing financial NLP benchmarks often rely on labels supplied by outside observers, measuring how language is perceived rather than what speakers have committed to in the market. We introduce StakeBench, an evaluation framework for language understanding grounded in market commitment. StakeBench links 560,876 comments from 2,261 resolved markets to verified position, action, and market-odds records across Polymarket and Manifold. Supervision is derived from observable market behavior. Position sides, post-comment trading actions, and market-odds trajectories replace human annotation. Four diagnostic tasks test whether models detect market commitment, identify the revealed side, anticipate future action, and perform collective odds projection. Three commitment-aware metrics measure alignment with revealed preferences rather than perceived sentiment. Validity audits and explicit interpretation boundaries help distinguish observable commitment signals from latent belief and causal market-odds impact. Across 15 LLMs and 18 topics and platform settings, models partially recover position-side signals, with Directed Accuracy from 0.506 to 0.599, but show structural failures on later tasks. Ten of the fifteen models collapse to one or two action labels in future action anticipation, and no model consistently improves on the naive odds-direction baseline in collective odds projection. Model scale is not correlated with performance, finance-domain tuning does not improve revealed-side identification, and platform incentives strongly shape higher-order results. StakeBench is packaged with evaluation code and dataset under CC-BY 4.0.

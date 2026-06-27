@@ -1,0 +1,11 @@
+package pages
+
+import "myapp/ui/layouts"
+
+templ Landing() {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "FC Software Studio", ActivePage: "projects"}) {
+		<div class="flex h-full items-center justify-center py-24 px-4">
+			<p class="text-muted-foreground">Welcome</p>
+		</div>
+	}
+}

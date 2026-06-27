@@ -1,0 +1,6 @@
+.env
+app.db
+blog_stats.json
+assets/css/output.css
+assets/css/sources.generated.css
+*_templ.go

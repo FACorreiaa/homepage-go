@@ -1,0 +1,28 @@
+---
+mal_id: 19647
+title: Hajime no Ippo: Rising
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 25
+media_type: tv
+genres: ["Combat Sports", "Shounen", "Sports"]
+studios: ["Madhouse", "MAPPA"]
+mal_rating: 8.61
+mal_rank: 108
+airing_season: 
+start_date: 2013-10-06
+end_date: 2014-03-30
+mal_url: https://myanimelist.net/anime/19647
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.893258Z
+---
+
+# Hajime no Ippo: Rising
+
+Japanese Featherweight Champion Makunouchi Ippo has defended his title belt once more with the help of his devastating signature move: the Dempsey Roll. However, new challengers are rising up left and right, claiming to have an answer for the move responsible for crushing his opponents. Will Ippo be able to step up to the challenge, or will the weight of his pride destroy him before he finds out just what it means to be strong? Meanwhile, fellow Kamogawa Gym mate Aoki Masaru is just a hop, skip, and a Frog Punch away from claiming his own belt, ready to take on the Japanese Lightweight Champion!
+
+Hajime no Ippo: Rising continues Ippo's quest to become stronger, featuring the same cast of loveable dimwits from Kamogawa Gym, as they put their bodies and hearts on the line to make their way in the harsh world of professional boxing. With a will of iron, Ippo steps into the ring once again.
+
+[Written by MAL Rewrite]

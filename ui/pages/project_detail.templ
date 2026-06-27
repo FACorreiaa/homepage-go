@@ -1,0 +1,92 @@
+package pages
+
+import (
+	"myapp/internal/model"
+	"myapp/ui/layouts"
+)
+
+templ ProjectDetail(d model.ProjectDetailData) {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: d.Project.Title + " | FC Software Studio", ActivePage: "projects"}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32">
+				<a href="/projects" class="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+					All Projects
+				</a>
+				<div class="grid gap-10 lg:grid-cols-[0.72fr_0.28fr] lg:items-end">
+					<div>
+						<h1 class="hero-title max-w-6xl font-semibold">{ d.Project.Title }</h1>
+						<p class="mt-6 max-w-3xl text-xl leading-9 text-muted-foreground">{ d.Tagline }</p>
+					</div>
+					<div class="public-card rounded-lg p-5">
+						<div class="mb-4 flex items-center gap-3">
+							<div class="grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-border bg-background">
+								if d.Project.LogoAsset != "" {
+									<img src={ d.Project.LogoAsset } alt={ d.Project.Title } width="48" height="48" class="h-full w-full object-cover"/>
+								} else if d.Project.IconURL != "" {
+									<img src={ d.Project.IconURL } alt={ d.Project.Title } width="28" height="28"/>
+								} else {
+									<span class="font-mono text-xs">{ d.Project.Icon }</span>
+								}
+							</div>
+							<div>
+								<p class="text-sm font-semibold">{ d.Project.Category }</p>
+								<p class="text-sm text-muted-foreground">{ d.Project.RoleTag }</p>
+							</div>
+						</div>
+						<div class="flex flex-wrap gap-2">
+							for _, t := range d.TechStack {
+								<span class="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">{ t }</span>
+							}
+						</div>
+					</div>
+				</div>
+				if d.BannerAsset != "" {
+					<div class="public-image-wrap mt-14 aspect-[16/7]" data-motion="image-scale">
+						<img src={ d.BannerAsset } alt={ d.Project.Title + " banner" } class="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-105"/>
+					</div>
+				} else {
+					<div class="public-image-wrap mt-14 aspect-[16/7] bg-[url('https://picsum.photos/seed/project-detail-system/1600/700')] bg-cover bg-center grayscale contrast-125" data-motion="image-scale"></div>
+				}
+			</section>
+			<section class="mx-auto max-w-7xl px-4 py-24 md:py-36" data-motion="pinned-split">
+				<div class="grid gap-12 lg:grid-cols-[0.38fr_0.62fr]">
+					<div data-motion-pin>
+						<h2 class="section-title max-w-xl font-semibold">The shape of the work.</h2>
+						<div class="mt-8 flex flex-wrap gap-3">
+							if d.Project.HasLiveLink {
+								<a href={ templ.SafeURL(d.Project.LiveLink) } target="_blank" rel="noopener noreferrer" class="rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background">Live Site</a>
+							}
+							if d.Project.GithubLink != "" && d.Project.GithubLink != "Private" {
+								<a href={ templ.SafeURL(d.Project.GithubLink) } target="_blank" rel="noopener noreferrer" class="rounded-full border border-border px-5 py-2.5 text-sm font-semibold">GitHub</a>
+							}
+							for _, l := range d.SocialLinks {
+								<a href={ templ.SafeURL(l.URL) } target="_blank" rel="noopener noreferrer" class="rounded-full border border-border px-5 py-2.5 text-sm font-semibold">{ l.Label }</a>
+							}
+						</div>
+					</div>
+					<div class="space-y-8" data-motion-track>
+						<div class="public-card rounded-lg p-8 md:p-10">
+							for _, para := range d.LongDesc {
+								<p class="mb-5 text-lg leading-9 text-muted-foreground last:mb-0">{ para }</p>
+							}
+						</div>
+						if len(d.Features) > 0 {
+							<div class="grid grid-flow-dense gap-px overflow-hidden rounded-lg bg-border md:grid-cols-2">
+								for _, f := range d.Features {
+									<div class="bg-card p-6">
+										<h3 class="text-xl font-semibold">{ f.Title }</h3>
+										<p class="mt-3 text-sm leading-6 text-muted-foreground">{ f.Body }</p>
+									</div>
+								}
+							</div>
+						}
+						if d.BackendNote != "" {
+							<p class="text-sm text-muted-foreground">{ d.BackendNote }</p>
+						}
+					</div>
+				</div>
+			</section>
+		</div>
+	}
+}

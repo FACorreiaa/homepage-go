@@ -1,0 +1,28 @@
+---
+mal_id: 6573
+title: Darker than Black: Ryuusei no Gemini
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 12
+media_type: tv
+genres: ["Action", "Mystery", "Super Power"]
+studios: ["Bones"]
+mal_rating: 7.42
+mal_rank: 2624
+airing_season: 
+start_date: 2009-10-09
+end_date: 2009-12-25
+mal_url: https://myanimelist.net/anime/6573
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.828687Z
+---
+
+# Darker than Black: Ryuusei no Gemini
+
+One night, as meteors streak across the star-studded sky, Shion Pavlichenko becomes a Contractor. Despite her brother's transformation, Shion's twin sister Suou continues to live a fairly ordinary life, attending middle school with her friends and getting caught up in the awkwardness of growing up. However, everything changes when her home is invaded by a masked man cloaked in black, destroying any sense of normality she once had. Revealed to possess latent Contractor abilities of her own, Suou is caught between family, friends, and her own sense of purpose as she ventures into the ruthless world of cutthroats and espionage that Contractors call home.
+
+Meanwhile in Tokyo, investigation surrounding Hell's Gate's sudden collapse is underway, and prophetic signs of doom point in the direction of a silver-haired doll.
+
+[Written by MAL Rewrite]

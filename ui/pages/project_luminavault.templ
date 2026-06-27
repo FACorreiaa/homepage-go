@@ -1,0 +1,78 @@
+package pages
+
+import (
+	"myapp/internal/model"
+	"myapp/ui/layouts"
+)
+
+templ ProjectLuminavault(p model.ProjectItem) {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "LuminaVault | FC Software Studio", ActivePage: "projects", Description: "Your second brain, built to think with you."}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32">
+				<a href="/projects" class="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+					All Projects
+				</a>
+				<div class="grid gap-10 lg:grid-cols-[0.68fr_0.32fr] lg:items-end">
+					<div>
+						<h1 class="hero-title max-w-6xl font-semibold">
+							Your second brain,
+							<span class="inline-type-image" style="background-image:url('/assets/static/projects/luminavault-banner.jpg')"></span>
+							built to think with you.
+						</h1>
+						<p class="mt-8 max-w-3xl text-xl leading-9 text-muted-foreground">LuminaVault is an early-stage iOS app for saving links, notes, and personal knowledge into organized Spaces, then using Hermes to reason across what you captured.</p>
+						<div class="mt-10 flex flex-wrap gap-3">
+							<a href="mailto:fernandocorreia316@gmail.com?subject=LuminaVault%20TestFlight%20Waitlist" class="rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background">Join TestFlight Waitlist</a>
+							<a href="/blog/hermes-personal-assistant" class="rounded-full border border-border bg-background/70 px-7 py-3 text-sm font-semibold backdrop-blur transition-colors hover:bg-accent">Read About Hermes</a>
+						</div>
+					</div>
+					<div class="public-image-wrap aspect-[4/5]" data-motion="image-scale">
+						<img src="/assets/static/projects/lumina/scene.png" alt="LuminaVault app scene" width="720" height="900" class="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-105"/>
+					</div>
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 py-24 md:py-40" data-motion="pinned-split">
+				<div class="grid gap-12 lg:grid-cols-[0.36fr_0.64fr]">
+					<div data-motion-pin>
+						<h2 class="section-title font-semibold">Capture, structure, ask, remember.</h2>
+						<p class="mt-6 text-lg leading-8 text-muted-foreground">The product is intentionally narrow: native capture, private structure, and grounded agent workflows.</p>
+					</div>
+					<div class="space-y-5" data-motion-track>
+						for _, step := range []model.LuminaStep{{"01","Save","Add links and notes from your phone as you discover them."},{"02","Organize","Place information into Spaces so your vault reflects how you actually think."},{"03","Ask Hermes","Use Hermes to summarize, connect, retrieve, and reason across what you saved."},{"04","Build memory","Over time, your saved context becomes a more useful personal knowledge base."}} {
+							<div class="public-card rounded-lg p-7 md:p-9">
+								<p class="font-mono text-sm text-muted-foreground">{ step.Num }</p>
+								<h3 class="mt-4 text-3xl font-semibold">{ step.Title }</h3>
+								<p class="mt-3 text-base leading-7 text-muted-foreground">{ step.Body }</p>
+							</div>
+						}
+					</div>
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 pb-32 md:pb-48">
+				<div class="grid grid-flow-dense gap-px overflow-hidden rounded-lg bg-border md:grid-cols-12">
+					for i, f := range []model.DetailFeature{{"Intelligent memory","Save links and notes into a vault Hermes can understand."},{"Spaces for structure","Organize knowledge by project, topic, or area of life."},{"Hermes as your agent","Hermes works with saved context rather than isolated prompts."},{"Privacy and control","LuminaVault is for people who care where their knowledge lives."},{"Mobile-first capture","A second brain only works if capture is close at hand."}} {
+						<div class={ luminaFeatureClass(i) }>
+							<h3 class="text-2xl font-semibold">{ f.Title }</h3>
+							<p class="mt-3 text-sm leading-6 text-muted-foreground">{ f.Body }</p>
+						</div>
+					}
+				</div>
+				<p class="mx-auto mt-8 max-w-3xl text-center text-sm leading-6 text-muted-foreground">Current focus: individual use, native iOS capture, structured memory, and grounded Hermes workflows. No web app or collaboration features are being promised at this stage.</p>
+			</section>
+		</div>
+	}
+}
+
+func luminaFeatureClass(i int) string {
+	base := "bg-card p-7 md:p-9 "
+	switch i {
+	case 0:
+		return base + "md:col-span-7"
+	case 1:
+		return base + "md:col-span-5"
+	case 2, 3, 4:
+		return base + "md:col-span-4"
+	default:
+		return base + "md:col-span-4"
+	}
+}

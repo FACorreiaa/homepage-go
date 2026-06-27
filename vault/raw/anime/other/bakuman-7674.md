@@ -1,0 +1,28 @@
+---
+mal_id: 7674
+title: Bakuman.
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 25
+media_type: tv
+genres: ["Comedy", "Drama", "Otaku Culture", "Romance", "Shounen"]
+studios: ["J.C.Staff"]
+mal_rating: 8.17
+mal_rank: 493
+airing_season: 
+start_date: 2010-10-02
+end_date: 2011-04-02
+mal_url: https://myanimelist.net/anime/7674
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.790073Z
+---
+
+# Bakuman.
+
+As a child, Moritaka Mashiro dreamt of becoming a mangaka, just like his childhood hero and uncle, Tarou Kawaguchi, creator of a popular gag manga. But when tragedy strikes, he gives up on his dream and spends his middle school days studying, aiming to become a salaryman instead.
+
+One day, his classmate Akito Takagi, the school's top student and aspiring writer, notices the detailed drawings in Moritaka's notebook. Seeing the vast potential of his artistic talent, Akito approaches Moritaka, proposing that they become mangaka together. After much convincing, Moritaka realizes that if he is able to create a popular manga series, he may be able to get the girl he has a crush on, Miho Azuki, to take part in the anime adaptation as a voice actor. Thus the pair begins creating manga under the pen name Muto Ashirogi, hoping to become the greatest mangaka in Japan, the likes of which no one has ever seen.
+
+[Written by MAL Rewrite]

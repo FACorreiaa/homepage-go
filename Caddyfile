@@ -1,0 +1,8 @@
+facorreia.com {
+	redir https://www.facorreia.com{uri} permanent
+}
+
+www.facorreia.com {
+	encode zstd gzip
+	reverse_proxy localhost:8090
+}

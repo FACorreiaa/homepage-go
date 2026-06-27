@@ -1,0 +1,23 @@
+{
+  "OUST": {
+    "conviction": null,
+    "max_allocation_pct": 1.0,
+    "thesis": "Digital lidar for AV/robotics/industrial",
+    "catalyst": "Expected: major OEM win, EBITDA breakeven, auto-sales inflection",
+    "exit": "Sell if: cash <12mo; market share loss; better lidar alternative"
+  },
+  "SMR": {
+    "conviction": null,
+    "max_allocation_pct": 1.0,
+    "thesis": "Small modular nuclear reactors \u2014 first-mover US licensing",
+    "catalyst": "Expected: NRC design approval, first EPC utility contract",
+    "exit": "Sell if: regulatory delay >18mo; cost overrun >30%; no new customers"
+  },
+  "ELF": {
+    "conviction": null,
+    "max_allocation_pct": 1.0,
+    "thesis": "Value cosmetics \u2014 viral DTC brand, strong margins, cash flow",
+    "catalyst": "Expected: international expansion, comps growth, margin sustain",
+    "exit": "Sell if: Valuation >45x P/E with flat growth; brand fatigue; multiple contraction"
+  }
+}

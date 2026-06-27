@@ -1,0 +1,119 @@
+package pages
+
+import (
+	"myapp/internal/model"
+	"myapp/ui/layouts"
+)
+
+templ Projects(trust []model.TrustItem, projects []model.ProjectItem) {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "FC Software Studio | Product Engineering", ActivePage: "projects", Description: "Fernando Correia builds polished web apps, high-performance iOS apps, and production backends for product teams."}) {
+		<div class="public-shell min-h-screen">
+			<section class="relative flex min-h-[82vh] items-center justify-center overflow-hidden px-4 py-24 md:py-32">
+				<div class="absolute inset-x-0 top-10 mx-auto h-[28rem] max-w-6xl rounded-full bg-[url('https://picsum.photos/seed/fc-studio-editorial/1800/900')] bg-cover bg-center opacity-16 grayscale contrast-125 blur-[1px] dark:opacity-18"></div>
+				<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,var(--background)_72%)]"></div>
+				<div class="relative mx-auto max-w-6xl text-center">
+					<h1 class="hero-title mx-auto max-w-6xl font-semibold">
+						I build product systems
+						<span class="inline-type-image" style="background-image:url('https://picsum.photos/seed/go-ios-systems/360/160')"></span>
+						that feel fast, calm, and finished.
+					</h1>
+					<p class="mx-auto mt-8 max-w-3xl text-lg leading-8 text-muted-foreground md:text-xl">
+						FC Software Studio is Fernando Correia's independent engineering practice for web applications, native iOS products, backend platforms, and the product glue between them.
+					</p>
+					<div class="mt-10 flex flex-wrap justify-center gap-3">
+						<a href="/book-call" class="rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90">Book a Call</a>
+						<a href="/proposal" class="rounded-full border border-border bg-background/70 px-7 py-3 text-sm font-semibold text-foreground backdrop-blur transition-colors hover:bg-accent">Request Proposal</a>
+					</div>
+				</div>
+			</section>
+			<section class="px-4 py-16" data-reveal>
+				<div class="mx-auto max-w-6xl border-y border-border py-8">
+					<div class="grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-border md:grid-cols-4">
+						for _, item := range trust {
+							<div class="bg-background p-6 text-center">
+								<span class="mx-auto mb-4 grid h-9 w-9 place-items-center rounded-full border border-border font-mono text-[10px] text-muted-foreground">{ item.Icon }</span>
+								<span class="block text-3xl font-semibold">{ item.Value }</span>
+								<span class="text-sm text-muted-foreground">{ item.Label }</span>
+							</div>
+						}
+					</div>
+				</div>
+			</section>
+			<section class="px-4 py-32 md:py-48">
+				<div class="mx-auto max-w-7xl">
+					<div class="mb-16 grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-end" data-reveal>
+						<h2 class="section-title max-w-4xl font-semibold">Selected systems, products, and client work.</h2>
+						<p class="max-w-xl text-lg leading-8 text-muted-foreground md:justify-self-end">A dense view across native apps, backend services, research tools, and production dashboards. Every card is clickable and tuned for quick scanning.</p>
+					</div>
+					<div class="grid grid-flow-dense gap-px overflow-hidden rounded-lg bg-border md:grid-cols-12 md:auto-rows-[minmax(220px,auto)]" data-motion="stack">
+						for i, p := range projects {
+							<a href={ templ.SafeURL("/projects/" + p.Slug) } class={ projectCardClass(i) } aria-label={ "Open " + p.Title + " project page" } data-stack-card>
+								<div class="public-image-wrap mb-5 aspect-[16/8]" data-motion="image-scale">
+									if p.LogoAsset != "" {
+										<img src={ p.LogoAsset } alt={ p.Title } width="720" height="360" loading="lazy" class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"/>
+									} else if p.IconURL != "" {
+										<div class="grid h-full place-items-center bg-muted">
+											<img src={ p.IconURL } alt={ p.Title } width="72" height="72" loading="lazy" class="h-16 w-16 transition-transform duration-700 ease-out group-hover:scale-110"/>
+										</div>
+									} else {
+										<div class="grid h-full place-items-center bg-foreground text-background">
+											<span class="font-mono text-4xl font-semibold">{ p.Icon }</span>
+										</div>
+									}
+								</div>
+								<div class="mb-4 flex items-center justify-between gap-4">
+									<div class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-background">
+										if p.LogoAsset != "" {
+											<img src={ p.LogoAsset } alt={ p.Title } width="40" height="40" loading="lazy" class="h-full w-full rounded-full object-cover"/>
+										} else if p.IconURL != "" {
+											<img src={ p.IconURL } alt={ p.Title } width="24" height="24" loading="lazy" class="h-6 w-6"/>
+										} else {
+											<span class="font-mono text-xs">{ p.Icon }</span>
+										}
+									</div>
+									<span class="text-xs text-muted-foreground">{ p.RoleTag }</span>
+								</div>
+								<div class="flex flex-1 flex-col">
+									<h3 class="text-2xl font-semibold tracking-normal">{ p.Title }</h3>
+									<p class="mt-3 text-sm leading-6 text-muted-foreground">{ p.Description }</p>
+								</div>
+								<div class="mt-6 flex flex-wrap gap-2">
+									for _, tag := range p.Tags {
+										<span class="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">{ tag }</span>
+									}
+								</div>
+								<div class="mt-6 inline-flex items-center gap-2 text-sm font-semibold">
+									<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+									Open project
+								</div>
+							</a>
+						}
+					</div>
+				</div>
+			</section>
+			<section class="overflow-hidden py-12">
+				<div class="marquee-row border-y border-border py-6">
+					<div class="marquee-track gap-10 pr-10 text-2xl font-semibold text-muted-foreground md:text-4xl">
+						for _, word := range []string{"Go", "SwiftUI", "Templ", "HTMX", "PostgreSQL", "Docker", "Vapor", "Hummingbird", "Redis", "Product Systems", "Go", "SwiftUI", "Templ", "HTMX", "PostgreSQL", "Docker", "Vapor", "Hummingbird", "Redis", "Product Systems"} {
+							<span>{ word }</span>
+						}
+					</div>
+				</div>
+			</section>
+		</div>
+	}
+}
+
+func projectCardClass(i int) string {
+	base := "group public-card motion-stack-card flex min-h-[260px] flex-col bg-card p-5 transition-colors hover:bg-accent/45 md:p-7 "
+	switch i {
+	case 0:
+		return base + "md:col-span-7 md:row-span-2"
+	case 1, 2:
+		return base + "md:col-span-5"
+	case 3:
+		return base + "md:col-span-8"
+	default:
+		return base + "md:col-span-4"
+	}
+}

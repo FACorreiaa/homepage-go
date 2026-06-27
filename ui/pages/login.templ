@@ -1,0 +1,27 @@
+package pages
+
+import "myapp/ui/layouts"
+
+templ Login(errMsg string) {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "Admin Login | FC Software Studio", ActivePage: "admin"}) {
+		<div class="flex items-center justify-center min-h-[60vh] px-4">
+			<div class="w-full max-w-sm">
+				<h1 class="text-2xl font-bold text-center mb-8">Admin Login</h1>
+				if errMsg != "" {
+					<div class="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{ errMsg }</div>
+				}
+				<form method="POST" action="/admin/login" class="space-y-4">
+					<div>
+						<label class="block text-sm font-medium mb-1" for="email">Email</label>
+						<input id="email" name="email" type="email" required class="w-full px-3 py-2 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"/>
+					</div>
+					<div>
+						<label class="block text-sm font-medium mb-1" for="password">Password</label>
+						<input id="password" name="password" type="password" required class="w-full px-3 py-2 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"/>
+					</div>
+					<button type="submit" class="w-full px-4 py-2 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90">Sign In</button>
+				</form>
+			</div>
+		</div>
+	}
+}

@@ -1,0 +1,92 @@
+package pages
+
+import "myapp/ui/layouts"
+
+type cvExperience struct {
+	Title    string
+	Company  string
+	Period   string
+	Location string
+	Bullets  []string
+}
+
+type cvEducation struct {
+	Degree   string
+	School   string
+	Date     string
+	Location string
+	GPA      string
+}
+
+templ Curriculum() {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "Curriculum | FC Software Studio", ActivePage: "curriculum"}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32">
+				<div class="grid gap-10 lg:grid-cols-[0.72fr_0.28fr] lg:items-end">
+					<div>
+						<h1 class="hero-title max-w-6xl font-semibold">Fernando Correia, software engineer.</h1>
+						<p class="mt-6 max-w-3xl text-xl leading-9 text-muted-foreground">Go, Swift, React, infrastructure, and product systems across healthcare, learning, finance, privacy, and independent software.</p>
+					</div>
+					<div class="public-card rounded-lg p-6">
+						<a href="tel:+351937042328" class="block text-sm hover:underline">+351 937042328</a>
+						<a href="mailto:fernandocorreia316@gmail.com" class="mt-2 block text-sm hover:underline">fernandocorreia316@gmail.com</a>
+						<a href="https://github.com/FACorreiaa" target="_blank" rel="noopener noreferrer" class="mt-2 block text-sm hover:underline">github.com/FACorreiaa</a>
+					</div>
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32" data-motion="pinned-split">
+				<div class="grid gap-12 lg:grid-cols-[0.32fr_0.68fr]">
+					<div data-motion-pin>
+						<h2 class="section-title font-semibold">Experience.</h2>
+					</div>
+					<div class="space-y-6" data-motion-track>
+						for _, e := range []cvExperience{
+							{"Golang Developer","iDWELL","Aug 2024 - Present","Vienna, Austria (Remote)",[]string{"Starting financial development from the ground up, creating financial services and implementing CI/CD.","Developing modular web services with Go, Postgres, MSSQL, and GraphQL.","Built scalable APIs that streamline financial data processing.","Collaborated with cross-functional teams to enhance system architecture."}},
+							{"Software Engineer","GSMK","Jan 2023 - Aug 2024","Berlin, Germany",[]string{"Introduced Go for CLI tooling across multi-technology projects.","Built a web version of a network tracking application using React and Rust.","Developed gRPC-based microservices for internal service communication.","Integrated OTLP for real-time telemetry."}},
+							{"Software Engineer","Beedeez","Jan 2021 - Jan 2023","Paris, France",[]string{"Led development of a social learning platform with React Native and TypeScript.","Developed a Go-based tool to aggregate and manage JSON data.","Built cross-platform mobile and web apps with full backoffice configuration."}},
+							{"Software Developer","Glintt HS","Sep 2017 - May 2019","Porto, Portugal",[]string{"Developed web applications for the healthcare sector.","Worked on a privacy-focused blockchain project with C# and MongoDB.","Created a restaurant data management MVP integrated with Google My Business."}},
+						} {
+							<article class="public-card rounded-lg p-7">
+								<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+									<div>
+										<h3 class="text-2xl font-semibold">{ e.Title }</h3>
+										<p class="mt-1 font-medium text-muted-foreground">{ e.Company }</p>
+									</div>
+									<div class="text-sm text-muted-foreground sm:text-right">
+										<p>{ e.Period }</p>
+										<p>{ e.Location }</p>
+									</div>
+								</div>
+								<ul class="mt-5 space-y-2">
+									for _, b := range e.Bullets {
+										<li class="text-sm leading-6 text-muted-foreground">{ b }</li>
+									}
+								</ul>
+							</article>
+						}
+					</div>
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 pb-32 md:pb-48">
+				<div class="grid gap-px overflow-hidden rounded-lg bg-border md:grid-cols-2">
+					for _, ed := range []cvEducation{
+						{"M.S. Computer Science","Instituto Politecnico do Cavado e Ave (IPCA)","Dec 2018","Barcelos, Portugal","GPA: 3.7/4"},
+						{"B.S. Computer Science","Instituto Politecnico do Cavado e Ave (IPCA)","May 2017","Barcelos, Portugal","GPA: 3.6/4"},
+					} {
+						<div class="bg-card p-8">
+							<h3 class="text-xl font-semibold">{ ed.Degree }</h3>
+							<p class="mt-2 text-sm text-muted-foreground">{ ed.School }</p>
+							<p class="mt-4 text-sm text-muted-foreground">{ ed.Date } · { ed.Location }</p>
+							<p class="mt-1 text-sm text-muted-foreground">{ ed.GPA }</p>
+						</div>
+					}
+				</div>
+				<div class="mt-8 flex flex-wrap gap-2">
+					for _, c := range []string{"Distributed Systems and Microservices","Cloud Computing and DevOps","Database Design and Management","Software Engineering Principles","API Design and Development","Data Structures and Algorithms","Web Development Technologies"} {
+						<span class="rounded-full bg-muted px-3 py-1.5 text-sm text-muted-foreground">{ c }</span>
+					}
+				</div>
+			</section>
+		</div>
+	}
+}

@@ -1,0 +1,30 @@
+---
+mal_id: 28851
+title: Koe no Katachi
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 1
+media_type: movie
+genres: ["Award Winning", "Drama", "Shounen"]
+studios: ["Kyoto Animation"]
+mal_rating: 8.93
+mal_rank: 20
+airing_season: 
+start_date: 2016-09-17
+end_date: 2016-09-17
+mal_url: https://myanimelist.net/anime/28851
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.957428Z
+---
+
+# Koe no Katachi
+
+As a wild youth, elementary school student Shouya Ishida sought to beat boredom in the cruelest ways. When the deaf Shouko Nishimiya transfers into his class, Shouya and the rest of his class thoughtlessly bully her for fun. However, when her mother notifies the school, he is singled out and blamed for everything done to her. With Shouko transferring out of the school, Shouya is left at the mercy of his classmates. He is heartlessly ostracized all throughout elementary and middle school, while teachers turn a blind eye.
+
+Now in his third year of high school, Shouya is still plagued by his wrongdoings as a young boy. Sincerely regretting his past actions, he sets out on a journey of redemption: to meet Shouko once more and make amends.
+
+Koe no Katachi tells the heartwarming tale of Shouya's reunion with Shouko and his honest attempts to redeem himself, all while being continually haunted by the shadows of his past.
+ 
+[Written by MAL Rewrite]

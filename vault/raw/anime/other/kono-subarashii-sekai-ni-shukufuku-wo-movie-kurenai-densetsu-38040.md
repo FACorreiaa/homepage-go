@@ -1,0 +1,30 @@
+---
+mal_id: 38040
+title: Kono Subarashii Sekai ni Shukufuku wo! Movie: Kurenai Densetsu
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 1
+media_type: movie
+genres: ["Adventure", "Comedy", "Fantasy", "Isekai", "Parody"]
+studios: ["J.C.Staff"]
+mal_rating: 8.4
+mal_rank: 233
+airing_season: 
+start_date: 2019-08-30
+end_date: 2019-08-30
+mal_url: https://myanimelist.net/anime/38040
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.959796Z
+---
+
+# Kono Subarashii Sekai ni Shukufuku wo! Movie: Kurenai Densetsu
+
+It is not strange that the Demon Lord's forces fear the Crimson Demons, the clan from which Megumin and Yunyun originate. Even if the Demon Lord's generals attack their village, the Crimson Demons can just easily brush them off with their supreme mastery of advanced and overpowered magic.
+
+When Yunyun receives a seemingly serious letter regarding a potential disaster coming to her hometown, she immediately informs Kazuma Satou and the rest of his party. After a series of wacky misunderstandings, it turns out to be a mere prank by her fellow demon who wants to be an author. Even so, Megumin becomes worried about her family and sets out toward the Crimson Demons' village with the gang.
+
+There, Kazuma and the others decide to sightsee the wonders of Megumin's birthplace. However, they soon come to realize that the nonsense threat they received might have been more than just a joke.
+
+[Written by MAL Rewrite]

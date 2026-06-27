@@ -1,0 +1,28 @@
+---
+mal_id: 9989
+title: Ano Hi Mita Hana no Namae wo Bokutachi wa Mada Shiranai.
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 11
+media_type: tv
+genres: ["Drama", "Supernatural"]
+studios: ["A-1 Pictures"]
+mal_rating: 8.29
+mal_rank: 325
+airing_season: 
+start_date: 2011-04-15
+end_date: 2011-06-24
+mal_url: https://myanimelist.net/anime/9989
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.768484Z
+---
+
+# Ano Hi Mita Hana no Namae wo Bokutachi wa Mada Shiranai.
+
+Jinta Yadomi is peacefully living as a recluse, spending his days away from school and playing video games at home instead. One hot summer day, his childhood friend, Meiko "Menma" Honma, appears and pesters him to grant a forgotten wish. He pays her no mind, which annoys her, but he doesn't really care. After all, Menma already died years ago.
+
+At first, Jinta thinks that he is merely hallucinating due to the summer heat, but he is later on convinced that what he sees truly is the ghost of Menma. Jinta and his group of childhood friends grew apart after her untimely death, but they are drawn together once more as they try to lay Menma's spirit to rest. Re-living their pain and guilt, will they be able to find the strength to help not only Menma move on—but themselves as well?
+
+[Written by MAL Rewrite]

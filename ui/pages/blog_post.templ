@@ -1,0 +1,30 @@
+package pages
+
+import (
+	"myapp/internal/db"
+	"myapp/ui/layouts"
+)
+
+templ BlogPost(post db.BlogPost, htmlContent string) {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: post.Title + " | FC Software Studio", ActivePage: "blog", Description: post.Summary, OGType: "article"}) {
+		<div class="public-shell min-h-screen">
+			<article class="mx-auto max-w-5xl px-4 py-20 md:py-32">
+				<a href="/blog" class="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+					All Posts
+				</a>
+				<header class="mb-16">
+					<div class="mb-6 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+						<span>{ post.Category }</span>
+						<span>{ post.Date }</span>
+					</div>
+					<h1 class="section-title max-w-5xl font-semibold">{ post.Title }</h1>
+					<p class="mt-6 max-w-3xl text-lg leading-8 text-muted-foreground">{ post.Summary }</p>
+				</header>
+				<div class="prose prose-neutral prose-public dark:prose-invert max-w-none">
+					@templ.Raw(htmlContent)
+				</div>
+			</article>
+		</div>
+	}
+}

@@ -1,0 +1,30 @@
+---
+mal_id: 245
+title: Great Teacher Onizuka
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 43
+media_type: tv
+genres: ["Comedy", "Delinquents", "School", "Shounen", "Workplace"]
+studios: ["Studio Pierrot"]
+mal_rating: 8.68
+mal_rank: 76
+airing_season: 
+start_date: 1999-06-30
+end_date: 2000-09-17
+mal_url: https://myanimelist.net/anime/245
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.883490Z
+---
+
+# Great Teacher Onizuka
+
+Twenty-two-year-old Eikichi Onizuka—ex-biker gang leader, conqueror of Shonan, and virgin—has a dream: to become the greatest high school teacher in all of Japan. This isn't because of a passion for teaching, but because he wants a loving teenage wife when he's old and gray. Still, for a perverted, greedy, and lazy delinquent, there is more to Onizuka than meets the eye. So when he lands a job as the homeroom teacher of the Class 3-4 at the prestigious Holy Forest Academy—despite suplexing the Vice Principal—all of his talents are put to the test, as this class is particularly infamous.
+
+Due to their utter contempt for all teachers, the class' students use psychological warfare to mentally break any new homeroom teacher they get, forcing them to quit and leave school. However, Onizuka isn't your average teacher, and he's ready for any challenge in his way.
+
+Bullying, suicide, and sexual harassment are just a few of the issues his students face daily. By tackling the roots of their problems, Onizuka supports them with his unpredictable and unconventional methods—even if it means jumping off a building to save a suicidal child. Thanks to his eccentric charm and fun-loving nature, Class 3-4 slowly learns just how enjoyable school can be when you're the pupils of the Great Teacher Onizuka.
+
+[Written by MAL Rewrite]

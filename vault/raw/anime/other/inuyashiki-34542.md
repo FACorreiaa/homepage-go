@@ -1,0 +1,30 @@
+---
+mal_id: 34542
+title: Inuyashiki
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 11
+media_type: tv
+genres: ["Action", "Drama", "Gore", "Psychological", "Sci-Fi", "Seinen", "Suspense"]
+studios: ["MAPPA"]
+mal_rating: 7.63
+mal_rank: 1706
+airing_season: 
+start_date: 2017-10-13
+end_date: 2017-12-22
+mal_url: https://myanimelist.net/anime/34542
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.915385Z
+---
+
+# Inuyashiki
+
+Ichirou Inuyashiki is a 58-year-old family man who is going through a difficult time in his life. Though his frequent back problems are painful, nothing hurts quite as much as the indifference and distaste that his wife and children have for him. Despite this, Ichirou still manages to find solace in Hanako, an abandoned Shiba Inu that he adopts into his home. However, his life takes a turn for the worse when a follow-up physical examination reveals that Ichirou has stomach cancer and only three months to live; though he tries to be strong, his family's disinterest causes an emotional breakdown. Running off into a nearby field, Ichirou embraces his dog and weeps—until he notices a strange figure standing before him.
+
+Suddenly, a bright light appears and Ichirou is enveloped by smoke and dust. When he comes to, he discovers something is amiss—he has been reborn as a mechanized weapon wearing the skin of his former self. Though initially shocked, the compassionate Ichirou immediately uses his newfound powers to save a life, an act of kindness that fills him with happiness and newfound hope.
+
+However, the origins of these strange powers remain unclear. Who was the mysterious figure at the site of the explosion, and are they as kind as Ichirou when it comes to using this dangerous gift?
+
+[Written by MAL Rewrite]

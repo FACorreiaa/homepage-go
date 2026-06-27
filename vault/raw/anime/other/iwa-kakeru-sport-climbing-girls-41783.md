@@ -1,0 +1,28 @@
+---
+mal_id: 41783
+title: Iwa Kakeru! Sport Climbing Girls
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 12
+media_type: tv
+genres: ["School", "Sports"]
+studios: ["Blade"]
+mal_rating: 6.51
+mal_rank: 8111
+airing_season: 
+start_date: 2020-10-04
+end_date: 2020-12-20
+mal_url: https://myanimelist.net/anime/41783
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.918865Z
+---
+
+# Iwa Kakeru! Sport Climbing Girls
+
+Video games, especially puzzle games, were always at the center of Konomi Kasahara's life. However, upon entering Hanamiya High School, she decides to break away from this lifestyle. As Konomi wanders the halls in search of a new activity to engage herself in, she stumbles upon a gigantic wall owned by the school's rock climbing team. Fascinated, she attempts to scale the wall, discovering that she can use her puzzle-solving skills to help her reach the top.
+
+Certain that she has found her calling, Konomi immediately joins the club. As she strives to improve her climbing skills, Konomi, alongside the rest of the Hanamiya Climbing Team, will learn what it truly means to be a "sports climber" and work to achieve victory in the upcoming competitions.
+
+[Written by MAL Rewrite]

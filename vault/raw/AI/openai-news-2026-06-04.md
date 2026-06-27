@@ -1,0 +1,74 @@
+---
+source: openai-news
+ingested_at: 2026-06-04T09:19:13Z
+type: market-intelligence
+category: AI
+subcategory: openai
+status: uncompiled
+---
+# OpenAI News - 2026-06-04
+- **[Company](https://openai.com/news/company-announcements/)**
+- **[Research](https://openai.com/news/research/)**
+- **[Product](https://openai.com/news/product-releases/)**
+- **[Safety](https://openai.com/news/safety-alignment/)**
+- **[Engineering](https://openai.com/news/engineering/)**
+- **[Security](https://openai.com/news/security/)**
+- **[Global Affairs](https://openai.com/news/global-affairs/)**
+- **[AI Adoption](https://openai.com/news/ai-adoption/)**
+- **[Image 1: Rosalind5.5 ArtCard](https://images.ctfassets.net/kftzwdyauwt9/6USIQM1B7TggUvvTFxxwoi/0176ac6633c8bdc24641d25d1d2db824/GPT-Rosalind_ArtCard.png?w=3840&q=90&fm=webp)**
+- **[Introducing new capabilities to GPT-Rosalind Product Jun 3, 2026](https://openai.com/index/introducing-new-capabilities-to-gpt-rosalind/)**
+- **[Image 2: 1 1 Art Card](https://images.ctfassets.net/kftzwdyauwt9/4xugzd9dTDMUzIUmuamtO3/1f40af4e50ab8b2bdd64d5b491964961/1_1_Art_Card.png?w=3840&q=90&fm=webp)**
+- **[Codex for every role, tool, and workflow Product Jun 2, 2026](https://openai.com/index/codex-for-every-role-tool-workflow/)**
+- **[Image 3: oai 1x1](https://images.ctfassets.net/kftzwdyauwt9/7eONRWq61MKUix4tK4t88Y/170085acc9b241a0bdfba429bd217907/oai_1x1.png?w=3840&q=90&fm=webp)**
+- **[Advancing youth safety and opportunity through global leadership Global Affairs Jun 2, 2026](https://openai.com/index/advancing-youth-safety-and-opportunity-through-global-leadership/)**
+- **[Image 4: Open AI > AWS > Card Img](https://images.ctfassets.net/kftzwdyauwt9/4DyPHqWFzvKSbt5XNS0cCb/4b5da512c5bc9d6950c64d3ab2b85126/OAI_AWS_Partnership_1x1_Art_Card.png?w=3840&q=90&fm=webp)**
+- **[OpenAI frontier models and Codex are now available on AWS Product Jun 1, 2026](https://openai.com/index/openai-frontier-models-and-codex-are-now-available-on-aws/)**
+- **[Image 5: 1x1](https://images.ctfassets.net/kftzwdyauwt9/6ui4uYfTTbR4xbiFRcqEfo/81d973f14bea720820f692271f6c6834/square.png?w=3840&q=90&fm=webp)**
+- **[Strengthening societal resilience with Rosalind Biodefense Product May 29, 2026](https://openai.com/index/strengthening-societal-resilience-with-rosalind-biodefense/)**
+- **[Image 6: Technical foundations > Art Card](https://images.ctfassets.net/kftzwdyauwt9/6gugGfSiM1oO6UHxxwnqTk/c7173a5a2c096a8f8a24c258ddfa22dd/ArtCard-TechnicalFoundations.png?w=3840&q=90&fm=webp)**
+- **[A shared playbook for trustworthy third party evaluations Safety May 29, 2026](https://openai.com/index/trustworthy-third-party-evaluations-foundations/)**
+- **[Image 7: Frontier Governance Framework > card image](https://images.ctfassets.net/kftzwdyauwt9/2KoiHuErR5YxXGUnhCU8VY/e392c6249ec4644e07e944edea22e837/Frame2.png?w=3840&q=90&fm=webp)**
+- **[OpenAI’s Frontier Governance Framework Safety May 28, 2026](https://openai.com/index/openai-frontier-governance-framework/)**
+- **[Image 8: Tax Agent > Art Card](https://images.ctfassets.net/kftzwdyauwt9/6ojJ6B55QUlmNdaLifgMkQ/22e429ec7b3fdd119a2499358af899b7/Art_Card.png?w=3840&q=90&fm=webp)**
+- **[Building self-improving tax agents with Codex Engineering May 27, 2026](https://openai.com/index/building-self-improving-tax-agents-with-codex/)**
+- **[Image 9: Gartner MQ > Art Card](https://images.ctfassets.net/kftzwdyauwt9/6GUkmRON5hyvikNSF3IEmH/78ea7491689ec5d07cd6a6c2ad6f0254/Gartner-MQ-ArtCard.png?w=3840&q=90&fm=webp)**
+- **[OpenAI named a Leader in enterprise coding agents by Gartner AI Adoption May 22, 2026](https://openai.com/index/gartner-2026-agentic-coding-leader/)**
+- **[Research Overview](https://openai.com/research/)**
+- **[Research Residency](https://openai.com/residency/)**
+- **[Economic Research](https://openai.com/signals/)**
+- **[GPT-5.5](https://openai.com/index/introducing-gpt-5-5/)**
+- **[GPT-5.4](https://openai.com/index/introducing-gpt-5-4/)**
+- **[GPT-5.3 Instant](https://openai.com/index/gpt-5-3-instant/)**
+- **[GPT-5.3-Codex](https://openai.com/index/introducing-gpt-5-3-codex/)**
+- **[Safety Approach](https://openai.com/safety/)**
+- **[Security & Privacy](https://openai.com/security-and-privacy/)**
+- **[Trust & Transparency](https://openai.com/trust-and-transparency/)**
+- **[Explore ChatGPT(opens in a new window)](https://chatgpt.com/overview)**
+- **[Business](https://chatgpt.com/business/business-plan)**
+- **[Enterprise](https://chatgpt.com/business/enterprise)**
+- **[Education](https://chatgpt.com/business/education)**
+- **[Pricing(opens in a new window)](https://chatgpt.com/pricing)**
+- **[Download(opens in a new window)](https://chatgpt.com/download)**
+- **[Pricing](https://openai.com/api/pricing/)**
+- **[API log in(opens in a new window)](https://platform.openai.com/login)**
+- **[Documentation(opens in a new window)](https://developers.openai.com/api/docs)**
+- **[Developer Forum(opens in a new window)](https://community.openai.com/)**
+- **[Solutions](https://openai.com/solutions/)**
+- **[Contact Sales](https://openai.com/contact-sales/)**
+- **[Our Charter](https://openai.com/charter/)**
+- **[Careers](https://openai.com/careers/)**
+- **[Help Center(opens in a new window)](https://help.openai.com/)**
+- **[Stories](https://openai.com/stories/)**
+- **[Academy](https://openai.com/academy/)**
+- **[Livestreams](https://openai.com/live/)**
+- **[Podcast](https://openai.com/podcast/)**
+- **[Terms of Use](https://openai.com/policies/terms-of-use/)**
+- **[Privacy Policy](https://openai.com/policies/privacy-policy/)**
+- **[Other Policies](https://openai.com/policies/)**
+- **[(opens in a new window)](https://x.com/OpenAI)**
+- **[(opens in a new window)](https://www.youtube.com/OpenAI)**
+- **[(opens in a new window)](https://www.linkedin.com/company/openai)**
+- **[(opens in a new window)](https://github.com/openai)**
+- **[(opens in a new window)](https://www.instagram.com/openai/)**
+- **[(opens in a new window)](https://www.tiktok.com/@openai)**
+- **[(opens in a new window)](https://discord.gg/openai)**

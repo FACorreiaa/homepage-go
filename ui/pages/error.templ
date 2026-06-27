@@ -1,0 +1,16 @@
+package pages
+
+import (
+	"myapp/ui/layouts"
+	"strconv"
+)
+
+templ ErrorPage(code int, message string) {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: strconv.Itoa(code) + " | FC Software Studio"}) {
+		<div class="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+			<p class="text-8xl font-bold text-primary/20">{ strconv.Itoa(code) }</p>
+			<h1 class="text-2xl font-bold mt-4 mb-2">{ message }</h1>
+			<a href="/" class="mt-6 px-6 py-3 rounded-md bg-primary text-primary-foreground text-sm">Go Home</a>
+		</div>
+	}
+}

@@ -1,0 +1,22 @@
+{
+  "name": "FC Software Studio",
+  "short_name": "FC Studio",
+  "description": "FC Software Studio — Polished web and iOS apps, built with engineering excellence.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0f1a",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/static/projects/norviq-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/static/projects/norviq-icon-dark.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}

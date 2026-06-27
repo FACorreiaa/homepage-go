@@ -1,0 +1,28 @@
+---
+mal_id: 21881
+title: Sword Art Online II
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 24
+media_type: tv
+genres: ["Action", "Adventure", "Fantasy", "Romance", "Video Game"]
+studios: ["A-1 Pictures"]
+mal_rating: 6.72
+mal_rank: 6852
+airing_season: 
+start_date: 2014-07-05
+end_date: 2014-12-20
+mal_url: https://myanimelist.net/anime/21881
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:14.080837Z
+---
+
+# Sword Art Online II
+
+A year after escaping Sword Art Online, Kazuto Kirigaya has been settling back into the real world. However, his peace is short-lived as a new incident occurs in a game called Gun Gale Online, where a player by the name of Death Gun appears to be killing people in the real world by shooting them in-game. Approached by officials to assist in investigating the murders, Kazuto assumes his persona of Kirito once again and logs into Gun Gale Online, intent on stopping the killer.
+
+Once inside, Kirito meets Sinon, a highly skilled sniper afflicted by a traumatic past. She is soon dragged in his chase after Death Gun, and together they enter the Bullet of Bullets, a tournament where their target is sure to appear. Uncertain of Death Gun's real powers, Kirito and Sinon race to stop him before he has the chance to claim another life. Not everything goes smoothly, however, as scars from the past impede their progress. In a high-stakes game where the next victim could easily be one of them, Kirito puts his life on the line in the virtual world once more.
+
+[Written by MAL Rewrite]

@@ -1,0 +1,30 @@
+---
+mal_id: 28805
+title: Bakemono no Ko
+status: 
+score: 0
+episodes_watched: 0
+episodes_total: 1
+media_type: movie
+genres: ["Anthropomorphic", "Fantasy", "Isekai"]
+studios: ["Studio Chizu"]
+mal_rating: 8.22
+mal_rank: 416
+airing_season: 
+start_date: 2015-07-11
+end_date: 2015-07-11
+mal_url: https://myanimelist.net/anime/28805
+cover_image: 
+is_rewatching: False
+synced_at: 2026-05-15T04:30:13.787324Z
+---
+
+# Bakemono no Ko
+
+Two souls, living very different lives, wander alone and isolated in their respective worlds. For nine-year-old Ren, the last person who treated him with any form of kindness has been killed, and he is shunned by what is left of his family. With no parents, no real family, and no place to go, Ren escapes into the confusing streets and alleyways of Shibuya. Through the twists and turns of the alleys, Ren stumbles into the intimidating Kumatetsu, who leads him to the beast realm of Shibuten.
+
+For Kumatetsu, the boy represents a chance for him to become a candidate to replace the lord of the realm once he retires. While nearly unmatched in combat, Kumatetsu's chilly persona leaves him with no disciples to teach and no way to prove he is worthy of becoming the lord's successor. 
+
+While the two share different goals, they agree to help each other in order to reach them. Kumatetsu searches for recognition; Ren, now known as Kyuuta, searches for the home he never had. As the years pass by, it starts to become apparent that the two are helping each other in more ways than they had originally thought. Perhaps there has always been less of a difference between them, a boy and a beast, than either of the two ever realized.
+
+[Written by MAL Rewrite]
