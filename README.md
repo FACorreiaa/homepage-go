@@ -12,6 +12,76 @@ task dev
 
 Open `http://localhost:7331` for templ live preview or `http://localhost:8090` for the app.
 
+## VPS Deployment
+
+### 1) Clone on VPS
+
+```sh
+cd /opt
+git clone git@github.com:FACorreiaa/homepage-go.git facorreia-site-go
+cd facorreia-site-go
+```
+
+If SSH access fails, copy/add a repo-specific key to GitHub and use:
+
+```sh
+GIT_SSH_COMMAND='ssh -i /path/to/key -o IdentitiesOnly=yes' \
+  git clone git@github.com:FACorreiaa/homepage-go.git facorreia-site-go
+```
+
+### 2) Create required runtime folders
+
+```sh
+mkdir -p /opt/facorreia-site-go/vault/raw
+```
+
+`vault/raw` is the only required mount layout for bookmarks. The app reads
+content from `/app/vault` inside the container.
+
+### 3) Configure environment
+
+```sh
+cd /opt/facorreia-site-go
+cp .env.example .env
+```
+
+Set at least these values in `.env`:
+
+- `GO_ENV=production`
+- `SESSION_SECRET` (strong random value)
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `HOST_VAULT_PATH=/opt/facorreia-site-go/vault`
+
+Optional:
+
+- `DISCORD_WEBHOOK_URL`
+- `CALENDLY_URL`
+
+The app also uses these internal paths from `docker-compose.yml`:
+
+- `DATABASE_PATH=/var/lib/facorreia-site/studio.sqlite`
+- `BLOG_STATS_PATH=/var/lib/facorreia-site/blog_stats.json`
+- `VAULT_PATH=/app/vault`
+
+Protect `.env`:
+
+```sh
+chmod 600 .env
+```
+
+### 4) Build and run
+
+```sh
+git pull
+docker compose build
+docker compose up -d
+docker compose ps
+```
+
+`studio_data` is the persistent Docker volume used for SQLite and blog stats. You
+do not need a host folder at `/var/lib/facorreia-site`.
+
 ## Production
 
 The production compose file runs the Go app on port `8090`, stores SQLite and
@@ -64,8 +134,19 @@ go build -o /tmp/facorreia-site-go-check ./main.go
 docker compose build
 ```
 
-Smoke-test `/`, `/projects`, `/projects/luminavault`, `/blog`,
-`/blog/{slug}`, `/bookmarks`, `/api/graph`, `/proposal`, `/admin/login`, and
-`/admin/dashboard`.
-# homepage-go
-# homepage-go
+Smoke-test:
+
+```sh
+curl -I https://www.facorreia.com
+curl -I https://facorreia.com
+curl -I https://www.facorreia.com/assets/static/vendor/gsap/gsap.min.js
+curl -I https://www.facorreia.com/assets/static/vendor/gsap/ScrollTrigger.min.js
+```
+
+Also verify:
+
+- `/?` and public routes load
+- `/proposal` POST works against production SQLite
+- `/admin/login` and `/admin/dashboard` behavior
+- `/bookmarks` renders after content in `vault/raw` and container restart
+- service worker/caching headers for static assets are present
