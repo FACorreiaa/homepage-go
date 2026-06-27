@@ -1,11 +1,11 @@
 // Service Worker for FC Software Studio
-// Network-first: always serve fresh content when online, fall back to cache
-// offline. Cache-first (the previous strategy) silently served stale CSS/HTML
-// after every deploy until the cache name was bumped — avoid that.
-const CACHE_NAME = 'fc-studio-v2';
+const CACHE_NAME = 'fc-studio-v3';
 const PRECACHE = [
   '/',
   '/assets/css/output.css',
+  '/assets/static/site-motion.js',
+  '/assets/static/vendor/gsap/gsap.min.js',
+  '/assets/static/vendor/gsap/ScrollTrigger.min.js',
   '/assets/static/manifest.json',
 ];
 
@@ -28,11 +28,17 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch - network-first for same-origin GETs, cache as offline fallback
+// Fetch - cache assets aggressively, keep HTML/API network-first for freshness.
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   if (new URL(req.url).origin !== self.location.origin) return;
+
+  const isAsset = new URL(req.url).pathname.startsWith('/assets/');
+  if (isAsset) {
+    event.respondWith(cacheFirst(req));
+    return;
+  }
 
   event.respondWith(
     fetch(req)
@@ -44,3 +50,14 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(req))
   );
 });
+
+function cacheFirst(req) {
+  return caches.match(req).then((cached) => {
+    if (cached) return cached;
+    return fetch(req).then((res) => {
+      const copy = res.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
+      return res;
+    });
+  });
+}

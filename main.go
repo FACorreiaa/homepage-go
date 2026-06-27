@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"myapp/assets"
 	"myapp/content"
@@ -120,7 +121,9 @@ func getEnvOrDefault(key, fallback string) string {
 }
 
 func setupAssets(mux *http.ServeMux) {
-	isDev := os.Getenv("GO_ENV") != "production"
+	goEnv := strings.ToLower(strings.TrimSpace(os.Getenv("GO_ENV")))
+	isProd := goEnv == "" || goEnv == "production"
+	isDev := !isProd
 
 	assetHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isDev {

@@ -4,5 +4,9 @@ facorreia.com {
 
 www.facorreia.com {
 	encode zstd gzip
+
+	reverse_proxy /assets/* localhost:8090 {
+		header_down Cache-Control "public, max-age=31536000, immutable"
+	}
 	reverse_proxy localhost:8090
 }
