@@ -1,0 +1,100 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to /opt/facorreia-site-go
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate deploy secrets
+        run: |
+          test -n "${{ secrets.SERVER_HOST }}" || (echo "SERVER_HOST is not configured in the production environment" && exit 1)
+          test -n "${{ secrets.SERVER_USER }}" || (echo "SERVER_USER is not configured in the production environment" && exit 1)
+          test -n "${{ secrets.SERVER_SSH_KEY }}" || (echo "SERVER_SSH_KEY is not configured in the production environment" && exit 1)
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            log() {
+              echo "[deploy] $*"
+            }
+
+            fail() {
+              log "ERROR: $1"
+              log "Deployment failure context:"
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail 30 app || true
+              exit 1
+            }
+
+            require_command() {
+              command -v "$1" >/dev/null 2>&1 || fail "Required command '$1' is missing on the VPS."
+            }
+
+            require_command git
+            require_command docker
+            require_command curl
+
+            DEPLOY_DIR="/opt/facorreia-site-go"
+            REPO_URL="git@github.com:FACorreiaa/homepage-go.git"
+            REPO_BRANCH="main"
+            APP_PORT="8090"
+            COMPOSE_FILES="-f docker-compose.yml -f docker-compose.prod.yml"
+
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+
+            if [ -d ".git" ]; then
+              log "Updating existing checkout in $DEPLOY_DIR"
+              git fetch --all --prune
+              git reset --hard "origin/$REPO_BRANCH"
+            else
+              if [ -n "$(ls -A . 2>/dev/null)" ]; then
+                fail "Expected $DEPLOY_DIR to be a git repository, but directory is not empty and has no .git."
+              fi
+
+              log "Cloning repository into $DEPLOY_DIR"
+              git clone --depth 1 --branch "$REPO_BRANCH" "$REPO_URL" .
+            fi
+
+            if [ ! -f ".env" ]; then
+              fail ".env is missing at $DEPLOY_DIR/.env. Copy/create it on the VPS before deployment."
+            fi
+
+            mkdir -p vault/raw
+
+            log "Deploying with production compose overrides"
+            docker compose $COMPOSE_FILES pull || true
+            docker compose $COMPOSE_FILES up -d --build --remove-orphans
+
+            log "Pruning dangling images"
+            docker image prune -f
+
+            for attempt in $(seq 1 12); do
+              if curl -fsS "http://127.0.0.1:${APP_PORT}/" >/dev/null; then
+                log "Health check passed"
+                break
+              fi
+              if [ "$attempt" -eq 12 ]; then
+                fail "Health check failed: app did not respond on / after 12 attempts."
+              fi
+              log "Waiting for application health check ($attempt/12)"
+              sleep 5
+            done
+
+            if ! docker compose $COMPOSE_FILES ps --services --status running | grep -q '^app$'; then
+              fail "Container app is not running after deploy."
+            fi
+
+            log "Deployment successful"

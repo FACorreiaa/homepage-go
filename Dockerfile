@@ -48,8 +48,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main ./main.go
 FROM alpine:3.20.2
 WORKDIR /app
 
-# Install runtime certificates.
-RUN apk add --no-cache ca-certificates
+# Install runtime certificates and runtime client tools.
+RUN apk add --no-cache ca-certificates curl
 
 # Run the app in production mode.
 ENV GO_ENV=production
@@ -59,6 +59,9 @@ COPY --from=build /app/main .
 
 # The app listens on port 8090.
 EXPOSE 8090
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=5 \
+  CMD curl -fsS http://127.0.0.1:8090/ || exit 1
 
 # Start the app.
 CMD ["./main"]

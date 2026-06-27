@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+    image: facorreia-site-go:latest
+    ports:
+      - "8090:8090"
+    volumes:
+      - studio_data:/var/lib/facorreia-site
+      - ${HOST_VAULT_PATH:-/opt/facorreia-site-go/vault}:/app/vault:ro
+    restart: unless-stopped
+
+volumes:
+  studio_data:
