@@ -9,7 +9,7 @@ type ctxKey int
 
 const requestPathKey ctxKey = 0
 
-const siteBaseURL = "https://www.facorreia.com"
+const siteBaseURL = "https://facorreia.com"
 
 // WithRequestPath stores the request path so BaseLayout can emit
 // canonical/og:url tags without every page threading it through props.
