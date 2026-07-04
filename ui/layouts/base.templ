@@ -47,6 +47,8 @@ templ BaseLayout(props LayoutProps) {
 			<title>{ props.title() }</title>
 			<meta name="description" content={ props.description() }/>
 			<meta name="author" content="Fernando Correia"/>
+			<link rel="canonical" href={ canonicalURL(ctx) }/>
+			<meta property="og:url" content={ canonicalURL(ctx) }/>
 			<meta property="og:title" content={ props.title() }/>
 			<meta property="og:description" content={ props.description() }/>
 			<meta property="og:type" content={ props.ogType() }/>

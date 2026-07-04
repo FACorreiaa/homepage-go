@@ -13,6 +13,7 @@ import (
 	"myapp/internal/handler"
 	"myapp/internal/service"
 	sess "myapp/internal/session"
+	"myapp/ui/layouts"
 	"myapp/ui/pages"
 
 	"github.com/joho/godotenv"
@@ -114,9 +115,16 @@ func main() {
 	})
 
 	fmt.Println("Server is running on http://localhost:8090")
-	if err := http.ListenAndServe(":8090", mux); err != nil {
+	if err := http.ListenAndServe(":8090", withRequestPath(mux)); err != nil {
 		panic(err)
 	}
+}
+
+// withRequestPath exposes the request path to templates for canonical/og:url tags.
+func withRequestPath(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r.WithContext(layouts.WithRequestPath(r.Context(), r.URL.Path)))
+	})
 }
 
 func getEnvOrDefault(key, fallback string) string {

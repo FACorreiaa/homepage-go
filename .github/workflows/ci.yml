@@ -28,22 +28,11 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: go.sum
 
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
       - name: Install templ
         run: go install github.com/a-h/templ/cmd/templ@latest
 
       - name: Generate templates
         run: templ generate
-
-      - name: Install frontend dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build frontend assets
-        run: bun run build
 
       - name: Run tests
         run: go test ./... -count=1 -race
