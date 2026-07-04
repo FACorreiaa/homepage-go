@@ -13,6 +13,7 @@ import (
 	"myapp/internal/handler"
 	"myapp/internal/service"
 	sess "myapp/internal/session"
+	"myapp/ui/layouts"
 	"myapp/ui/pages"
 
 	"github.com/joho/godotenv"
@@ -50,7 +51,7 @@ func main() {
 	// Vault index. In production, mount a vault directory and set VAULT_PATH.
 	// The directory should contain raw/ at its root.
 	vaultFS := os.DirFS(getEnvOrDefault("VAULT_PATH", "./vault"))
-	bookmarkIdx := service.BuildBookmarkIndex(vaultFS)
+	bookmarkStore := service.NewBookmarkStore(vaultFS)
 	blogTracker := service.NewBlogTracker()
 
 	sess.Init()
@@ -79,7 +80,7 @@ func main() {
 	mux.HandleFunc("POST /proposal", proposal.Submit)
 
 	// Bookmarks
-	bk := &handler.BookmarksHandler{Index: bookmarkIdx, VaultFS: vaultFS}
+	bk := &handler.BookmarksHandler{Store: bookmarkStore, VaultFS: vaultFS}
 	mux.HandleFunc("GET /bookmarks", bk.List)
 	mux.HandleFunc("GET /bookmarks/{slug}", bk.Show)
 	mux.HandleFunc("GET /api/graph", bk.GraphData)
@@ -114,9 +115,16 @@ func main() {
 	})
 
 	fmt.Println("Server is running on http://localhost:8090")
-	if err := http.ListenAndServe(":8090", mux); err != nil {
+	if err := http.ListenAndServe(":8090", withRequestPath(mux)); err != nil {
 		panic(err)
 	}
+}
+
+// withRequestPath exposes the request path to templates for canonical/og:url tags.
+func withRequestPath(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r.WithContext(layouts.WithRequestPath(r.Context(), r.URL.Path)))
+	})
 }
 
 func getEnvOrDefault(key, fallback string) string {

@@ -1,0 +1,14 @@
+[Unit]
+Description=Pull Obsidian vault from Hermes into the site vault directory
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/rsync -az --delete \
+  --exclude='.*' \
+  --exclude='*sync-conflict*' \
+  --exclude='*.tmp' \
+  -e "ssh -i /root/.ssh/id_ed25519_vault_sync -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15" \
+  root@78.46.192.73:/root/.hermes/obsidian-vault/FACorreia/raw/ \
+  /opt/facorreia-site-go/vault/raw/

@@ -1,92 +1,204 @@
 package pages
 
 import (
+	"fmt"
 	"myapp/internal/service"
 	"myapp/ui/layouts"
+	"net/url"
 	"strconv"
 )
 
-templ Bookmarks(sidebar []service.SidebarCategory, totalNotes int) {
+type BookmarkQuery struct {
+	Q        string
+	Category string
+	Sort     string
+	Page     int
+	Total    int
+	PerPage  int
+}
+
+func (p BookmarkQuery) Remaining() int {
+	r := p.Total - p.Page*p.PerPage
+	if r < 0 {
+		return 0
+	}
+	return r
+}
+
+func (p BookmarkQuery) NextPageURL() string {
+	v := url.Values{}
+	v.Set("page", strconv.Itoa(p.Page+1))
+	if p.Q != "" {
+		v.Set("q", p.Q)
+	}
+	if p.Category != "" {
+		v.Set("category", p.Category)
+	}
+	if p.Sort != "" {
+		v.Set("sort", p.Sort)
+	}
+	return "/bookmarks?" + v.Encode()
+}
+
+// catHue maps a category name to a stable hue (0-359) shared by the
+// library dots and the graph nodes.
+func catHue(name string) int {
+	h := 0
+	for _, c := range name {
+		h = (h*31 + int(c)) % 360
+	}
+	if h < 0 {
+		h += 360
+	}
+	return h
+}
+
+func catDotStyle(name string) string {
+	return fmt.Sprintf("background: hsl(%d 55%% 52%%)", catHue(name))
+}
+
+templ Bookmarks(idx service.BookmarkIndex, items []service.VaultFile, params BookmarkQuery) {
 	@layouts.BaseLayout(layouts.LayoutProps{Title: "Bookmarks | FC Software Studio", ActivePage: "bookmarks", Description: "A digital garden and knowledge graph of my Obsidian notes, insights, and bookmarks."}) {
-		<div class="public-shell min-h-screen">
-			<section class="mx-auto max-w-7xl px-4 py-20 md:py-28">
-				<div class="grid gap-10 lg:grid-cols-[0.62fr_0.38fr] lg:items-end">
-					<div>
-						<h1 class="hero-title max-w-6xl font-semibold">A working knowledge garden.</h1>
-						<p class="mt-6 max-w-3xl text-xl leading-9 text-muted-foreground">A public window into saved notes, research fragments, and links indexed from an Obsidian vault.</p>
-					</div>
-					<div class="public-card rounded-lg p-6">
-						<p class="text-5xl font-semibold">{ strconv.Itoa(totalNotes) }</p>
-						<p class="mt-2 text-sm text-muted-foreground">indexed notes</p>
-						<button onclick="toggleGraph()" class="mt-6 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background">Toggle Knowledge Graph</button>
-					</div>
+		<style>[x-cloak]{display:none!important}</style>
+		<div class="public-shell min-h-screen" x-data="{ view: 'library' }">
+			<section class="mx-auto max-w-5xl px-4 pt-20 md:pt-28">
+				<h1 class="hero-title font-semibold">The archive.</h1>
+				<p class="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">Notes, links, and research fragments clipped into an Obsidian vault and indexed here as they sync.</p>
+				<p class="mt-6 font-mono text-xs tracking-wide text-muted-foreground">
+					{ strconv.Itoa(len(idx.Files)) } notes
+					<span class="mx-1.5 opacity-50">·</span>
+					{ strconv.Itoa(len(idx.CategoryCounts())) } categories
+					if idx.CrossLinkCount() > 0 {
+						<span class="mx-1.5 opacity-50">·</span>
+						{ strconv.Itoa(idx.CrossLinkCount()) } cross-links
+					}
+					<span class="mx-1.5 opacity-50">·</span>
+					indexed { idx.BuiltAt.Format("Jan 2 15:04") }
+				</p>
+				<div class="mt-10 inline-flex rounded-full border border-border p-1 font-mono text-xs">
+					<button
+						@click="view = 'library'"
+						:class="view === 'library' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'"
+						class="rounded-full px-4 py-1.5 transition-colors"
+					>Library</button>
+					<button
+						@click="view = 'graph'; if (!window._graphLoaded) { window._graphLoaded = true; loadGraph(); }"
+						:class="view === 'graph' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'"
+						class="rounded-full px-4 py-1.5 transition-colors"
+					>Graph</button>
 				</div>
 			</section>
-			<section class="mx-auto max-w-7xl px-4 pb-32 md:pb-48">
-				<div id="graph-container" class="mb-8 hidden">
-					<div id="graph" class="w-full rounded-lg border border-border bg-card" style="height:520px"></div>
-				</div>
-				<div class="grid items-start gap-8 lg:grid-cols-[18rem_1fr]">
-					<aside class="hidden lg:block sticky top-28 max-h-[78vh] overflow-y-auto rounded-lg border border-border bg-card/72 p-5 backdrop-blur">
-						<nav class="space-y-5">
-							for _, cat := range sidebar {
-								<div>
-									<p class="mb-2 text-xs font-semibold text-muted-foreground">{ cat.Name }</p>
-									<div class="space-y-1">
-										for _, item := range cat.Items {
-											<a
-												href={ templ.SafeURL("/bookmarks/" + item.Slug) }
-												hx-get={ "/bookmarks/" + item.Slug }
-												hx-target="#note-content"
-												hx-swap="innerHTML"
-												hx-push-url="true"
-												class="block truncate rounded px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-											>{ item.Name }</a>
-										}
-									</div>
-								</div>
-							}
-						</nav>
-					</aside>
-					<div class="min-w-0">
-						<div id="note-content" class="prose prose-neutral prose-public dark:prose-invert max-w-none rounded-lg border border-border bg-card/80 p-6 backdrop-blur md:p-10">
-							<p class="text-muted-foreground">Select a note from the sidebar to start reading.</p>
-						</div>
+			<section x-show="view === 'library'" class="mx-auto max-w-5xl px-4 pb-32 pt-10 md:pb-44">
+				<form id="library-filters" action="/bookmarks" method="get" class="border-b border-border pb-6">
+					<div class="flex flex-wrap items-center gap-3">
+						<input
+							type="search"
+							name="q"
+							value={ params.Q }
+							placeholder="Search titles and excerpts…"
+							autocomplete="off"
+							hx-get="/bookmarks"
+							hx-trigger="input changed delay:300ms, search"
+							hx-target="#library-results"
+							hx-swap="innerHTML"
+							hx-include="closest form"
+							hx-push-url="true"
+							class="h-10 w-full max-w-sm rounded-md border border-border bg-card px-3 text-sm outline-none transition-colors focus:border-foreground/40"
+						/>
+						<select
+							name="sort"
+							hx-get="/bookmarks"
+							hx-trigger="change"
+							hx-target="#library-results"
+							hx-swap="innerHTML"
+							hx-include="closest form"
+							hx-push-url="true"
+							class="h-10 rounded-md border border-border bg-card px-2 font-mono text-xs text-muted-foreground outline-none"
+						>
+							<option value="" selected?={ params.Sort == "" }>newest first</option>
+							<option value="name" selected?={ params.Sort == "name" }>a → z</option>
+							<option value="category" selected?={ params.Sort == "category" }>by category</option>
+						</select>
 					</div>
+					<div class="mt-4 flex flex-wrap gap-2">
+						<label class="cursor-pointer">
+							<input
+								type="radio"
+								name="category"
+								value=""
+								checked?={ params.Category == "" }
+								hx-get="/bookmarks"
+								hx-trigger="change"
+								hx-target="#library-results"
+								hx-swap="innerHTML"
+								hx-include="closest form"
+								hx-push-url="true"
+								class="peer sr-only"
+							/>
+							<span class="inline-flex items-center rounded-full border border-border px-3 py-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground peer-checked:border-foreground peer-checked:text-foreground">all</span>
+						</label>
+						for _, cat := range idx.CategoryCounts() {
+							<label class="cursor-pointer">
+								<input
+									type="radio"
+									name="category"
+									value={ cat.Name }
+									checked?={ params.Category == cat.Name }
+									hx-get="/bookmarks"
+									hx-trigger="change"
+									hx-target="#library-results"
+									hx-swap="innerHTML"
+									hx-include="closest form"
+									hx-push-url="true"
+									class="peer sr-only"
+								/>
+								<span class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground peer-checked:border-foreground peer-checked:text-foreground">
+									<span class="h-1.5 w-1.5 rounded-full" style={ catDotStyle(cat.Name) }></span>
+									{ cat.Name }
+									<span class="opacity-50">{ strconv.Itoa(cat.Count) }</span>
+								</span>
+							</label>
+						}
+					</div>
+				</form>
+				<div id="library-results">
+					@BookmarkResults(items, params)
 				</div>
+			</section>
+			<section x-show="view === 'graph'" x-cloak class="mx-auto max-w-7xl px-4 pb-32 pt-10 md:pb-44">
+				<p class="mb-4 font-mono text-xs text-muted-foreground">drag to explore · click a node to read · categories share their library colors</p>
+				<div id="graph" class="w-full rounded-lg border border-border bg-card" style="height:640px"></div>
 			</section>
 		</div>
 		<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 		<script>
-			function toggleGraph() {
-				const c = document.getElementById('graph-container');
-				const hidden = c.classList.toggle('hidden');
-				if (!hidden && !window._graphLoaded) {
-					window._graphLoaded = true;
-					loadGraph();
-				}
+			function catHue(name) {
+				let h = 0;
+				for (const c of name) h = (h * 31 + c.codePointAt(0)) % 360;
+				return h < 0 ? h + 360 : h;
 			}
 			async function loadGraph() {
 				const data = await fetch('/api/graph').then(r => r.json());
-				const width = document.getElementById('graph').clientWidth;
-				const height = 520;
+				const el = document.getElementById('graph');
+				const width = el.clientWidth;
+				const height = 640;
 				const svg = d3.select('#graph').append('svg').attr('width', width).attr('height', height);
 				const sim = d3.forceSimulation(data.nodes)
 					.force('link', d3.forceLink(data.links).id(d => d.id).distance(60))
 					.force('charge', d3.forceManyBody().strength(-80))
 					.force('center', d3.forceCenter(width / 2, height / 2));
 				const link = svg.append('g').selectAll('line').data(data.links).join('line')
-					.attr('stroke', '#888').attr('stroke-opacity', 0.4).attr('stroke-width', 1);
+					.attr('stroke', '#888').attr('stroke-opacity', 0.35).attr('stroke-width', 1);
 				const node = svg.append('g').selectAll('circle').data(data.nodes).join('circle')
-					.attr('r', d => d.isHub ? 8 : 4)
-					.attr('fill', d => d.isHub ? '#0f172a' : '#64748b')
+					.attr('r', d => d.isHub ? 9 : 4)
+					.attr('fill', d => `hsl(${catHue(d.category)} 55% ${d.isHub ? 42 : 58}%)`)
 					.attr('cursor', 'pointer')
 					.on('click', (e, d) => { if (!d.isHub) window.location.href = '/bookmarks/' + d.id; })
 					.call(d3.drag().on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
 						.on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
 						.on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
 				const label = svg.append('g').selectAll('text').data(data.nodes.filter(d => d.isHub)).join('text')
-					.text(d => d.name).attr('font-size', 10).attr('fill', '#64748b').attr('dx', 10).attr('dy', 3);
+					.text(d => d.name).attr('font-size', 11).attr('font-family', 'monospace').attr('fill', 'currentColor').attr('opacity', 0.7).attr('dx', 12).attr('dy', 4);
 				sim.on('tick', () => {
 					link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
 					node.attr('cx', d => d.x).attr('cy', d => d.y);
@@ -95,4 +207,64 @@ templ Bookmarks(sidebar []service.SidebarCategory, totalNotes int) {
 			}
 		</script>
 	}
+}
+
+templ BookmarkResults(items []service.VaultFile, params BookmarkQuery) {
+	<p class="py-4 font-mono text-xs text-muted-foreground" role="status">
+		if params.Q != "" || params.Category != "" {
+			{ strconv.Itoa(params.Total) } matching notes
+		} else {
+			{ strconv.Itoa(params.Total) } notes
+		}
+	</p>
+	<div class="divide-y divide-border border-t border-border">
+		@BookmarkRows(items, params)
+	</div>
+	if len(items) == 0 {
+		<div class="py-16 text-center">
+			<p class="text-muted-foreground">No notes match this search.</p>
+			<a href="/bookmarks" class="mt-3 inline-block font-mono text-xs text-foreground underline underline-offset-4">clear filters</a>
+		</div>
+	}
+}
+
+templ BookmarkRows(items []service.VaultFile, params BookmarkQuery) {
+	for _, f := range items {
+		<a href={ templ.SafeURL("/bookmarks/" + f.Slug) } class="group grid gap-1 py-5 transition-colors hover:bg-accent/40 sm:grid-cols-[7rem_1fr] sm:gap-6 sm:px-3">
+			<time class="pt-0.5 font-mono text-xs text-muted-foreground">{ f.Date.Format("2006-01-02") }</time>
+			<div class="min-w-0">
+				<p class="truncate text-base font-medium leading-snug group-hover:underline group-hover:underline-offset-4">{ f.Name }</p>
+				if f.Excerpt != "" {
+					<p class="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground">{ f.Excerpt }</p>
+				}
+				<p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-muted-foreground">
+					<span class="inline-flex items-center gap-1.5">
+						<span class="h-1.5 w-1.5 rounded-full" style={ catDotStyle(f.Category) }></span>
+						{ f.Category }
+					</span>
+					if f.SourceDomain() != "" {
+						<span class="opacity-50">·</span>
+						<span>{ f.SourceDomain() }</span>
+					}
+					<span class="opacity-50">·</span>
+					<span>{ strconv.Itoa(f.ReadMinutes()) } min</span>
+				</p>
+			</div>
+		</a>
+	}
+	if params.Remaining() > 0 {
+		<button
+			hx-get={ params.NextPageURL() }
+			hx-target="this"
+			hx-swap="outerHTML"
+			class="block w-full py-5 text-center font-mono text-xs text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground"
+		>load { strconv.Itoa(minInt(params.PerPage, params.Remaining())) } more ↓ <span class="opacity-60">({ strconv.Itoa(params.Remaining()) } remaining)</span></button>
+	}
+}
+
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
