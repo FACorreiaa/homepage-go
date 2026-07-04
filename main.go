@@ -51,7 +51,7 @@ func main() {
 	// Vault index. In production, mount a vault directory and set VAULT_PATH.
 	// The directory should contain raw/ at its root.
 	vaultFS := os.DirFS(getEnvOrDefault("VAULT_PATH", "./vault"))
-	bookmarkIdx := service.BuildBookmarkIndex(vaultFS)
+	bookmarkStore := service.NewBookmarkStore(vaultFS)
 	blogTracker := service.NewBlogTracker()
 
 	sess.Init()
@@ -80,7 +80,7 @@ func main() {
 	mux.HandleFunc("POST /proposal", proposal.Submit)
 
 	// Bookmarks
-	bk := &handler.BookmarksHandler{Index: bookmarkIdx, VaultFS: vaultFS}
+	bk := &handler.BookmarksHandler{Store: bookmarkStore, VaultFS: vaultFS}
 	mux.HandleFunc("GET /bookmarks", bk.List)
 	mux.HandleFunc("GET /bookmarks/{slug}", bk.Show)
 	mux.HandleFunc("GET /api/graph", bk.GraphData)
