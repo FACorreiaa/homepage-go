@@ -81,7 +81,11 @@ func (h *BookmarksHandler) Show(w http.ResponseWriter, r *http.Request) {
 
 func (h *BookmarksHandler) GraphData(w http.ResponseWriter, r *http.Request) {
 	idx := h.Store.Index()
+	limit := 2000
+	if v, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && v > 0 && v <= 10000 {
+		limit = v
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "public, max-age=300")
-	json.NewEncoder(w).Encode(idx.GraphData) //nolint:errcheck
+	json.NewEncoder(w).Encode(idx.GraphData.Subset(limit)) //nolint:errcheck
 }

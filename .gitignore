@@ -8,3 +8,6 @@ vault/*
 !vault/raw/
 vault/raw/*
 !vault/raw/.gitkeep
+app.db-shm
+app.db-wal
+app.db-journal

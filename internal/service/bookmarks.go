@@ -1,7 +1,9 @@
 package service
 
 import (
+	"hash/fnv"
 	"io/fs"
+	"math"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -58,12 +60,21 @@ type CategoryCount struct {
 }
 
 type GraphNode struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Val      int    `json:"val"`
-	Group    int    `json:"group"`
-	Category string `json:"category"`
-	IsHub    bool   `json:"isHub"`
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	Val      float64 `json:"val"`
+	Group    int     `json:"group"`
+	Category string  `json:"category"`
+	IsHub    bool    `json:"isHub"`
+	// Precomputed, deterministic 3D position (fx/fy/fz are treated as fixed
+	// coordinates by 3d-force-graph, so no client-side physics is needed and
+	// the layout never jitters between loads).
+	FX float64 `json:"fx"`
+	FY float64 `json:"fy"`
+	FZ float64 `json:"fz"`
+	// Heat is recency in [0,1]: 1 = touched today, decaying over months.
+	Heat float64 `json:"heat"`
+	Deg  int     `json:"-"`
 }
 
 type GraphLink struct {
@@ -181,7 +192,7 @@ func parseAnyDate(s string) (time.Time, bool) {
 	return time.Time{}, false
 }
 
-var filenameDateRe = regexp.MustCompile(`^(\d{4}-\d{2}-\d{2})[-_]`)
+var filenameDateRe = regexp.MustCompile(`(\d{4}-\d{2}-\d{2})`)
 
 func (m vaultMeta) date(baseName string, mtime time.Time) time.Time {
 	for _, c := range []string{m.Date, m.Published, m.PubDate, m.Created, m.IngestedAt, m.SyncedAt} {
@@ -363,7 +374,9 @@ func BuildBookmarkIndex(vaultFS fs.FS) BookmarkIndex {
 	}
 	sort.Slice(sidebar, func(i, j int) bool { return sidebar[i].Name < sidebar[j].Name })
 
-	// Graph
+	// Graph: category hubs on a fibonacci sphere, notes clustered around
+	// their hub with hash-deterministic offsets. Node size encodes note
+	// length + connectivity; heat encodes recency.
 	categoryIndex := map[string]int{}
 	catCount := map[string]int{}
 	for _, f := range files {
@@ -373,18 +386,61 @@ func BuildBookmarkIndex(vaultFS fs.FS) BookmarkIndex {
 		catCount[f.Category]++
 	}
 
+	const hubRadius = 1500.0
+	nCats := len(categoryIndex)
+	hubPos := map[string][3]float64{}
+	for cat, grp := range categoryIndex {
+		x, y, z := fibonacciSphere(grp, nCats)
+		hubPos[cat] = [3]float64{x * hubRadius, y * hubRadius, z * hubRadius}
+	}
+
+	// Degree counts only edges between notes that actually exist — clipped
+	// notes often carry hundreds of [[entity]] links with no matching note.
+	existing := map[string]bool{}
+	for _, f := range files {
+		existing[f.Slug] = true
+	}
+	degree := map[string]int{}
+	for _, f := range files {
+		for _, target := range f.Links {
+			if existing[target] && target != f.Slug {
+				degree[target]++
+				degree[f.Slug]++
+			}
+		}
+	}
+
+	now := time.Now()
 	nodeIDs := map[string]bool{}
 	var nodes []GraphNode
 	var links []GraphLink
 
 	for cat, grp := range categoryIndex {
 		hubID := "hub-" + slugify(cat)
-		nodes = append(nodes, GraphNode{ID: hubID, Name: cat, Val: max(3, catCount[cat]/2), Group: grp, Category: cat, IsHub: true})
+		p := hubPos[cat]
+		val := math.Max(6, math.Sqrt(float64(catCount[cat]))*1.6)
+		nodes = append(nodes, GraphNode{
+			ID: hubID, Name: cat, Val: val, Group: grp, Category: cat, IsHub: true,
+			FX: p[0], FY: p[1], FZ: p[2], Heat: 0.55,
+		})
 		nodeIDs[hubID] = true
 	}
 	for _, f := range files {
 		grp := categoryIndex[f.Category]
-		nodes = append(nodes, GraphNode{ID: f.Slug, Name: f.Name, Val: 1, Group: grp, Category: f.Category})
+		hub := hubPos[f.Category]
+		spread := math.Min(430, 60+30*math.Cbrt(float64(catCount[f.Category])))
+		ox, oy, oz := hashOffset(f.Slug)
+		ageDays := now.Sub(f.Date).Hours() / 24
+		if ageDays < 0 {
+			ageDays = 0
+		}
+		heat := math.Exp(-ageDays / 120)
+		val := 1.2 + math.Min(3, float64(f.WordCount)/900) + math.Min(6, float64(degree[f.Slug]))
+		nodes = append(nodes, GraphNode{
+			ID: f.Slug, Name: f.Name, Val: val, Group: grp, Category: f.Category,
+			FX: hub[0] + ox*spread, FY: hub[1] + oy*spread, FZ: hub[2] + oz*spread,
+			Heat: heat, Deg: degree[f.Slug],
+		})
 		nodeIDs[f.Slug] = true
 		links = append(links, GraphLink{Source: f.Slug, Target: "hub-" + slugify(f.Category)})
 	}
@@ -523,11 +579,95 @@ func (idx BookmarkIndex) Related(f *VaultFile, limit int) []VaultFile {
 	return out
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
+// fibonacciSphere returns the i-th of n evenly distributed unit vectors.
+func fibonacciSphere(i, n int) (x, y, z float64) {
+	if n <= 1 {
+		return 0, 1, 0
 	}
-	return b
+	y = 1 - 2*(float64(i)+0.5)/float64(n)
+	r := math.Sqrt(1 - y*y)
+	phi := float64(i) * 2.399963229728653 // golden angle
+	return math.Cos(phi) * r, y, math.Sin(phi) * r
+}
+
+// hashOffset derives a deterministic offset in [-1,1]^3 from a slug, biased
+// toward the cluster core so clusters read as dense centers with sparse halos.
+func hashOffset(s string) (x, y, z float64) {
+	h := fnv.New64a()
+	h.Write([]byte(s)) //nolint:errcheck
+	v := h.Sum64()
+	f := func(bits uint64) float64 {
+		u := float64(bits&0xFFFFF) / float64(0xFFFFF) // [0,1]
+		return (u*2 - 1)
+	}
+	x, y, z = f(v), f(v>>20), f(v>>40)
+	// bias toward center
+	n := math.Sqrt(x*x+y*y+z*z) + 1e-9
+	scale := math.Pow(n/math.Sqrt(3), 0.5) / n * math.Sqrt(3)
+	return x * scale, y * scale, z * scale
+}
+
+// GraphSubset keeps all hubs plus the top-N notes ranked by heat and
+// connectivity, dropping links whose endpoints were pruned.
+func (g GraphData) Subset(maxNotes int) GraphData {
+	notes := 0
+	for _, n := range g.Nodes {
+		if !n.IsHub {
+			notes++
+		}
+	}
+	if maxNotes <= 0 || notes <= maxNotes {
+		return g
+	}
+	var out GraphData
+	byCat := map[string][]GraphNode{}
+	for _, n := range g.Nodes {
+		if n.IsHub {
+			out.Nodes = append(out.Nodes, n)
+		} else {
+			byCat[n.Category] = append(byCat[n.Category], n)
+		}
+	}
+	keep := map[string]bool{}
+	for _, n := range out.Nodes {
+		keep[n.ID] = true
+	}
+	// Proportional quota per category, filled by evenly-spaced sampling of
+	// the category's recency-sorted notes — clusters keep their relative
+	// size and the full hot→cold age spread stays visible.
+	cats := make([]string, 0, len(byCat))
+	for c := range byCat {
+		cats = append(cats, c)
+	}
+	sort.Strings(cats)
+	for _, c := range cats {
+		grp := byCat[c]
+		sort.Slice(grp, func(i, j int) bool {
+			if grp[i].Heat != grp[j].Heat {
+				return grp[i].Heat > grp[j].Heat
+			}
+			return grp[i].ID < grp[j].ID
+		})
+		quota := int(float64(maxNotes)*float64(len(grp))/float64(notes) + 0.5)
+		if quota < 1 {
+			quota = 1
+		}
+		if quota > len(grp) {
+			quota = len(grp)
+		}
+		step := float64(len(grp)) / float64(quota)
+		for k := 0; k < quota; k++ {
+			n := grp[int(float64(k)*step)]
+			out.Nodes = append(out.Nodes, n)
+			keep[n.ID] = true
+		}
+	}
+	for _, l := range g.Links {
+		if keep[l.Source] && keep[l.Target] {
+			out.Links = append(out.Links, l)
+		}
+	}
+	return out
 }
 
 func ResolveWikilinks(content string) string {

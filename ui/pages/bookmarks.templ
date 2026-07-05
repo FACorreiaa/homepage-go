@@ -60,7 +60,7 @@ func catDotStyle(name string) string {
 templ Bookmarks(idx service.BookmarkIndex, items []service.VaultFile, params BookmarkQuery) {
 	@layouts.BaseLayout(layouts.LayoutProps{Title: "Bookmarks | FC Software Studio", ActivePage: "bookmarks", Description: "A digital garden and knowledge graph of my Obsidian notes, insights, and bookmarks."}) {
 		<style>[x-cloak]{display:none!important}</style>
-		<div class="public-shell min-h-screen" x-data="{ view: 'library' }">
+		<div class="public-shell min-h-screen" x-data="{ view: location.hash === '#graph' ? 'graph' : 'library' }" x-init="if (view === 'graph') window.loadGraph?.()">
 			<section class="mx-auto max-w-5xl px-4 pt-20 md:pt-28">
 				<h1 class="hero-title font-semibold">The archive.</h1>
 				<p class="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">Notes, links, and research fragments clipped into an Obsidian vault and indexed here as they sync.</p>
@@ -82,7 +82,7 @@ templ Bookmarks(idx service.BookmarkIndex, items []service.VaultFile, params Boo
 						class="rounded-full px-4 py-1.5 transition-colors"
 					>Library</button>
 					<button
-						@click="view = 'graph'; if (!window._graphLoaded) { window._graphLoaded = true; loadGraph(); }"
+						@click="view = 'graph'; history.replaceState(null, '', '#graph'); window.loadGraph?.()"
 						:class="view === 'graph' ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'"
 						class="rounded-full px-4 py-1.5 transition-colors"
 					>Graph</button>
@@ -167,55 +167,97 @@ templ Bookmarks(idx service.BookmarkIndex, items []service.VaultFile, params Boo
 				</div>
 			</section>
 			<section x-show="view === 'graph'" x-cloak class="mx-auto max-w-7xl px-4 pb-32 pt-10 md:pb-44">
-				<p class="mb-4 font-mono text-xs text-muted-foreground">drag to explore · click a node to read · categories share their library colors</p>
-				<div id="graph" class="w-full rounded-lg border border-border bg-card" style="height:640px"></div>
+				<p class="mb-4 font-mono text-xs text-muted-foreground">drag to rotate · scroll to zoom · click a sphere to read · <span style="color:#ff5533">hot</span> = recently touched, <span style="color:#7a6cff">cold</span> = older</p>
+				<div class="relative">
+					<div id="graph" class="w-full overflow-hidden rounded-lg border border-border" style="height:72vh;min-height:480px;background:#050208"></div>
+					<p id="graph-loading" class="absolute inset-0 grid place-items-center font-mono text-xs text-muted-foreground" style="color:#8a86a8">initializing neural map…</p>
+				</div>
 			</section>
 		</div>
-		<script>
-			function catHue(name) {
-				let h = 0;
-				for (const c of name) h = (h * 31 + c.codePointAt(0)) % 360;
-				return h < 0 ? h + 360 : h;
-			}
-			function ensureD3() {
-				if (window.d3) return Promise.resolve();
-				return new Promise((resolve, reject) => {
-					const s = document.createElement('script');
-					s.src = '/assets/static/vendor/d3/d3.min.js';
-					s.onload = resolve;
-					s.onerror = reject;
-					document.head.appendChild(s);
-				});
-			}
-			async function loadGraph() {
-				await ensureD3();
-				const data = await fetch('/api/graph').then(r => r.json());
+		@templ.Raw(`<script type="importmap">{"imports":{"three":"/assets/static/vendor/three/three.module.min.js","three/webgpu":"/assets/static/vendor/three/webgpu-stub.js","three/examples/jsm/":"/assets/static/vendor/three/addons/"}}</script>`)
+		<script type="module">
+			let graphStarted = false;
+			window.loadGraph = async function () {
+				if (graphStarted) return;
+				graphStarted = true;
+				const [{ default: ForceGraph3D }, THREE, { UnrealBloomPass }, dataRes] = await Promise.all([
+					import('/assets/static/vendor/3d-force-graph/3d-force-graph.bundle.mjs'),
+					import('three'),
+					import('/assets/static/vendor/three/addons/postprocessing/UnrealBloomPass.js'),
+					fetch('/api/graph'),
+				]);
+				const data = await dataRes.json();
 				const el = document.getElementById('graph');
-				const width = el.clientWidth;
-				const height = 640;
-				const svg = d3.select('#graph').append('svg').attr('width', width).attr('height', height);
-				const sim = d3.forceSimulation(data.nodes)
-					.force('link', d3.forceLink(data.links).id(d => d.id).distance(60))
-					.force('charge', d3.forceManyBody().strength(-80))
-					.force('center', d3.forceCenter(width / 2, height / 2));
-				const link = svg.append('g').selectAll('line').data(data.links).join('line')
-					.attr('stroke', '#888').attr('stroke-opacity', 0.35).attr('stroke-width', 1);
-				const node = svg.append('g').selectAll('circle').data(data.nodes).join('circle')
-					.attr('r', d => d.isHub ? 9 : 4)
-					.attr('fill', d => `hsl(${catHue(d.category)} 55% ${d.isHub ? 42 : 58}%)`)
-					.attr('cursor', 'pointer')
-					.on('click', (e, d) => { if (!d.isHub) window.location.href = '/bookmarks/' + d.id; })
-					.call(d3.drag().on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
-						.on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
-						.on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
-				const label = svg.append('g').selectAll('text').data(data.nodes.filter(d => d.isHub)).join('text')
-					.text(d => d.name).attr('font-size', 11).attr('font-family', 'monospace').attr('fill', 'currentColor').attr('opacity', 0.7).attr('dx', 12).attr('dy', 4);
-				sim.on('tick', () => {
-					link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
-					node.attr('cx', d => d.x).attr('cy', d => d.y);
-					label.attr('x', d => d.x).attr('y', d => d.y);
+				document.getElementById('graph-loading')?.remove();
+
+				// Shared resources: one geometry, a small palette of emissive
+				// materials bucketed by heat — keeps GPU state changes low.
+				const sphereGeo = new THREE.SphereGeometry(1, 12, 10);
+				const BUCKETS = 14;
+				const heatMaterials = Array.from({ length: BUCKETS }, (_, i) => {
+					const h = i / (BUCKETS - 1); // 0 cold → 1 hot
+					const hue = (258 - 244 * h) / 360; // 258° blue-violet → 14° red-orange
+					const c = new THREE.Color().setHSL(hue, 0.9, 0.34 + 0.16 * h);
+					return new THREE.MeshLambertMaterial({ color: c, emissive: c, emissiveIntensity: 0.25 + 0.55 * h });
 				});
-			}
+				const hubColor = new THREE.Color().setHSL(0.09, 0.9, 0.62);
+				const hubMaterial = new THREE.MeshLambertMaterial({ color: hubColor, emissive: hubColor, emissiveIntensity: 0.9 });
+
+				const pulsing = [];
+				const Graph = new ForceGraph3D(el, { rendererConfig: { antialias: true, powerPreference: 'high-performance' } })
+					.width(el.clientWidth)
+					.height(el.clientHeight)
+					.backgroundColor('#050208')
+					.cooldownTicks(0)
+					.warmupTicks(0)
+					.enableNodeDrag(false)
+					.nodeThreeObject(node => {
+						const mat = node.isHub ? hubMaterial : heatMaterials[Math.min(BUCKETS - 1, Math.floor(node.heat * BUCKETS))];
+						const mesh = new THREE.Mesh(sphereGeo, mat);
+						const r = 3.1 * Math.cbrt(node.val || 1);
+						mesh.scale.setScalar(r);
+						if (!node.isHub && node.heat > 0.9 && pulsing.length < 150) pulsing.push({ mesh, r, phase: Math.random() * Math.PI * 2 });
+						return mesh;
+					})
+					.linkColor(() => '#5c5a7a')
+					.linkOpacity(0.03)
+					.nodeLabel(node => `<div style="font-family:ui-monospace,monospace;font-size:11px;background:#0b0618;color:#e8e4ff;border:1px solid #4c3d78;border-radius:6px;padding:6px 9px">
+						<div style="color:#9d8cff">${node.category}${node.isHub ? ' · cluster' : ''}</div>
+						<div style="margin-top:2px;font-weight:600">${node.name}</div>
+					</div>`)
+					.onNodeClick(node => {
+						if (node.isHub) {
+							window.location.href = '/bookmarks?category=' + encodeURIComponent(node.category);
+						} else {
+							window.location.href = '/bookmarks/' + node.id;
+						}
+					})
+					.graphData(data);
+
+				Graph.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+				Graph.scene().add(new THREE.AmbientLight(0xffffff, 1.6));
+				Graph.cameraPosition({ x: 0, y: 0, z: 3400 });
+
+				const controls = Graph.controls();
+				controls.autoRotate = true;
+				controls.autoRotateSpeed = 0.4;
+				el.addEventListener('pointerdown', () => { controls.autoRotate = false; }, { once: true });
+
+				const bloom = new UnrealBloomPass(new THREE.Vector2(el.clientWidth, el.clientHeight), 0.85, 0.6, 0.1);
+				Graph.postProcessingComposer().addPass(bloom);
+
+				// Recently-touched nodes breathe.
+				(function pulse(t) {
+					for (const p of pulsing) {
+						p.mesh.scale.setScalar(p.r * (1 + 0.14 * Math.sin(t / 420 + p.phase)));
+					}
+					requestAnimationFrame(pulse);
+				})(0);
+
+				window.addEventListener('resize', () => {
+					Graph.width(el.clientWidth).height(el.clientHeight);
+				}, { passive: true });
+			};
 		</script>
 	}
 }
