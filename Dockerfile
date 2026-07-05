@@ -31,9 +31,9 @@ RUN TEMPLUI_PATH="$(go list -mod=mod -m -f '{{.Dir}}' github.com/templui/templui
     test -d "$TEMPLUI_PATH/components" && \
     printf '%s\n' \
       '@source "./**/*.templ";' \
-      '@source "./**/*.js";' \
-      "@source \"$TEMPLUI_PATH/components/**/*.templ\";" \
-      "@source \"$TEMPLUI_PATH/components/**/*.js\";" \
+      '@source "./assets/static/site-*.js";' \
+      "@source \"$TEMPLUI_PATH/components/button/**/*.templ\";" \
+      "@source \"$TEMPLUI_PATH/components/icon/**/*.templ\";" \
       > ./assets/css/sources.generated.css && \
     tailwindcss -i ./assets/css/input.css -o ./assets/css/output.css --minify
 
@@ -41,7 +41,7 @@ RUN TEMPLUI_PATH="$(go list -mod=mod -m -f '{{.Dir}}' github.com/templui/templui
 RUN go tool templ generate
 
 # Build one static Linux binary for the final image.
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o main ./main.go
 
 # Runtime stage:
 # This image stays small and only contains the final app binary.

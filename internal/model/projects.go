@@ -14,6 +14,7 @@ type ProjectItem struct {
 	Icon        string
 	IconURL     string
 	LogoAsset   string
+	Status      string
 }
 
 type TrustItem struct {

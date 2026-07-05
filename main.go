@@ -85,6 +85,11 @@ func main() {
 	mux.HandleFunc("GET /bookmarks/{slug}", bk.Show)
 	mux.HandleFunc("GET /api/graph", bk.GraphData)
 
+	// SEO
+	sm := &handler.SitemapHandler{Q: q, Store: bookmarkStore}
+	mux.HandleFunc("GET /robots.txt", handler.RobotsTxt)
+	mux.HandleFunc("GET /sitemap.xml", sm.Serve)
+
 	// Admin
 	admin := &handler.AdminHandler{Q: q}
 	mux.HandleFunc("GET /admin/login", admin.LoginPage)
@@ -116,7 +121,7 @@ func main() {
 
 	port := getEnvOrDefault("PORT", "8090")
 	fmt.Println("Server is running on http://localhost:" + port)
-	if err := http.ListenAndServe(":"+port, withRequestPath(mux)); err != nil {
+	if err := http.ListenAndServe(":"+port, handler.Gzip(withRequestPath(mux))); err != nil {
 		panic(err)
 	}
 }
