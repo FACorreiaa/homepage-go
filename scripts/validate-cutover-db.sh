@@ -12,7 +12,8 @@ if [ ! -f "$source_db" ]; then
   exit 2
 fi
 
-tmp_db="$(mktemp "${TMPDIR:-/tmp}/facorreia-cutover.XXXXXX.sqlite")"
+# BusyBox mktemp (Alpine) requires the X's at the very end — no suffix.
+tmp_db="$(mktemp "${TMPDIR:-/tmp}/facorreia-cutover.XXXXXX")"
 cleanup() {
   rm -f "$tmp_db"
 }
