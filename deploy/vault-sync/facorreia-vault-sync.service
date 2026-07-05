@@ -6,12 +6,19 @@ After=network-online.target
 [Service]
 Type=oneshot
 # The remote path is "/" because the key on Hermes is restricted with
-# rrsync -ro /root/.hermes/obsidian-vault/FACorreia/raw/ — rrsync resolves
-# requested paths relative to that directory.
+# rrsync -ro /root/.hermes/obsidian-vault/FACorreia/ — rrsync resolves
+# requested paths relative to that directory. The whole vault syncs except
+# private dirs (also excluded again in the app's indexer).
 ExecStart=/usr/bin/rsync -az --delete \
   --exclude='.*' \
   --exclude='*sync-conflict*' \
   --exclude='*.tmp' \
+  --exclude='*.canvas' \
+  --exclude='Diary/' \
+  --exclude='Kanban/' \
+  --exclude='Tickets/' \
+  --exclude='Setup/' \
+  --exclude='scripts/' \
   -e "ssh -i /root/.ssh/id_ed25519_vault_sync -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15" \
   root@78.46.192.73:/ \
-  /opt/facorreia-site-go/vault/raw/
+  /opt/facorreia-site-go/vault/

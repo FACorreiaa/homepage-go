@@ -25,14 +25,37 @@ func testVault() fstest.MapFS {
 			ModTime: time.Date(2026, 1, 15, 0, 0, 0, 0, time.UTC),
 		},
 		"raw/AI/skip.sync-conflict-1.md": &fstest.MapFile{Data: []byte("ignored")},
+		"wiki/ai-scoreboard.md": &fstest.MapFile{
+			Data:    []byte("Weekly model rankings."),
+			ModTime: time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC),
+		},
+		"daily-note.md": &fstest.MapFile{
+			Data:    []byte("Root-level note."),
+			ModTime: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+		"Diary/private-entry.md": &fstest.MapFile{
+			Data: []byte("never public"),
+		},
+		".obsidian/workspace.md": &fstest.MapFile{
+			Data: []byte("editor state"),
+		},
 	}
 }
 
 func TestBuildBookmarkIndexEnrichment(t *testing.T) {
 	idx := BuildBookmarkIndex(testVault())
 
-	if len(idx.Files) != 4 {
-		t.Fatalf("want 4 files, got %d", len(idx.Files))
+	if len(idx.Files) != 6 {
+		t.Fatalf("want 6 files, got %d", len(idx.Files))
+	}
+	if idx.BySlug["private-entry"] != nil || idx.BySlug["workspace"] != nil {
+		t.Fatal("private/hidden dirs must not be indexed")
+	}
+	if w := idx.BySlug["ai-scoreboard"]; w == nil || w.Category != "wiki" {
+		t.Errorf("wiki category: %+v", w)
+	}
+	if r := idx.BySlug["daily-note"]; r == nil || r.Category != "Notes" {
+		t.Errorf("root files should get Notes category: %+v", r)
 	}
 
 	gg := idx.BySlug["go-generics"]
@@ -73,8 +96,8 @@ func TestBuildBookmarkIndexEnrichment(t *testing.T) {
 		t.Errorf("mtime fallback not used: %v", nd.Date)
 	}
 
-	// Date-desc ordering
-	if idx.Files[0].Slug != "2026-04-05-llm-agents" {
+	// Date-desc ordering (ai-scoreboard has the newest mtime: 2026-05-01)
+	if idx.Files[0].Slug != "ai-scoreboard" {
 		t.Errorf("expected newest first, got %s", idx.Files[0].Slug)
 	}
 }
@@ -93,14 +116,14 @@ func TestFilter(t *testing.T) {
 	}
 
 	items, total = idx.Filter("", "", "name", 1, 2)
-	if total != 4 || len(items) != 2 {
+	if total != 6 || len(items) != 2 {
 		t.Errorf("pagination: total=%d len=%d", total, len(items))
 	}
 	if items[0].Name > items[1].Name {
 		t.Errorf("name sort broken: %q > %q", items[0].Name, items[1].Name)
 	}
 
-	items, _ = idx.Filter("", "", "", 3, 2)
+	items, _ = idx.Filter("", "", "", 4, 2)
 	if len(items) != 0 {
 		t.Errorf("out-of-range page should be empty, got %d", len(items))
 	}
@@ -110,7 +133,7 @@ func TestCategoryCountsAndRelated(t *testing.T) {
 	idx := BuildBookmarkIndex(testVault())
 
 	counts := idx.CategoryCounts()
-	if len(counts) != 2 || counts[0].Name != "AI" || counts[0].Count != 2 {
+	if len(counts) != 4 || counts[0].Name != "AI" || counts[0].Count != 2 {
 		t.Errorf("category counts: %v", counts)
 	}
 

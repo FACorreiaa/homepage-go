@@ -114,8 +114,9 @@ func main() {
 		}
 	})
 
-	fmt.Println("Server is running on http://localhost:8090")
-	if err := http.ListenAndServe(":8090", withRequestPath(mux)); err != nil {
+	port := getEnvOrDefault("PORT", "8090")
+	fmt.Println("Server is running on http://localhost:" + port)
+	if err := http.ListenAndServe(":"+port, withRequestPath(mux)); err != nil {
 		panic(err)
 	}
 }

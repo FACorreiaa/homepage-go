@@ -230,15 +230,34 @@ func makeExcerpt(body string, maxWords int) string {
 	return strings.Join(words, " ")
 }
 
+// privateDirs are vault directories that must never reach the public site,
+// enforced here as well as in the rsync excludes (defense in depth).
+var privateDirs = map[string]bool{
+	"diary":   true,
+	"kanban":  true,
+	"tickets": true,
+	"setup":   true,
+	"scripts": true,
+}
+
 func BuildBookmarkIndex(vaultFS fs.FS) BookmarkIndex {
 	var files []VaultFile
 	seen := map[string]bool{}
 
-	fs.WalkDir(vaultFS, "raw", func(path string, d fs.DirEntry, err error) error { //nolint:errcheck
-		if err != nil || d.IsDir() {
+	fs.WalkDir(vaultFS, ".", func(path string, d fs.DirEntry, err error) error { //nolint:errcheck
+		if err != nil {
 			return nil
 		}
 		name := d.Name()
+		if d.IsDir() {
+			if path == "." {
+				return nil
+			}
+			if strings.HasPrefix(name, ".") || privateDirs[strings.ToLower(name)] {
+				return fs.SkipDir
+			}
+			return nil
+		}
 		if !strings.HasSuffix(name, ".md") {
 			return nil
 		}
@@ -257,10 +276,20 @@ func BuildBookmarkIndex(vaultFS fs.FS) BookmarkIndex {
 		}
 		seen[slug] = true
 
-		rel := strings.TrimPrefix(path, "raw/")
-		parts := strings.SplitN(rel, "/", 2)
-		category := "Uncategorized"
-		if len(parts) > 1 {
+		// Category: top-level directory; inside raw/ the second level is the
+		// real category (raw/AI/..., raw/Dev/...). Root-level files → Notes.
+		parts := strings.Split(path, "/")
+		category := "Notes"
+		switch {
+		case len(parts) == 1:
+			// root-level file
+		case strings.EqualFold(parts[0], "raw"):
+			if len(parts) > 2 {
+				category = parts[1]
+			} else {
+				category = "Uncategorized"
+			}
+		default:
 			category = parts[0]
 		}
 
