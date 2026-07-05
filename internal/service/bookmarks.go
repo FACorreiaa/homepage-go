@@ -251,6 +251,13 @@ var privateDirs = map[string]bool{
 	"scripts": true,
 }
 
+// generatedNames are auto-generated index/readme files (matched case-insensitively).
+var generatedNames = map[string]bool{
+	"INDEX.MD":        true,
+	"README.MD":       true,
+	"_AGENT_INDEX.MD": true,
+}
+
 func BuildBookmarkIndex(vaultFS fs.FS) BookmarkIndex {
 	var files []VaultFile
 	seen := map[string]bool{}
@@ -273,6 +280,11 @@ func BuildBookmarkIndex(vaultFS fs.FS) BookmarkIndex {
 			return nil
 		}
 		if strings.Contains(name, ".sync-conflict") || strings.HasPrefix(name, ".syncthing.") || strings.HasSuffix(name, ".tmp") {
+			return nil
+		}
+		// Skip machine-generated scaffolding: agent index files and folder
+		// READMEs. They carry no reader value and leak internal server paths.
+		if strings.HasPrefix(name, "_") || generatedNames[strings.ToUpper(name)] {
 			return nil
 		}
 		baseName := strings.TrimSuffix(name, ".md")

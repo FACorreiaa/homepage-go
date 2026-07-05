@@ -39,6 +39,15 @@ func testVault() fstest.MapFS {
 		".obsidian/workspace.md": &fstest.MapFile{
 			Data: []byte("editor state"),
 		},
+		"_AGENT_INDEX.md": &fstest.MapFile{
+			Data: []byte("Vault root: /mnt/volume-fsn1-1/hermes-data"),
+		},
+		"AI/INDEX.md": &fstest.MapFile{
+			Data: []byte("generated index"),
+		},
+		"AI/README.md": &fstest.MapFile{
+			Data: []byte("folder readme"),
+		},
 	}
 }
 
@@ -50,6 +59,9 @@ func TestBuildBookmarkIndexEnrichment(t *testing.T) {
 	}
 	if idx.BySlug["private-entry"] != nil || idx.BySlug["workspace"] != nil {
 		t.Fatal("private/hidden dirs must not be indexed")
+	}
+	if idx.BySlug["_agent_index"] != nil || idx.BySlug["index"] != nil || idx.BySlug["readme"] != nil {
+		t.Fatal("generated scaffolding files must not be indexed")
 	}
 	if w := idx.BySlug["ai-scoreboard"]; w == nil || w.Category != "wiki" {
 		t.Errorf("wiki category: %+v", w)
