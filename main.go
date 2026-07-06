@@ -121,7 +121,7 @@ func main() {
 
 	port := getEnvOrDefault("PORT", "8090")
 	fmt.Println("Server is running on http://localhost:" + port)
-	if err := http.ListenAndServe(":"+port, handler.Gzip(withRequestPath(mux))); err != nil {
+	if err := http.ListenAndServe(":"+port, withRequestPath(mux)); err != nil {
 		panic(err)
 	}
 }
