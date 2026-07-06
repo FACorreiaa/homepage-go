@@ -4,7 +4,9 @@ services:
       context: .
     image: facorreia-site-go:latest
     ports:
-      - "8090:8090"
+      # Bind to loopback only — Caddy reverse-proxies to localhost:8090.
+      # Never expose the app port publicly (it would bypass TLS + headers).
+      - "127.0.0.1:8090:8090"
     volumes:
       - studio_data:/var/lib/facorreia-site
       - ${HOST_VAULT_PATH:-/opt/facorreia-site-go/vault}:/app/vault:ro
