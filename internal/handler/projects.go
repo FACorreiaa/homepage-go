@@ -21,7 +21,7 @@ var allProjects = []model.ProjectItem{
 	{Slug: "hermes", Title: "Hermes", RoleTag: "Independent", Description: "A private gateway and automation hub hosted on a VPS, acting as a central coordinator for AI models, webhooks, and personal services.", Tags: []string{"Docker", "VPS", "Gateway", "Swift", "API"}, Category: "Backend API", GithubLink: "Private", HasLiveLink: false, Icon: "HM", Status: "Private infra"},
 	{Slug: "hermesvault-client", Title: "HermesVault Client", RoleTag: "Independent", Description: "Native iOS app with Vision-based OCR, native capture of photos, notes, and HealthKit data.", Tags: []string{"SwiftUI", "SwiftData", "Vision OCR", "AVFoundation"}, Category: "iOS App", GithubLink: "Private", HasLiveLink: false, Icon: "HC", IconURL: "/assets/static/vendor/devicon/apple-original.svg", Status: "In development"},
 	{Slug: "hermes-integrations", Title: "Hermes Integrations", RoleTag: "Independent", Description: "Messaging integrations for Hermes: Discord, Slack, and Telegram bots for remote commands and instant knowledge capture.", Tags: []string{"Swift", "Discord API", "Slack API", "Telegram Bot API", "Webhooks"}, Category: "Integrations / Services", GithubLink: "Private", HasLiveLink: false, Icon: "HI", Status: "Private infra"},
-	{Slug: "fanapi", Title: "FanAPI", RoleTag: "Client Work", Description: "RESTful API for Fandemic with JWT auth, real-time group chat via WebSockets, and OpenAPI documentation.", Tags: []string{"Go", "REST API", "WebSocket", "JWT", "PostgreSQL"}, Category: "Backend API", GithubLink: "Private", HasLiveLink: false, Icon: "FA", IconURL: "/assets/static/vendor/devicon/go-original.svg", Status: "Delivered"},
+	{Slug: "fandemic", Title: "Fandemic", RoleTag: "Client Work", Description: "Backend and client work for Fandemic — a Go REST API with JWT auth, real-time group chat over WebSockets, and OpenAPI documentation.", Tags: []string{"Go", "REST API", "WebSocket", "JWT", "PostgreSQL"}, Category: "Backend / Client Work", GithubLink: "Private", HasLiveLink: false, Featured: true, Icon: "FN", IconURL: "/assets/static/vendor/devicon/go-original.svg", LogoAsset: "/assets/static/projects/fandemic-icon.jpg", Status: "Delivered"},
 	{Slug: "pamozi-crm", Title: "Pamozi CRM", RoleTag: "Client Work", Description: "Platform for managing data, users and stock for an NGO providing used glasses to communities in need.", Tags: []string{"Go", "Server Side Rendering", "Templ", "HTMX", "PostgreSQL"}, Category: "Backend API", GithubLink: "https://github.com/FACorreiaa/glasses-management-platform", LiveLink: "https://pamozi.de", HasLiveLink: true, Icon: "PC", IconURL: "/assets/static/vendor/devicon/go-original.svg", Status: "Live"},
 	{Slug: "ios-ecommerce", Title: "iOS E-Commerce App", RoleTag: "Client Work", Description: "Native iOS e-commerce application with Apple Pay integration and smooth animations.", Tags: []string{"Swift", "SwiftUI", "CoreData", "Combine"}, Category: "iOS App", GithubLink: "https://github.com/FACorreiaa", HasLiveLink: false, Icon: "IE", IconURL: "/assets/static/vendor/devicon/apple-original.svg", Status: "Delivered"},
 	{Slug: "android-fitness-tracker", Title: "Android Fitness Tracker", RoleTag: "Client Work", Description: "Native Android fitness tracking app integrating health APIs, built with Kotlin and Jetpack Compose.", Tags: []string{"Kotlin", "Jetpack Compose", "Android SDK"}, Category: "Android App", GithubLink: "https://github.com/FACorreiaa", HasLiveLink: false, Icon: "AF", IconURL: "/assets/static/vendor/devicon/android-original.svg", Status: "Delivered"},
@@ -73,6 +73,19 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 			TechStack:   []string{"SwiftUI", "SwiftData", "Vision OCR", "Swift 6", "Hummingbird 2", "PostgreSQL", "pgvector", "Docker"},
 			BackendNote: "Self-hosted on your own VPS.",
 			BannerAsset: "/assets/static/projects/luminavault-banner.jpg",
+		}
+	case "fandemic":
+		return model.ProjectDetailData{
+			Project:  p,
+			Tagline:  "Backend and client work for Fandemic — a real-time community platform.",
+			LongDesc: []string{"I built and delivered the backend for Fandemic: a Go REST API handling authentication, membership, and real-time group chat, plus client-side work across the product.", "The service is documented with OpenAPI and backed by PostgreSQL, with JWT-secured sessions and WebSocket channels for live messaging."},
+			Features: []model.DetailFeature{
+				{Title: "Real-time chat", Body: "Group messaging over WebSockets with presence and delivery handling."},
+				{Title: "Secure by default", Body: "JWT authentication, scoped permissions, and hardened API endpoints."},
+				{Title: "Documented API", Body: "OpenAPI spec so client teams could integrate quickly and reliably."},
+			},
+			TechStack:   []string{"Go", "REST API", "WebSocket", "JWT", "PostgreSQL", "OpenAPI"},
+			BackendNote: "Backend delivered as client work.",
 		}
 	default:
 		return model.ProjectDetailData{Project: p, Tagline: p.Category, LongDesc: []string{p.Description}, TechStack: p.Tags}

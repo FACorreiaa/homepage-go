@@ -36,12 +36,13 @@ templ Projects(trust []model.TrustItem, projects []model.ProjectItem) {
 			<section class="mx-auto max-w-6xl px-4 pt-28 md:pt-40">
 				<div class="flex items-baseline justify-between gap-6 border-b border-border pb-6">
 					<h2 class="section-title font-semibold">Case studies</h2>
-					<p class="font-mono text-xs text-muted-foreground">independent products, built end to end</p>
+					<p class="font-mono text-xs text-muted-foreground">selected products & platforms, built end to end</p>
 				</div>
 				<div>
 					for i, p := range featuredOf(projects) {
 						<a href={ templ.SafeURL("/projects/" + p.Slug) } class="group grid gap-8 border-b border-border py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-14 md:py-20" data-reveal>
-							<div class={ "overflow-hidden rounded-lg border border-border bg-muted " + orderClass(i) }>
+							<div class={ "relative overflow-hidden rounded-lg border border-border bg-muted " + orderClass(i) }>
+								<span class="absolute left-4 top-4 z-10 font-mono text-xs text-white/70 mix-blend-difference">{ indexLabel(i) }</span>
 								if p.LogoAsset != "" {
 									<img src={ p.LogoAsset } alt={ p.Title + " app artwork" } width="640" height="640" loading={ lazyAfter(i) } fetchpriority={ priorityFor(i) } class="aspect-[4/3] h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"/>
 								} else {
@@ -55,12 +56,16 @@ templ Projects(trust []model.TrustItem, projects []model.ProjectItem) {
 								}
 							</div>
 							<div class="flex flex-col justify-center">
-								<p class="font-mono text-xs text-muted-foreground">
+								<p class="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-muted-foreground">
 									{ p.Category }
-									<span class="mx-2 opacity-40">·</span>
+									<span class="opacity-40">·</span>
 									{ p.RoleTag }
-									<span class="mx-2 opacity-40">·</span>
-									<span class="text-foreground">{ p.Status }</span>
+									<span class="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-foreground">
+										if p.HasLiveLink {
+											<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+										}
+										{ p.Status }
+									</span>
 								</p>
 								<h3 class="mt-4 text-3xl font-semibold tracking-normal md:text-5xl">{ p.Title }</h3>
 								<p class="mt-5 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">{ p.Description }</p>
@@ -95,17 +100,16 @@ templ Projects(trust []model.TrustItem, projects []model.ProjectItem) {
 					}
 				</div>
 			</section>
-			<section class="border-t border-border px-4 py-28 md:py-36">
-				<div class="mx-auto max-w-6xl">
-					<h2 class="section-title max-w-3xl font-semibold" data-reveal>Have a product that needs senior engineering taste?</h2>
-					<div class="mt-10 flex flex-wrap gap-3">
-						<a href="/book-call" class="rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90">Book a Call</a>
-						<a href="/proposal" class="rounded-full border border-border px-7 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent">Request Proposal</a>
-					</div>
-				</div>
-			</section>
 		</div>
 	}
+}
+
+func indexLabel(i int) string {
+	n := i + 1
+	if n < 10 {
+		return "0" + string(rune('0'+n))
+	}
+	return string(rune('0'+n/10)) + string(rune('0'+n%10))
 }
 
 func featuredOf(projects []model.ProjectItem) []model.ProjectItem {
