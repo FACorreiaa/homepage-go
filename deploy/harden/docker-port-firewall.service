@@ -1,0 +1,13 @@
+[Unit]
+Description=Firewall the app's published Docker port from external access
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/facorreia-site-go/deploy/harden/docker-port-firewall.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -4,9 +4,12 @@ services:
       context: .
     image: facorreia-site-go:latest
     ports:
-      # Bind to loopback only — Caddy reverse-proxies to localhost:8090.
-      # Never expose the app port publicly (it would bypass TLS + headers).
-      - "127.0.0.1:8090:8090"
+      # Published on all interfaces at the Docker level, but external access
+      # to :8090 is dropped by a DOCKER-USER iptables rule (see
+      # deploy/harden/ and harden-server.sh). A 127.0.0.1 bind here triggers
+      # a userland-proxy "address already in use" bug on this host, so the
+      # firewall rule is the reliable way to keep the app port private.
+      - "8090:8090"
     volumes:
       - studio_data:/var/lib/facorreia-site
       - ${HOST_VAULT_PATH:-/opt/facorreia-site-go/vault}:/app/vault:ro
