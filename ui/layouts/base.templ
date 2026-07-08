@@ -19,14 +19,14 @@ func (p LayoutProps) title() string {
 
 func (p LayoutProps) description() string {
 	if p.Description == "" {
-		return "FC Software Studio — Building polished web apps, high-performance iOS apps, and custom product engineering services."
+		return "FC Software Studio builds polished web apps, high-performance iOS apps, and custom product engineering services."
 	}
 	return p.Description
 }
 
 func (p LayoutProps) ogImage() string {
 	if p.OGImage == "" {
-		return "https://facorreia.com/images/default-og.png"
+		return "https://facorreia.com/assets/static/icon-512.png"
 	}
 	return p.OGImage
 }
@@ -78,8 +78,12 @@ templ BaseLayout(props LayoutProps) {
 			</script>
 		</head>
 		<body class="bg-background text-foreground min-h-screen flex flex-col overflow-x-hidden w-full max-w-full">
+			<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-foreground focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-background">
+				Skip to content
+			</a>
+			<div id="top-sentinel" class="h-px" aria-hidden="true"></div>
 			@modules.Navbar(props.ActivePage)
-			<main class="flex-1 overflow-x-hidden w-full max-w-full">
+			<main id="main-content" class="flex-1 overflow-x-hidden w-full max-w-full">
 				{ children... }
 			</main>
 			@modules.Footer()
@@ -89,15 +93,18 @@ templ BaseLayout(props LayoutProps) {
 				aria-label="Scroll to top"
 				class="fixed bottom-6 right-6 z-50 hidden p-2 rounded-full bg-primary text-primary-foreground shadow-lg transition-opacity"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg>
+				@modules.UIIcon("arrow-up", "h-5 w-5")
 			</button>
 			<script>
 				(function() {
 					const btn = document.getElementById('scroll-top-btn');
-					if (btn) {
-						window.addEventListener('scroll', function() {
-							btn.classList.toggle('hidden', window.scrollY <= 400);
-						}, { passive: true });
+					const sentinel = document.getElementById('top-sentinel');
+					if (btn && sentinel && 'IntersectionObserver' in window) {
+						const topObserver = new IntersectionObserver(function(entries) {
+							const isAtTop = entries[0] && entries[0].isIntersecting;
+							btn.classList.toggle('hidden', isAtTop);
+						});
+						topObserver.observe(sentinel);
 					}
 					const obs = new IntersectionObserver(function(entries) {
 						entries.forEach(function(e) {

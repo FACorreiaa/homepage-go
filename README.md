@@ -108,6 +108,12 @@ docker compose up -d
 
 Then open `http://localhost:8090`.
 
+Health check endpoint:
+
+```sh
+curl -fsS http://localhost:8090/healthz
+```
+
 The container reads:
 
 - `DATABASE_PATH=/var/lib/facorreia-site/studio.sqlite`
@@ -115,8 +121,37 @@ The container reads:
 - `VAULT_PATH=/app/vault`
 
 For fresh production bookmark content, sync the Obsidian vault to
-`HOST_VAULT_PATH` and restart the container so the in-memory bookmark index is
-rebuilt.
+`HOST_VAULT_PATH`. The app refreshes the in-memory bookmark index in the
+background when it becomes stale, using `BOOKMARK_INDEX_TTL` if set or 5
+minutes by default. No container restart is required for normal syncs.
+
+On the VPS, verify the vault sync timer with:
+
+```sh
+systemctl list-timers facorreia-vault-sync.timer --no-pager
+journalctl -u facorreia-vault-sync -n 50 --no-pager
+find /opt/facorreia-site-go/vault/raw -type f -name '*.md' | wc -l
+```
+
+## Simple Personal-Site Infra
+
+Keep the production setup intentionally small:
+
+- Caddy terminates HTTPS and proxies to the Go container.
+- Docker Compose runs one app service with `restart: unless-stopped`.
+- SQLite and blog stats live in the `studio_data` Docker volume.
+- Proposal leads are saved in SQLite first; Discord notification is best-effort.
+- External uptime monitoring should check `https://facorreia.com/healthz`.
+
+Back up the persistent data from the running container:
+
+```sh
+./scripts/backup-site-data.sh
+```
+
+Set `BACKUP_DIR=/path/to/backups` to write outside the repo. Schedule that
+script with cron or a systemd timer on the VPS. For this site, that is enough
+operational machinery unless traffic or lead volume changes materially.
 
 ## Cutover Checks
 
@@ -139,8 +174,10 @@ Smoke-test:
 ```sh
 curl -I https://www.facorreia.com
 curl -I https://facorreia.com
-curl -I https://www.facorreia.com/assets/static/vendor/gsap/gsap.min.js
-curl -I https://www.facorreia.com/assets/static/vendor/gsap/ScrollTrigger.min.js
+curl -I https://facorreia.com/assets/css/output.css
+curl -I https://facorreia.com/assets/static/sw.js
+curl -I https://facorreia.com/assets/static/manifest.json
+curl -I https://facorreia.com/assets/static/vendor/htmx/htmx.min.js
 ```
 
 Also verify:
@@ -148,5 +185,5 @@ Also verify:
 - `/?` and public routes load
 - `/proposal` POST works against production SQLite
 - `/admin/login` and `/admin/dashboard` behavior
-- `/bookmarks` renders after content in `vault/raw` and container restart
+- `/bookmarks` renders after content appears in `vault/raw` and the bookmark index TTL expires
 - service worker/caching headers for static assets are present

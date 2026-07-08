@@ -3,6 +3,7 @@ package pages
 import (
 	"myapp/internal/model"
 	"myapp/ui/layouts"
+	"myapp/ui/modules"
 )
 
 templ ProjectLuminavault(p model.ProjectItem) {
@@ -10,14 +11,14 @@ templ ProjectLuminavault(p model.ProjectItem) {
 		<div class="public-shell min-h-screen">
 			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32">
 				<a href="/projects" class="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
-					All Projects
+					@modules.UIIcon("arrow-left", "h-4 w-4")
+					All projects
 				</a>
 				<div class="grid gap-10 lg:grid-cols-[0.68fr_0.32fr] lg:items-end">
 					<div>
 						<h1 class="hero-title max-w-6xl font-semibold">
 							Your second brain,
-							<span class="inline-type-image" style="background-image:url('/assets/static/projects/luminavault-banner.jpg')"></span>
+							<span class="inline-type-image" style="background-image:url('/assets/static/projects/luminavault-banner.webp')"></span>
 							built to think with you.
 						</h1>
 						<p class="mt-8 max-w-3xl text-xl leading-9 text-muted-foreground">LuminaVault is an early-stage iOS app for saving links, notes, and personal knowledge into organized Spaces, then using Hermes to reason across what you captured.</p>
@@ -27,7 +28,7 @@ templ ProjectLuminavault(p model.ProjectItem) {
 						</div>
 					</div>
 					<div class="public-image-wrap aspect-[4/5]" data-motion="image-scale">
-						<img src="/assets/static/projects/lumina/scene.png" alt="LuminaVault app scene" width="720" height="900" class="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-105"/>
+						<img src="/assets/static/projects/lumina/scene.webp" alt="LuminaVault app scene" width="720" height="900" class="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-105"/>
 					</div>
 				</div>
 			</section>
@@ -40,8 +41,10 @@ templ ProjectLuminavault(p model.ProjectItem) {
 					<div class="space-y-5" data-motion-track>
 						for _, step := range []model.LuminaStep{{"01","Save","Add links and notes from your phone as you discover them."},{"02","Organize","Place information into Spaces so your vault reflects how you actually think."},{"03","Ask Hermes","Use Hermes to summarize, connect, retrieve, and reason across what you saved."},{"04","Build memory","Over time, your saved context becomes a more useful personal knowledge base."}} {
 							<div class="public-card rounded-lg p-7 md:p-9">
-								<p class="font-mono text-sm text-muted-foreground">{ step.Num }</p>
-								<h3 class="mt-4 text-3xl font-semibold">{ step.Title }</h3>
+								<div class="mb-5 grid h-10 w-10 place-items-center rounded-md bg-muted">
+									@modules.UIIcon("check", "h-5 w-5")
+								</div>
+								<h3 class="text-3xl font-semibold">{ step.Title }</h3>
 								<p class="mt-3 text-base leading-7 text-muted-foreground">{ step.Body }</p>
 							</div>
 						}

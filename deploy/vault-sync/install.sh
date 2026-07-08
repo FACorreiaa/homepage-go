@@ -12,7 +12,7 @@ if [[ ! -f "$KEY" ]]; then
   ssh-keygen -t ed25519 -f "$KEY" -N '' -C vault-sync@homepage
   echo
   echo "Add this public key to root@78.46.192.73:~/.ssh/authorized_keys"
-  echo "(ideally restricted: restrict,command=\"rrsync -ro /root/.hermes/obsidian-vault/FACorreia/raw/\"):"
+  echo "(ideally restricted: restrict,command=\"rrsync -ro /root/.hermes/obsidian-vault/FACorreia/\"):"
   echo
   cat "$KEY.pub"
   echo

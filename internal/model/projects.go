@@ -1,20 +1,21 @@
 package model
 
 type ProjectItem struct {
-	Slug        string
-	Title       string
-	RoleTag     string
-	Description string
-	Tags        []string
-	Category    string
-	GithubLink  string
-	LiveLink    string
-	HasLiveLink bool
-	Featured    bool
-	Icon        string
-	IconURL     string
-	LogoAsset   string
-	Status      string
+	Slug         string
+	Title        string
+	RoleTag      string
+	Description  string
+	Outcome      string
+	Tags         []string
+	Category     string
+	DisplayGroup string
+	GithubLink   string
+	LiveLink     string
+	HasLiveLink  bool
+	Featured     bool
+	Icon         string
+	LogoAsset    string
+	Status       string
 }
 
 type TrustItem struct {

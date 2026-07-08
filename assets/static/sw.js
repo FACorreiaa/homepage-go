@@ -1,5 +1,5 @@
 // Service Worker for FC Software Studio
-const CACHE_NAME = 'fc-studio-v4';
+const CACHE_NAME = 'fc-studio-v5';
 const PRECACHE = [
   '/',
   '/assets/css/output.css',
@@ -33,7 +33,16 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   if (new URL(req.url).origin !== self.location.origin) return;
 
-  const isAsset = new URL(req.url).pathname.startsWith('/assets/');
+  const path = new URL(req.url).pathname;
+  const isRevalidatedAsset = path === '/assets/css/output.css' ||
+    path === '/assets/static/sw.js' ||
+    path === '/assets/static/manifest.json';
+  if (isRevalidatedAsset) {
+    event.respondWith(networkFirst(req));
+    return;
+  }
+
+  const isAsset = path.startsWith('/assets/');
   if (isAsset) {
     event.respondWith(cacheFirst(req));
     return;
@@ -49,6 +58,16 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(req))
   );
 });
+
+function networkFirst(req) {
+  return fetch(req)
+    .then((res) => {
+      const copy = res.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
+      return res;
+    })
+    .catch(() => caches.match(req));
+}
 
 function cacheFirst(req) {
   return caches.match(req).then((cached) => {

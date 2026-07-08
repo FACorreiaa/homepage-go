@@ -137,6 +137,11 @@
       "rlig" 1,
       "calt" 1;
   }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--ring) 82%, var(--foreground));
+    outline-offset: 3px;
+  }
 }
 
 @layer components {
@@ -193,6 +198,103 @@
     background: color-mix(in oklab, var(--card) 90%, transparent);
     box-shadow: 0 24px 80px color-mix(in oklab, var(--foreground) 8%, transparent);
     backdrop-filter: blur(16px);
+  }
+
+  [x-cloak] {
+    display: none !important;
+  }
+
+  .project-showcase-card {
+    box-shadow: 0 18px 70px color-mix(in oklab, var(--foreground) 6%, transparent);
+  }
+
+  .project-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
+    border: 1px solid color-mix(in oklab, var(--border) 88%, transparent);
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    background: color-mix(in oklab, var(--background) 58%, transparent);
+    color: color-mix(in oklab, var(--foreground) 68%, transparent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .project-art-shell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    isolation: isolate;
+    overflow: hidden;
+    color: var(--foreground);
+    background:
+      radial-gradient(circle at 24% 22%, color-mix(in oklab, white 38%, transparent), transparent 18rem),
+      linear-gradient(135deg, var(--project-tone-a), var(--project-tone-b));
+  }
+
+  .project-art-grid {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.22;
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--foreground) 14%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--foreground) 14%, transparent) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(circle at 50% 44%, black, transparent 72%);
+  }
+
+  .project-app-mark,
+  .project-mini-mark {
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, white 32%, transparent);
+    background:
+      linear-gradient(180deg, color-mix(in oklab, white 84%, transparent), color-mix(in oklab, white 56%, transparent)),
+      color-mix(in oklab, var(--background) 72%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 62%, transparent),
+      0 22px 70px color-mix(in oklab, var(--foreground) 18%, transparent);
+  }
+
+  .project-app-mark {
+    border-radius: 1.35rem;
+  }
+
+  .project-mini-mark {
+    height: 2.75rem;
+    width: 2.75rem;
+    flex-shrink: 0;
+    border-radius: 0.8rem;
+  }
+
+  .project-tone-slate {
+    --project-tone-a: oklch(0.88 0.018 250);
+    --project-tone-b: oklch(0.68 0.045 245);
+  }
+
+  .project-tone-emerald {
+    --project-tone-a: oklch(0.9 0.042 165);
+    --project-tone-b: oklch(0.66 0.085 170);
+  }
+
+  .project-tone-ink {
+    --project-tone-a: oklch(0.78 0.018 260);
+    --project-tone-b: oklch(0.46 0.03 260);
+  }
+
+  .project-tone-rust {
+    --project-tone-a: oklch(0.88 0.055 55);
+    --project-tone-b: oklch(0.64 0.09 42);
+  }
+
+  .project-tone-steel {
+    --project-tone-a: oklch(0.9 0.015 210);
+    --project-tone-b: oklch(0.63 0.055 215);
   }
 
   .public-image-wrap {

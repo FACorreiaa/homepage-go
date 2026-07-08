@@ -39,6 +39,15 @@ facorreia.com {
 	import security_headers
 	encode zstd gzip
 
+	reverse_proxy /assets/css/output.css localhost:8090 {
+		header_down Cache-Control "public, max-age=0, must-revalidate"
+	}
+	reverse_proxy /assets/static/sw.js localhost:8090 {
+		header_down Cache-Control "public, max-age=0, must-revalidate"
+	}
+	reverse_proxy /assets/static/manifest.json localhost:8090 {
+		header_down Cache-Control "public, max-age=0, must-revalidate"
+	}
 	reverse_proxy /assets/* localhost:8090 {
 		header_down Cache-Control "public, max-age=31536000, immutable"
 	}

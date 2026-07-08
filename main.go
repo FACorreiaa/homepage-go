@@ -59,6 +59,12 @@ func main() {
 	mux := http.NewServeMux()
 	setupAssets(mux)
 
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok\n"))
+	})
+
 	// Static pages
 	mux.HandleFunc("GET /", handler.ProjectsList)
 	mux.HandleFunc("GET /projects", handler.ProjectsList)
@@ -149,7 +155,12 @@ func setupAssets(mux *http.ServeMux) {
 		if isDev {
 			w.Header().Set("Cache-Control", "no-store")
 		} else {
-			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+			switch r.URL.Path {
+			case "/assets/css/output.css", "/assets/static/sw.js", "/assets/static/manifest.json":
+				w.Header().Set("Cache-Control", "public, max-age=0, must-revalidate")
+			default:
+				w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+			}
 		}
 		var h http.Handler
 		if isDev {

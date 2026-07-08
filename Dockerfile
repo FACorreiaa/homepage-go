@@ -61,7 +61,7 @@ COPY --from=build /app/main .
 EXPOSE 8090
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=5 \
-  CMD curl -fsS http://127.0.0.1:8090/ || exit 1
+  CMD curl -fsS http://127.0.0.1:8090/healthz || exit 1
 
 # Start the app.
 CMD ["./main"]
