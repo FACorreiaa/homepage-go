@@ -297,6 +297,77 @@
     --project-tone-b: oklch(0.63 0.055 215);
   }
 
+  .texture-noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  .project-index {
+    font-family: var(--font-mono);
+    font-size: clamp(2.75rem, 4vw, 4.5rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in oklab, var(--foreground) 14%, transparent);
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .project-showcase-card {
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .project-showcase-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 28px 90px color-mix(in oklab, var(--foreground) 11%, transparent);
+    }
+
+    .project-app-mark {
+      transition: transform 0.4s ease;
+    }
+
+    .project-showcase-card:hover .project-app-mark {
+      transform: translateY(-5px) scale(1.03);
+    }
+
+    .project-showcase-card:hover .project-art-grid {
+      opacity: 0.32;
+    }
+  }
+
+  .footer-watermark {
+    font-family: var(--font-mono);
+    font-size: clamp(4rem, 14vw, 12rem);
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    user-select: none;
+    color: color-mix(in oklab, var(--background) 7%, transparent);
+  }
+
+  .status-dot {
+    position: relative;
+    display: inline-block;
+    height: 0.5rem;
+    width: 0.5rem;
+    border-radius: 9999px;
+    background: oklch(0.72 0.17 150);
+  }
+
+  .status-dot::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: oklch(0.72 0.17 150);
+    animation: status-pulse 2.2s ease-out infinite;
+  }
+
   .public-image-wrap {
     overflow: hidden;
     border-radius: 0.5rem;
@@ -342,8 +413,23 @@
   }
 }
 
+@keyframes status-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
+    animation: none;
+  }
+
+  .status-dot::before {
     animation: none;
   }
 }

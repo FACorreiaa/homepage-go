@@ -3,10 +3,14 @@ package modules
 templ Footer() {
 	<footer class="mt-auto border-t border-border bg-foreground text-background">
 		<div class="mx-auto max-w-6xl px-4 py-18 md:py-24">
-			<div class="grid gap-10 border-b border-background/12 pb-14 md:grid-cols-[1.35fr_0.65fr] md:items-end">
+			<div class="texture-noise relative grid gap-10 border-b border-background/12 pb-14 md:grid-cols-[1.35fr_0.65fr] md:items-end">
 				<div>
-					<p class="font-mono text-xs tracking-[0.18em] text-background/60">AVAILABLE FOR SELECT PRODUCT WORK</p>
+					<p class="inline-flex items-center gap-2.5 font-mono text-xs tracking-[0.18em] text-background/60">
+						<span class="status-dot" aria-hidden="true"></span>
+						AVAILABLE FOR SELECT PRODUCT WORK — REMOTE
+					</p>
 					<p class="mt-5 max-w-4xl text-[clamp(2.25rem,5vw,4.5rem)] font-semibold leading-[0.98] tracking-normal">Have a product that needs senior engineering taste?</p>
+					<p class="mt-5 max-w-2xl text-base leading-7 text-background/72">One senior engineer across iOS, web, and backend — from first commit to production.</p>
 				</div>
 				<div class="flex flex-col gap-3 sm:flex-row md:flex-col">
 					<a href="/proposal" class="inline-flex items-center justify-center gap-2 rounded-full bg-background px-6 py-3 text-center text-sm font-semibold text-foreground transition-opacity hover:opacity-90">
@@ -16,6 +20,9 @@ templ Footer() {
 					<a href="mailto:fernandocorreia316@gmail.com" class="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-6 py-3 text-center text-sm font-semibold text-background transition-colors hover:bg-background/10">
 						Email Fernando
 						@UIIcon("mail", "h-4 w-4")
+					</a>
+					<a href="/curriculum" class="text-center text-sm text-background/72 transition-colors hover:text-background sm:self-center md:self-auto md:text-left">
+						Hiring for a full-time role? View my CV →
 					</a>
 				</div>
 			</div>
@@ -46,6 +53,7 @@ templ Footer() {
 				<div>
 					<p class="mb-4 font-mono text-[11px] uppercase tracking-wider text-background/55">Contact</p>
 					<a href="mailto:fernandocorreia316@gmail.com" class="block text-sm text-background/72 transition-colors hover:text-background">fernandocorreia316@gmail.com</a>
+					<a href="/curriculum" class="mt-2.5 block text-sm text-background/72 transition-colors hover:text-background">View CV</a>
 					<p class="mt-2.5 text-sm text-background/72">Portugal, remote</p>
 					<div class="mt-5 flex gap-3">
 						<a href="https://github.com/FACorreiaa" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="grid h-9 w-9 place-items-center rounded-full border border-background/15 text-background/72 transition-colors hover:border-background/40 hover:text-background">
@@ -57,6 +65,7 @@ templ Footer() {
 					</div>
 				</div>
 			</div>
+			<p class="footer-watermark" aria-hidden="true">FC — SOFTWARE STUDIO</p>
 			<div class="flex flex-col items-center justify-between gap-4 border-t border-background/12 pt-8 md:flex-row">
 				<p class="text-sm text-background/60">© 2026 FC Software Studio. All rights reserved.</p>
 				<p class="font-mono text-xs text-background/60">Built with Go, templ, HTMX, SQLite</p>

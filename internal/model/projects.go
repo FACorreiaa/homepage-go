@@ -16,6 +16,23 @@ type ProjectItem struct {
 	Icon         string
 	LogoAsset    string
 	Status       string
+
+	// Proof slots: templates render these only when populated.
+	Metrics         []ProjectMetric
+	Testimonial     Testimonial
+	ScreenshotAsset string
+	ScreenshotAlt   string
+}
+
+type ProjectMetric struct {
+	Value string // e.g. "38ms"
+	Label string // e.g. "p95 API latency"
+}
+
+type Testimonial struct {
+	Quote  string
+	Author string
+	Role   string // e.g. "Founder, Fandemic"
 }
 
 type TrustItem struct {
