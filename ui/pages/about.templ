@@ -17,11 +17,11 @@ templ About() {
 						</h1>
 						<p class="mt-8 max-w-2xl text-xl leading-9 text-muted-foreground">I build FC Software Studio around senior backend, web, and iOS product engineering for teams that need practical execution and finished systems.</p>
 						<div class="mt-10 flex flex-wrap gap-3">
-							<a href="/proposal" class="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90 active:scale-[0.99]">
+							<a href="/proposal" class="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.97]">
 								Request proposal
 								@modules.UIIcon("arrow-right", "h-4 w-4")
 							</a>
-							<a href="mailto:fernandocorreia316@gmail.com" class="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-semibold transition-colors hover:bg-accent active:scale-[0.99]">
+							<a href="mailto:fernandocorreia316@gmail.com" class="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-semibold transition hover:bg-accent active:scale-[0.97]">
 								Email me
 								@modules.UIIcon("mail", "h-4 w-4")
 							</a>
@@ -72,7 +72,7 @@ templ About() {
 					<div class="public-card rounded-lg p-7 md:p-8">
 						<h2 class="text-3xl font-semibold">Best way to reach me</h2>
 						<p class="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">For project work, use the proposal form so I can understand context, timeline, and fit before suggesting next steps.</p>
-						<a href="/proposal" class="mt-7 inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90">
+						<a href="/proposal" class="mt-7 inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.97]">
 							Request proposal
 							@modules.UIIcon("arrow-right", "h-4 w-4")
 						</a>
@@ -109,7 +109,7 @@ templ aboutContactLink(iconName, label, value, href string) {
 				<span class="block truncate font-semibold">{ value }</span>
 			</span>
 		</span>
-		@modules.UIIcon("arrow-right", "h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground")
+		@modules.UIIcon("arrow-right", "h-4 w-4 shrink-0 text-muted-foreground motion-safe:transition-transform motion-safe:group-hover:translate-x-1 group-hover:text-foreground")
 	</a>
 }
 

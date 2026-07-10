@@ -88,10 +88,10 @@ templ BaseLayout(props LayoutProps) {
 			</main>
 			@modules.Footer()
 			<button
-				onclick="window.scrollTo({top:0,behavior:'smooth'})"
+				onclick="window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})"
 				id="scroll-top-btn"
 				aria-label="Scroll to top"
-				class="fixed bottom-6 right-6 z-50 hidden p-2 rounded-full bg-primary text-primary-foreground shadow-lg transition-opacity"
+				class="fixed bottom-6 right-6 z-50 p-2 rounded-full bg-primary text-primary-foreground shadow-lg opacity-0 pointer-events-none transition duration-200 ease-out active:scale-[0.97]"
 			>
 				@modules.UIIcon("arrow-up", "h-5 w-5")
 			</button>
@@ -102,7 +102,8 @@ templ BaseLayout(props LayoutProps) {
 					if (btn && sentinel && 'IntersectionObserver' in window) {
 						const topObserver = new IntersectionObserver(function(entries) {
 							const isAtTop = entries[0] && entries[0].isIntersecting;
-							btn.classList.toggle('hidden', isAtTop);
+							btn.classList.toggle('opacity-0', isAtTop);
+							btn.classList.toggle('pointer-events-none', isAtTop);
 						});
 						topObserver.observe(sentinel);
 					}

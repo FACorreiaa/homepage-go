@@ -17,6 +17,7 @@ var trustItems = []model.TrustItem{
 // Proof slots (Metrics, Testimonial, ScreenshotAsset) are intentionally empty
 // until real data exists — never fabricate numbers, quotes, or screenshots.
 // Populate like:
+//
 //	Metrics: []model.ProjectMetric{{Value: "38ms", Label: "p95 API latency"}},
 var allProjects = []model.ProjectItem{
 	{Slug: "norviq", Title: "Norviq", RoleTag: "Independent", Description: "An investing workspace that puts holdings, research, and decisions in one calm, fast native app — designed, built, and shipped to the App Store by one engineer.", Outcome: "I own the full stack in production: SwiftUI client with Swift Charts, Vapor API, PostgreSQL and Redis on Hetzner, secured with MFA and Face ID.", Tags: []string{"Vapor (Swift)", "SwiftUI", "Docker", "PostgreSQL", "Redis", "Hetzner VPS"}, Category: "Full Stack / iOS App", DisplayGroup: "iOS products", GithubLink: "Private", LiveLink: "https://apps.apple.com/", HasLiveLink: true, Featured: true, Icon: "NV", LogoAsset: "/assets/static/projects/norviq-icon.webp", Status: "App Store"},

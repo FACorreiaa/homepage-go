@@ -22,11 +22,11 @@ templ Projects(trust []model.TrustItem, projects []model.ProjectItem) {
 							Independent engineering practice for web apps, native iOS products, backend platforms, and the product glue between them.
 						</p>
 						<div class="mt-10 flex flex-wrap gap-3">
-							<a href="/proposal" class="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90 active:scale-[0.99]">
+							<a href="/proposal" class="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.97]">
 								Request proposal
 								@modules.UIIcon("arrow-right", "h-4 w-4")
 							</a>
-							<a href="#case-studies" class="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent active:scale-[0.99]">View case studies</a>
+							<a href="#case-studies" class="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-accent active:scale-[0.97]">View case studies</a>
 						</div>
 						<p class="mt-6 font-mono text-xs text-muted-foreground">
 							Also open to senior product-engineering roles —
@@ -93,7 +93,7 @@ templ Projects(trust []model.TrustItem, projects []model.ProjectItem) {
 								}
 								<span class="mt-8 inline-flex items-center gap-2 text-sm font-semibold">
 									View case study
-									@modules.UIIcon("arrow-right", "h-4 w-4 transition-transform group-hover:translate-x-1")
+									@modules.UIIcon("arrow-right", "h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-1")
 								</span>
 							</div>
 						</a>
