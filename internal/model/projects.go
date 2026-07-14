@@ -11,6 +11,7 @@ type ProjectItem struct {
 	DisplayGroup string
 	GithubLink   string
 	LiveLink     string
+	AppStoreLink string
 	HasLiveLink  bool
 	Featured     bool
 	Icon         string

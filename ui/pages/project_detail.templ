@@ -58,7 +58,13 @@ templ ProjectDetail(d model.ProjectDetailData) {
 						<div class="mt-8 flex flex-wrap gap-3">
 							if d.Project.HasLiveLink {
 								<a href={ templ.SafeURL(d.Project.LiveLink) } target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background">
-									Live site
+									Website
+									@modules.UIIcon("external", "h-4 w-4")
+								</a>
+							}
+							if d.Project.AppStoreLink != "" {
+								<a href={ templ.SafeURL(d.Project.AppStoreLink) } target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold">
+									App Store
 									@modules.UIIcon("external", "h-4 w-4")
 								</a>
 							}

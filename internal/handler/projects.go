@@ -20,7 +20,24 @@ var trustItems = []model.TrustItem{
 //
 //	Metrics: []model.ProjectMetric{{Value: "38ms", Label: "p95 API latency"}},
 var allProjects = []model.ProjectItem{
-	{Slug: "norviq", Title: "Norviq", RoleTag: "Independent", Description: "An investing workspace that puts holdings, research, and decisions in one calm, fast native app — designed, built, and shipped to the App Store by one engineer.", Outcome: "I own the full stack in production: SwiftUI client with Swift Charts, Vapor API, PostgreSQL and Redis on Hetzner, secured with MFA and Face ID.", Tags: []string{"Vapor (Swift)", "SwiftUI", "Docker", "PostgreSQL", "Redis", "Hetzner VPS"}, Category: "Full Stack / iOS App", DisplayGroup: "iOS products", GithubLink: "Private", LiveLink: "https://apps.apple.com/", HasLiveLink: true, Featured: true, Icon: "NV", LogoAsset: "/assets/static/projects/norviq-icon.webp", Status: "App Store"},
+	{
+		Slug:         "norviq",
+		Title:        "Norviq",
+		RoleTag:      "Independent",
+		Description:  "A private financial command center for holdings, research, targets, and spending — available on the web and as a native iPhone app.",
+		Outcome:      "I own and maintain the full stack in production: SwiftUI, Vapor, PostgreSQL, and Redis on Hetzner, secured with MFA, passkeys, and Face ID.",
+		Tags:         []string{"Vapor (Swift)", "SwiftUI", "Web", "PostgreSQL", "Redis", "Hetzner VPS"},
+		Category:     "Full Stack / Web & iOS",
+		DisplayGroup: "Web & iOS products",
+		GithubLink:   "Private",
+		LiveLink:     "https://norviq.org",
+		AppStoreLink: "https://apps.apple.com/pt/app/norviq/id6765849578?l=en-GB",
+		HasLiveLink:  true,
+		Featured:     true,
+		Icon:         "NV",
+		LogoAsset:    "/assets/static/projects/norviq-icon.webp",
+		Status:       "Live · App Store",
+	},
 	{Slug: "luminavault", Title: "LuminaVault", RoleTag: "Independent", Description: "A private second brain for people who want to own their memory: organized Spaces plus Hermes, an AI agent that reasons only over what you've saved.", Outcome: "Live on TestFlight — capture becomes structured, searchable memory, and every AI answer is grounded in your own vault, self-hostable end to end.", Tags: []string{"SwiftUI", "Hermes Agent", "Spaces", "AI Memory", "TestFlight"}, Category: "iOS App / AI Memory", DisplayGroup: "iOS products", GithubLink: "Private", HasLiveLink: false, Featured: true, Icon: "LV", LogoAsset: "/assets/static/projects/luminavault-icon.webp", Status: "TestFlight"},
 	{Slug: "hermesvault-backend", Title: "HermesVault Backend", RoleTag: "Independent", Description: "The self-hosted engine behind HermesVault: a Swift 6 / Hummingbird 2 API whose kb-compile pipeline turns raw Markdown into a queryable knowledge base with pgvector semantic search.", Outcome: "Runs in production as private infrastructure — per-tenant vaults, JWT auth, Docker deploys on a bare VPS.", Tags: []string{"Swift 6", "Hummingbird 2", "Postgres", "pgvector", "Docker"}, Category: "Backend API", DisplayGroup: "Backend systems", GithubLink: "Private", HasLiveLink: false, Featured: true, Icon: "HB", LogoAsset: "/assets/static/projects/hermesvault-icon.webp", Status: "Self-hosted"},
 	{Slug: "hermes", Title: "Hermes", RoleTag: "Independent", Description: "A private gateway and automation hub hosted on a VPS, acting as a central coordinator for AI models, webhooks, and personal services.", Outcome: "Personal infra gateway for model routing, webhooks, and small automations.", Tags: []string{"Docker", "VPS", "Gateway", "Swift", "API"}, Category: "Backend API", DisplayGroup: "Private infrastructure", GithubLink: "Private", HasLiveLink: false, Icon: "HM", Status: "Private infra"},
@@ -50,12 +67,12 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 	case "norviq":
 		return model.ProjectDetailData{
 			Project:  p,
-			Tagline:  "A focused investing workspace for portfolios, watchlists, targets, and market context.",
-			LongDesc: []string{"Norviq is a personal investing workspace for active investors who want research, holdings, and decisions in one calm, fast app.", "The iOS client is built natively in SwiftUI with Swift Charts, secured by MFA, Face ID, and an app-lock layer."},
+			Tagline:  "A private financial command center for portfolios, research, targets, and spending — synced across web and iPhone.",
+			LongDesc: []string{"Norviq gives active investors one calm workspace for holdings, watchlists, due diligence, target scenarios, expenses, and reports.", "It is available in the browser and as a native SwiftUI app, with secure account access, passkeys, MFA, Face ID, exports, and account deletion built in."},
 			Features: []model.DetailFeature{
-				{Title: "Portfolio clarity", Body: "Track holdings, cost basis, and allocation in real time."},
-				{Title: "Research workspace", Body: "Watchlists, stock insights, valuation editor, projections, and notes."},
-				{Title: "Security first", Body: "MFA, Face ID, app-lock with security code, encrypted token storage."},
+				{Title: "Portfolio clarity", Body: "Track holdings, watchlists, performance, and allocation with current pricing."},
+				{Title: "Research and targets", Body: "Capture thesis, risks, and catalysts, then model base, bear, and bull scenarios."},
+				{Title: "Private by design", Body: "Passkeys, MFA, Face ID, private notes, data export, and in-app account deletion."},
 			},
 			TechStack: []string{"SwiftUI", "Swift Charts", "Vapor", "PostgreSQL", "Redis", "Docker", "RevenueCat"},
 			SocialLinks: []model.DetailLink{

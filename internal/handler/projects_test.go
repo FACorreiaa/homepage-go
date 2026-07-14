@@ -10,11 +10,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	norviqWebsiteURL  = "https://norviq.org"
+	norviqAppStoreURL = "https://apps.apple.com/pt/app/norviq/id6765849578?l=en-GB"
+)
+
 func TestProjectsList(t *testing.T) {
 	r := httptest.NewRequest("GET", "/projects", nil)
 	w := httptest.NewRecorder()
 	handler.ProjectsList(w, r)
 	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), `href="`+norviqWebsiteURL+`"`)
+	assert.Contains(t, w.Body.String(), `href="`+norviqAppStoreURL+`"`)
 }
 
 func TestProjectDetail(t *testing.T) {
@@ -34,6 +41,10 @@ func TestProjectDetail(t *testing.T) {
 			w := httptest.NewRecorder()
 			handler.ProjectDetail(w, r)
 			assert.Equal(t, tt.want, w.Code)
+			if tt.slug == "norviq" {
+				assert.Contains(t, w.Body.String(), `href="`+norviqWebsiteURL+`"`)
+				assert.Contains(t, w.Body.String(), `href="`+norviqAppStoreURL+`"`)
+			}
 		})
 	}
 }
