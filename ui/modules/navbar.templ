@@ -7,7 +7,7 @@ templ Navbar(activePage string) {
 				<span class="grid h-9 w-9 place-items-center rounded-full bg-foreground text-sm text-background">FC</span>
 				<span class="hidden text-sm text-muted-foreground sm:inline">Software Studio</span>
 			</a>
-			<div class="hidden items-center gap-1 lg:flex">
+			<div class="hidden items-center gap-1 min-[900px]:flex">
 				@navLink("/projects", "Projects", activePage == "projects")
 				@navLink("/about", "About", activePage == "about")
 				@navLink("/curriculum", "CV", activePage == "curriculum")
@@ -16,20 +16,26 @@ templ Navbar(activePage string) {
 				@navLink("/bookmarks", "Garden", activePage == "bookmarks")
 				@navLink("/play", "Play", activePage == "play")
 				@navLink("/stats", "Live", activePage == "stats")
-				<div class="mx-2 h-5 w-px bg-border"></div>
-				<a href="https://github.com/FACorreiaa" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+				// GitHub is the first thing to go when the bar is tight: it is a
+				// secondary destination and the footer carries it on every page.
+				<div class="mx-2 hidden h-5 w-px bg-border xl:block"></div>
+				<a href="https://github.com/FACorreiaa" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="hidden rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground xl:inline-flex">
 					@UIIcon("github", "h-4 w-4")
 				</a>
 				<button onclick="toggleTheme()" aria-label="Toggle theme" class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
 					@UIIcon("sun", "hidden h-4 w-4 dark:block")
 					@UIIcon("moon", "block h-4 w-4 dark:hidden")
 				</button>
+				// The label is the widest single item in the bar. Below xl it drops
+				// the verb rather than the button, which is what buys the room to
+				// keep all eight links on screen at laptop width.
 				<a href="/proposal" class="ml-1 inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.97]">
-					Request proposal
+					<span class="hidden xl:inline">Request proposal</span>
+					<span class="xl:hidden">Proposal</span>
 					@UIIcon("arrow-right", "h-4 w-4")
 				</a>
 			</div>
-			<div class="flex items-center gap-2 lg:hidden" x-data="{ open: false }">
+			<div class="flex items-center gap-2 min-[900px]:hidden" x-data="{ open: false }">
 				<button onclick="toggleTheme()" aria-label="Toggle theme" class="rounded-full p-2 hover:bg-accent">
 					@UIIcon("sun", "hidden h-4 w-4 dark:block")
 					@UIIcon("moon", "block h-4 w-4 dark:hidden")
@@ -96,11 +102,14 @@ templ Navbar(activePage string) {
 	</nav>
 }
 
+// Eight links, a theme toggle and a call to action have to share one pill.
+// Padding tightens below xl so the whole bar survives a laptop-width window
+// rather than collapsing to a hamburger on a screen with room for it.
 templ navLink(href, label string, active bool) {
 	if active {
-		<a href={ templ.SafeURL(href) } class="rounded-full bg-accent px-3 py-1.5 text-sm font-medium">{ label }</a>
+		<a href={ templ.SafeURL(href) } class="rounded-full bg-accent px-2 py-1.5 text-sm font-medium xl:px-3">{ label }</a>
 	} else {
-		<a href={ templ.SafeURL(href) } class="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">{ label }</a>
+		<a href={ templ.SafeURL(href) } class="rounded-full px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground xl:px-3">{ label }</a>
 	}
 }
 
