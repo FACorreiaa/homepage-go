@@ -28,6 +28,8 @@ reads `-n facorreia ... deploy/site`.
 1. **Merge to `main`.** That is the only manual step.
 2. CI builds the Dockerfile and pushes two tags to GHCR:
    `ghcr.io/facorreiaa/homepage-go:<git-sha>` and `:latest`.
+   Skipped entirely if the push changed **only** documentation — see
+   [Docs-only pushes do not deploy](#docs-only-pushes-do-not-deploy).
 3. CI clones `LuminaVaultInfra` using the `INFRA_TOKEN` PAT, `sed`s the new SHA
    into `apps/facorreia/values.yaml`, commits as `facorreia-ci`, and pushes to
    `main`.
@@ -53,6 +55,31 @@ seconds. Git is the only lever.
 
 The deployment pins a SHA, never `:latest` — so a rollout only happens when a
 commit says so.
+
+### Docs-only pushes do not deploy
+
+`build-push.yml` carries a `paths-ignore` for `**.md`, `docs/**`, `LICENSE`
+and `.gitignore`. A push whose changed files are *all* documentation builds
+nothing and rolls nothing.
+
+Every rollout costs downtime (see
+[Expect downtime](#expect-downtime-on-every-rollout)), so paying it for a
+change the image does not contain is pure loss.
+
+Two consequences worth knowing:
+
+- **A mixed commit still deploys.** `paths-ignore` skips only when *every*
+  changed file matches. Touch one `.go` file alongside the docs and it builds.
+- **A docs-only SHA is not a rollback target.** No image was ever pushed for
+  it. Roll back to the last SHA that actually built:
+
+  ```sh
+  gh run list --workflow "Build and Push" --status success \
+    --limit 5 --json headSha,displayTitle
+  ```
+
+The `CI` workflow (lint and test) has no such filter on purpose — it is cheap
+and touches nothing outside the runner.
 
 ### The CI ↔ values.yaml contract
 
