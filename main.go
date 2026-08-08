@@ -198,6 +198,26 @@ func getEnvOrDefault(key, fallback string) string {
 	return fallback
 }
 
+// assetCacheControl picks the caching policy for an asset from its full request
+// path — the path as the browser asked for it, before StripPrefix rewrites it.
+// Matching after the strip is the bug this replaced: r.URL.Path is
+// "css/output.css" by then, so the allowlist never fired and every asset was
+// served immutable for a year, including the three that change without changing
+// name. Those three are the only way to ship a CSS or service-worker update to
+// someone who has already visited.
+func assetCacheControl(requestPath string, isDev bool) string {
+	if isDev {
+		// Read-through so the Tailwind watcher's output shows up on reload.
+		return "no-store"
+	}
+	switch requestPath {
+	case "/assets/css/output.css", "/assets/static/sw.js", "/assets/static/manifest.json":
+		return "public, max-age=0, must-revalidate"
+	default:
+		return "public, max-age=31536000, immutable"
+	}
+}
+
 func setupAssets(mux *http.ServeMux) {
 	goEnv := strings.ToLower(strings.TrimSpace(os.Getenv("GO_ENV")))
 	isProd := goEnv == "" || goEnv == "production"
@@ -211,22 +231,10 @@ func setupAssets(mux *http.ServeMux) {
 		files = http.FileServer(http.FS(assets.Assets))
 	}
 
-	// The cache header is chosen before StripPrefix runs, so the allowlist can
-	// be written as the URLs a browser actually requests. Matching after the
-	// strip would silently never fire: r.URL.Path is "css/output.css" by then,
-	// and every asset would fall through to immutable — including the three
-	// that must stay revalidated because they change without changing name.
+	// The header is chosen before StripPrefix runs, so the allowlist can be
+	// written as the URLs a browser actually requests.
 	assetHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if isDev {
-			w.Header().Set("Cache-Control", "no-store")
-		} else {
-			switch r.URL.Path {
-			case "/assets/css/output.css", "/assets/static/sw.js", "/assets/static/manifest.json":
-				w.Header().Set("Cache-Control", "public, max-age=0, must-revalidate")
-			default:
-				w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
-			}
-		}
+		w.Header().Set("Cache-Control", assetCacheControl(r.URL.Path, isDev))
 		http.StripPrefix("/assets/", files).ServeHTTP(w, r)
 	})
 	mux.Handle("GET /assets/", assetHandler)
