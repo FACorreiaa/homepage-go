@@ -8,6 +8,18 @@ type LayoutProps struct {
 	OGImage     string
 	OGType      string
 	ActivePage  string
+
+	// SmoothScroll hands scrolling to Lenis on this page. Two things in the
+	// layout fight it and have to stand down when it is set: the native
+	// scroll-behavior on <html>, and the scroll-to-top button's window.scrollTo.
+	SmoothScroll bool
+}
+
+func (p LayoutProps) htmlClass() string {
+	if p.SmoothScroll {
+		return ""
+	}
+	return "scroll-smooth"
 }
 
 func (p LayoutProps) title() string {
@@ -40,7 +52,7 @@ func (p LayoutProps) ogType() string {
 
 templ BaseLayout(props LayoutProps) {
 	<!DOCTYPE html>
-	<html lang="en" class="scroll-smooth">
+	<html lang="en" class={ props.htmlClass() }>
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -88,7 +100,7 @@ templ BaseLayout(props LayoutProps) {
 			</main>
 			@modules.Footer()
 			<button
-				onclick="window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})"
+				onclick="if(window.__lenis){window.__lenis.scrollTo(0)}else{window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}"
 				id="scroll-top-btn"
 				aria-label="Scroll to top"
 				class="fixed bottom-6 right-6 z-50 p-2 rounded-full bg-primary text-primary-foreground shadow-lg opacity-0 pointer-events-none transition duration-200 ease-out active:scale-[0.97]"

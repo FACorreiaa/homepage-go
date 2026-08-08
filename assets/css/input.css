@@ -507,6 +507,28 @@
     border-radius: 9999px;
   }
 
+  /* The landing page's 3D world. Fixed and behind everything, so the scene can
+     never move the page: with the canvas removed the layout is identical. */
+  .world-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .world-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Content sits above the canvas. Without this the scene would paint over the
+     hero rather than behind it. */
+  .world-shell {
+    position: relative;
+    z-index: 1;
+  }
+
   /* Stat panels — the two data lists get the same card treatment as the globe
      above them, so the page reads as three blocks rather than three systems. */
   .stat-panel {
@@ -594,6 +616,12 @@
 
   .status-dot::before {
     animation: none;
+  }
+
+  /* home-world.js already declines to start here. This is the belt to that
+     braces: if the scene ever loads anyway, it stays invisible. */
+  .world-stage {
+    display: none;
   }
 }
 

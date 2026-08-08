@@ -69,6 +69,36 @@ func TestHomeOpsStrip(t *testing.T) {
 	assert.Contains(t, body, `href="/stats"`)
 }
 
+func TestHomeWorldScaffold(t *testing.T) {
+	body := renderHome(t)
+
+	// The canvas mounts into an empty, inert, aria-hidden container. If it is
+	// ever given content or taken out of the fixed layer it starts affecting
+	// the page, which is the one thing the scene must never do.
+	assert.Contains(t, body, `<div class="world-stage" data-world aria-hidden="true"></div>`)
+	assert.Contains(t, body, "world-shell")
+
+	// Four stations, in the order the camera descends them.
+	for _, station := range []string{"device", "server", "cluster", "horizon"} {
+		assert.Contains(t, body, `data-world-station="`+station+`"`)
+	}
+
+	// gsap must load before ScrollTrigger, which registers itself against it.
+	gsap := strings.Index(body, "vendor/gsap/gsap.min.js")
+	scrollTrigger := strings.Index(body, "vendor/gsap/ScrollTrigger.min.js")
+	assert.Positive(t, gsap)
+	assert.Positive(t, scrollTrigger)
+	assert.Less(t, gsap, scrollTrigger, "gsap must be ordered before ScrollTrigger")
+
+	assert.Contains(t, body, "vendor/lenis/lenis.min.js")
+	assert.Contains(t, body, `<script type="module" src="/assets/static/home-world.js">`)
+
+	// Lenis owns scrolling here, so the two native behaviours that fight it are
+	// stood down: scroll-smooth on <html>, and the scroll-top button.
+	assert.NotContains(t, body, `<html lang="en" class="scroll-smooth">`)
+	assert.Contains(t, body, "window.__lenis")
+}
+
 func TestHomeRendersWithoutScripts(t *testing.T) {
 	body := renderHome(t)
 
