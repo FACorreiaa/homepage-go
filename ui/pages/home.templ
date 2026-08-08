@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"myapp/assets"
+
 	"myapp/internal/model"
 	"myapp/internal/service"
 	"myapp/ui/layouts"
@@ -117,7 +119,7 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 		<script defer src="/assets/static/vendor/gsap/ScrollTrigger.min.js"></script>
 		<script defer src="/assets/static/vendor/lenis/lenis.min.js"></script>
 		@templ.Raw(`<script type="importmap">{"imports":{"three":"/assets/static/vendor/three/three.module.min.js","three/webgpu":"/assets/static/vendor/three/webgpu-stub.js","three/examples/jsm/":"/assets/static/vendor/three/addons/"}}</script>`)
-		<script type="module" src="/assets/static/home-world.js"></script>
+		<script type="module" src={ assets.URL("static/home-world.js") }></script>
 	}
 }
 

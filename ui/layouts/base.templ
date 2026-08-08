@@ -1,6 +1,9 @@
 package layouts
 
-import "myapp/ui/modules"
+import (
+	"myapp/assets"
+	"myapp/ui/modules"
+)
 
 type LayoutProps struct {
 	Title       string
@@ -74,7 +77,10 @@ templ BaseLayout(props LayoutProps) {
 			<link rel="apple-touch-icon" href="/assets/static/icon-192.png"/>
 			<link rel="manifest" href="/assets/static/manifest.json"/>
 			<link rel="preload" href="/assets/fonts/geist/geist-variable.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
-			<link href="/assets/css/output.css" rel="stylesheet"/>
+			// Fingerprinted. A browser that cached this while it was being served
+			// immutable will never revalidate the bare URL, so the only way to
+			// reach it is a URL it has not seen before.
+			<link href={ assets.URL("css/output.css") } rel="stylesheet"/>
 			<script>
 				(function() {
 					document.documentElement.classList.add('js');

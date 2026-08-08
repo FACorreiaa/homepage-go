@@ -91,12 +91,25 @@ func TestHomeWorldScaffold(t *testing.T) {
 	assert.Less(t, gsap, scrollTrigger, "gsap must be ordered before ScrollTrigger")
 
 	assert.Contains(t, body, "vendor/lenis/lenis.min.js")
-	assert.Contains(t, body, `<script type="module" src="/assets/static/home-world.js">`)
+
+	// Fingerprinted, so match the path and assert the cache buster separately.
+	assert.Regexp(t, `<script type="module" src="/assets/static/home-world\.js\?v=[0-9a-f]{10}">`, body)
 
 	// Lenis owns scrolling here, so the two native behaviours that fight it are
 	// stood down: scroll-smooth on <html>, and the scroll-top button.
 	assert.NotContains(t, body, `<html lang="en" class="scroll-smooth">`)
 	assert.Contains(t, body, "window.__lenis")
+}
+
+// The stylesheet URL must carry a content fingerprint. A browser that cached
+// output.css while it was being served immutable will never revalidate the bare
+// URL — no header can reach it, only a URL it has not seen. Shipping markup that
+// depends on new CSS behind an unfingerprinted URL is what broke the live site.
+func TestStylesheetIsFingerprinted(t *testing.T) {
+	body := renderHome(t)
+	assert.Regexp(t, `<link href="/assets/css/output\.css\?v=[0-9a-f]+" rel="stylesheet">`, body)
+	assert.NotContains(t, body, `href="/assets/css/output.css"`,
+		"the bare URL is unreachable in poisoned caches and must never be emitted")
 }
 
 func TestHomeRendersWithoutScripts(t *testing.T) {

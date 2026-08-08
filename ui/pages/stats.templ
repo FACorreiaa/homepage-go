@@ -3,6 +3,8 @@ package pages
 import (
 	"fmt"
 
+	"myapp/assets"
+
 	"myapp/internal/service"
 	"myapp/ui/layouts"
 )
@@ -91,7 +93,7 @@ templ Stats(stats service.StatsSnapshot) {
 			</section>
 		</div>
 		@templ.Raw(`<script type="importmap">{"imports":{"three":"/assets/static/vendor/three/three.module.min.js","three/webgpu":"/assets/static/vendor/three/webgpu-stub.js","three/examples/jsm/":"/assets/static/vendor/three/addons/"}}</script>`)
-		<script type="module" src="/assets/static/globe.js"></script>
+		<script type="module" src={ assets.URL("static/globe.js") }></script>
 	}
 }
 

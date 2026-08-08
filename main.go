@@ -200,22 +200,24 @@ func getEnvOrDefault(key, fallback string) string {
 
 // assetCacheControl picks the caching policy for an asset from its full request
 // path — the path as the browser asked for it, before StripPrefix rewrites it.
-// Matching after the strip is the bug this replaced: r.URL.Path is
-// "css/output.css" by then, so the allowlist never fired and every asset was
-// served immutable for a year, including the three that change without changing
-// name. Those three are the only way to ship a CSS or service-worker update to
-// someone who has already visited.
+// Matching after the strip was the original bug here: r.URL.Path is
+// "css/output.css" by then, so the allowlist never fired.
+//
+// The policy is now allow-list-by-immutability rather than by filename. Only
+// paths that genuinely cannot change — vendored libraries, which carry their
+// version in the path, and fonts — are pinned. Everything this site builds
+// itself is rebuilt at a fixed path on every deploy, and pinning any of it for
+// a year is how a returning visitor ends up running new HTML against old CSS.
+// One conditional request per asset is nothing next to that failure.
 func assetCacheControl(requestPath string, isDev bool) string {
 	if isDev {
 		// Read-through so the Tailwind watcher's output shows up on reload.
 		return "no-store"
 	}
-	switch requestPath {
-	case "/assets/css/output.css", "/assets/static/sw.js", "/assets/static/manifest.json":
-		return "public, max-age=0, must-revalidate"
-	default:
+	if assets.IsImmutable(requestPath) {
 		return "public, max-age=31536000, immutable"
 	}
+	return "public, max-age=0, must-revalidate"
 }
 
 func setupAssets(mux *http.ServeMux) {
