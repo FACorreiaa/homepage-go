@@ -9,6 +9,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { tokenColor } from './three-utils.js';
 
 const GLOBE_RADIUS = 1;
 const HOME = { lat: 41.15, lon: -8.61 }; // Porto — where the arcs land.
@@ -28,28 +29,6 @@ const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 function fail(message) {
   if (status) status.textContent = message;
-}
-
-/**
- * Resolves any CSS colour — including the oklch() tokens this site uses, which
- * THREE.Color cannot parse — by letting the browser do it on a 1x1 canvas.
- */
-function resolveColor(cssValue, fallback) {
-  try {
-    const ctx = document.createElement('canvas').getContext('2d');
-    ctx.fillStyle = fallback;
-    ctx.fillStyle = cssValue;
-    ctx.fillRect(0, 0, 1, 1);
-    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-    return new THREE.Color(r / 255, g / 255, b / 255);
-  } catch {
-    return new THREE.Color(fallback);
-  }
-}
-
-function tokenColor(name, fallback) {
-  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  return resolveColor(value || fallback, fallback);
 }
 
 /** Standard three.js globe mapping. Land and markers must share it. */
