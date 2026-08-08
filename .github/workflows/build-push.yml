@@ -7,6 +7,18 @@ name: Build and Push
 on:
   push:
     branches: [main]
+    # Every run of this workflow rolls production, and the rollout is Recreate
+    # (ReadWriteOnce PVC), so it always costs ~20-40s of downtime. Skip it when
+    # a push changes nothing the image contains. A push that touches docs *and*
+    # code still builds — the filter only skips when every changed file matches.
+    #
+    # Trade-off: a docs-only commit gets no image, so its SHA is not a rollback
+    # target. Roll back to the last SHA that actually built.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
 
 permissions:
   contents: read
