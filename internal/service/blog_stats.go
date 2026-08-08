@@ -26,6 +26,7 @@ type BlogStatsSnapshot struct {
 type BlogTracker struct {
 	mu       sync.Mutex
 	path     string
+	salt     []byte
 	total    int
 	unique   map[string]bool
 	flags    map[string]int
@@ -35,13 +36,15 @@ type BlogTracker struct {
 
 type blogStatsFile struct {
 	TotalViews int            `json:"totalViews"`
-	UniqueIPs  []string       `json:"uniqueIPs"`
+	UniqueIPs  []string       `json:"uniqueIPs,omitempty"` // legacy, read once then dropped
+	Hashes     []string       `json:"uniqueHashes"`
 	Flags      map[string]int `json:"flags"`
 }
 
 func NewBlogTracker() *BlogTracker {
 	tracker := &BlogTracker{
 		path:   resolveBlogStatsPath(),
+		salt:   resolveVisitSalt(),
 		unique: map[string]bool{},
 		flags:  map[string]int{},
 		client: &http.Client{Timeout: 2 * time.Second},
@@ -56,12 +59,15 @@ func (t *BlogTracker) RecordVisit(r *http.Request) {
 	}
 
 	ip := clientIP(r)
+	// Only the hash is kept. The address stays in this function, long enough
+	// to ask the geo provider what country it is in.
+	hash := hashWithSalt(t.salt, ip)
 
 	t.mu.Lock()
 	t.total++
-	isNewIP := ip != "" && !t.unique[ip]
+	isNewIP := ip != "" && !t.unique[hash]
 	if isNewIP {
-		t.unique[ip] = true
+		t.unique[hash] = true
 	}
 	t.saveLocked()
 	t.mu.Unlock()
@@ -123,11 +129,22 @@ func (t *BlogTracker) load() {
 	}
 
 	t.total = file.TotalViews
-	for _, ip := range file.UniqueIPs {
-		t.unique[ip] = true
+	for _, hash := range file.Hashes {
+		t.unique[hash] = true
 	}
 	if file.Flags != nil {
 		t.flags = file.Flags
+	}
+
+	// Earlier versions stored raw visitor addresses. Hash whatever is left
+	// over and rewrite the file so the plaintext is gone after this boot.
+	if len(file.UniqueIPs) > 0 {
+		for _, ip := range file.UniqueIPs {
+			t.unique[hashWithSalt(t.salt, ip)] = true
+		}
+		t.mu.Lock()
+		t.saveLocked()
+		t.mu.Unlock()
 	}
 }
 
@@ -183,15 +200,15 @@ func (t *BlogTracker) saveLocked() {
 		return
 	}
 
-	uniqueIPs := make([]string, 0, len(t.unique))
-	for ip := range t.unique {
-		uniqueIPs = append(uniqueIPs, ip)
+	hashes := make([]string, 0, len(t.unique))
+	for hash := range t.unique {
+		hashes = append(hashes, hash)
 	}
-	sort.Strings(uniqueIPs)
+	sort.Strings(hashes)
 
 	data, err := json.Marshal(blogStatsFile{
 		TotalViews: t.total,
-		UniqueIPs:  uniqueIPs,
+		Hashes:     hashes,
 		Flags:      t.flags,
 	})
 	if err != nil {

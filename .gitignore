@@ -11,3 +11,5 @@ vault/raw/*
 app.db-shm
 app.db-wal
 app.db-journal
+.DS_Store
+visit-salt

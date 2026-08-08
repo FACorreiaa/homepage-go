@@ -31,7 +31,7 @@ RUN TEMPLUI_PATH="$(go list -mod=mod -m -f '{{.Dir}}' github.com/templui/templui
     test -d "$TEMPLUI_PATH/components" && \
     printf '%s\n' \
       '@source "./**/*.templ";' \
-      '@source "./assets/static/site-*.js";' \
+      '@source "./assets/static/*.js";' \
       "@source \"$TEMPLUI_PATH/components/button/**/*.templ\";" \
       "@source \"$TEMPLUI_PATH/components/icon/**/*.templ\";" \
       > ./assets/css/sources.generated.css && \

@@ -1,0 +1,157 @@
+package pages
+
+import (
+	"fmt"
+	"time"
+
+	"myapp/internal/model"
+	"myapp/internal/service"
+	"myapp/ui/layouts"
+	"myapp/ui/modules"
+)
+
+templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
+	@layouts.BaseLayout(layouts.LayoutProps{
+		Title:       "FC Software Studio | Fernando Correia",
+		ActivePage:  "home",
+		Description: "Fernando Correia designs, builds, ships, and operates product systems — SwiftUI on the phone, Go and Vapor on the server, Kubernetes underneath.",
+	}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-6xl px-4 pt-24 md:pt-32">
+				<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">PORTO, PT — SOLO PRACTICE — AVAILABLE Q4</p>
+				<h1 class="hero-title mt-6 max-w-4xl font-semibold">
+					One engineer, the whole stack, in production.
+				</h1>
+				<p class="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
+					I design, build, ship, and operate product systems — SwiftUI on the phone, Go and Vapor on
+					the server, Kubernetes underneath. Including this site, which is streaming you its own
+					telemetry right now.
+				</p>
+			</section>
+			@opsStrip(stats)
+			<section class="mx-auto max-w-6xl px-4 pt-20 md:pt-28">
+				<div class="grid gap-5 md:grid-cols-2">
+					<div class="fork-panel" data-reveal>
+						<p class="fork-panel-label">YOU NEED A CONTRACTOR</p>
+						<p class="mt-5 text-base leading-7 text-foreground/80">
+							Ship the product with one senior engineer instead of a team you have to assemble
+							first. Design through deployment, one person accountable for all of it.
+						</p>
+						<div class="mt-auto pt-8">
+							<a href="/proposal" class="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.97]">
+								Request proposal
+								@modules.UIIcon("arrow-right", "h-4 w-4")
+							</a>
+						</div>
+					</div>
+					<div class="fork-panel" data-reveal>
+						<p class="fork-panel-label">YOU'RE HIRING</p>
+						<p class="mt-5 text-base leading-7 text-foreground/80">
+							Seven years, four countries, and case studies where I owned the thing end to end —
+							not a slice of it.
+						</p>
+						<div class="mt-auto pt-8">
+							<a href="/curriculum" class="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.97]">
+								View CV
+								@modules.UIIcon("arrow-right", "h-4 w-4")
+							</a>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section class="mx-auto max-w-6xl px-4 pt-24 md:pt-32">
+				<div class="max-w-3xl border-b border-border pb-6">
+					<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">SELECTED WORK</p>
+					<h2 class="section-title mt-4 font-semibold">Three I own in production.</h2>
+					<p class="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">
+						Products where I wrote the app, the backend, and the deployment that keeps them up.
+						The full index has twelve more.
+					</p>
+				</div>
+				<div class="mt-10 space-y-6">
+					for i, p := range featured {
+						<article class={ "project-showcase-card group grid gap-0 overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent/40 " + showcaseLayout(i) } data-reveal>
+							<a href={ templ.SafeURL("/projects/" + p.Slug) } class={ "block h-full " + visualOrder(i) } aria-label={ "View " + p.Title + " case study" }>
+								@projectVisual(p, i, "h-full min-h-[18rem]")
+							</a>
+							<div class={ "flex flex-col justify-center p-6 md:p-9 " + contentOrder(i) }>
+								<div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+									<p class="font-mono text-xs tracking-[0.16em] text-muted-foreground">{ displayGroup(p) }</p>
+									if p.Status != "" {
+										<span class="project-meta-chip">{ p.Status }</span>
+									}
+								</div>
+								<h3 class="mt-4 text-3xl font-semibold md:text-4xl">{ p.Title }</h3>
+								<p class="mt-4 text-base leading-7 text-muted-foreground">{ p.Description }</p>
+								<div class="mt-6 flex flex-wrap gap-2">
+									for _, tag := range topTags(p.Tags, 4) {
+										<span class="project-meta-chip">{ tag }</span>
+									}
+								</div>
+								<div class="mt-7">
+									<a href={ templ.SafeURL("/projects/" + p.Slug) } class="inline-flex items-center gap-2 text-sm font-semibold underline underline-offset-4 transition-colors hover:text-muted-foreground">
+										View case study
+										@modules.UIIcon("arrow-right", "h-4 w-4")
+									</a>
+								</div>
+							</div>
+						</article>
+					}
+				</div>
+				<div class="mt-10">
+					<a href="/projects" class="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-accent active:scale-[0.97]">
+						See all work
+						@modules.UIIcon("arrow-right", "h-4 w-4")
+					</a>
+				</div>
+			</section>
+			<div class="pb-24 md:pb-32"></div>
+		</div>
+	}
+}
+
+// opsStrip is the thesis made checkable: the claim above it is "I operate what
+// I build", and these are this server's own numbers, low ones included.
+templ opsStrip(stats service.StatsSnapshot) {
+	<section class="ops-strip mt-16 md:mt-20" aria-label="Live site telemetry">
+		<div class="mx-auto grid max-w-6xl grid-cols-2 gap-x-8 px-4 md:grid-cols-4">
+			<div class="ops-metric">
+				<span class="ops-metric-label">SERVING FROM</span>
+				<span class="ops-metric-value">{ stats.ServingFrom }</span>
+			</div>
+			<div class="ops-metric">
+				<span class="ops-metric-label">UPTIME</span>
+				<span class="ops-metric-value">{ formatUptime(stats.Uptime) }</span>
+			</div>
+			<div class="ops-metric">
+				<span class="ops-metric-label">VIEWS 24H</span>
+				<span class="ops-metric-value">{ fmt.Sprintf("%d", stats.Views24h) }</span>
+			</div>
+			<div class="ops-metric">
+				<span class="ops-metric-label">VISITORS NOW</span>
+				<span class="ops-metric-value" data-live="true">{ fmt.Sprintf("%d", stats.VisitorsNow) }</span>
+			</div>
+		</div>
+		<div class="mx-auto max-w-6xl px-4 pb-5">
+			<a href="/stats" class="inline-flex items-center gap-2 font-mono text-xs tracking-[0.14em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground">
+				WATCH IT LIVE
+				@modules.UIIcon("arrow-right", "h-3.5 w-3.5")
+			</a>
+		</div>
+	</section>
+}
+
+// formatUptime keeps the strip honest at every scale: a server that restarted
+// four minutes ago should say so rather than round itself up to a day.
+func formatUptime(d time.Duration) string {
+	if d < time.Minute {
+		return fmt.Sprintf("%ds", int(d.Seconds()))
+	}
+	if d < time.Hour {
+		return fmt.Sprintf("%dm", int(d.Minutes()))
+	}
+	if d < 24*time.Hour {
+		return fmt.Sprintf("%dh %dm", int(d.Hours()), int(d.Minutes())%60)
+	}
+	return fmt.Sprintf("%dd %dh", int(d.Hours())/24, int(d.Hours())%24)
+}

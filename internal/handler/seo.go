@@ -36,7 +36,7 @@ type SitemapHandler struct {
 
 func (h *SitemapHandler) Serve(w http.ResponseWriter, r *http.Request) {
 	set := urlSet{Xmlns: "http://www.sitemaps.org/schemas/sitemap/0.9"}
-	for _, p := range []string{"/", "/projects", "/about", "/curriculum", "/stack", "/blog", "/bookmarks", "/proposal", "/play"} {
+	for _, p := range []string{"/", "/projects", "/about", "/curriculum", "/stack", "/blog", "/bookmarks", "/proposal", "/play", "/stats"} {
 		set.URLs = append(set.URLs, sitemapURL{Loc: siteBase + p})
 	}
 	for _, p := range allProjects {

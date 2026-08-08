@@ -1,3 +1,10 @@
+# NOT IN USE. Production moved to k3s + ArgoCD in 173c83a and is fronted by
+# Traefik; nothing reads this file any more. The security header block below
+# was dead from that cutover until it was restored as a Traefik middleware in
+# LuminaVaultInfra (charts/norviq-app/templates/security-headers-middleware.yaml,
+# enabled in apps/facorreia/values.yaml). Change the headers THERE — editing
+# them here has no effect. Kept only as a reference for local Caddy runs.
+#
 # Reference Caddyfile for the homepage server (/etc/caddy/Caddyfile).
 # Canonical host is the apex domain — matches what search engines have
 # indexed from the Swift-era site. Do not flip the redirect direction

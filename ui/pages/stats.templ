@@ -1,0 +1,115 @@
+package pages
+
+import (
+	"fmt"
+
+	"myapp/internal/service"
+	"myapp/ui/layouts"
+)
+
+templ Stats(stats service.StatsSnapshot) {
+	@layouts.BaseLayout(layouts.LayoutProps{
+		Title:       "Live traffic | FC Software Studio",
+		ActivePage:  "stats",
+		Description: "A live map of who is reading facorreia.com right now, plotted at city resolution from this server's own traffic.",
+	}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-6xl px-4 pt-24 md:pt-32">
+				<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">SITE TELEMETRY — LIVE</p>
+				<h1 class="section-title mt-6 max-w-3xl font-semibold">Who's here right now.</h1>
+				<p class="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">
+					Every dot is a real visit to this site in the last 24 hours, placed at city resolution.
+					No IP addresses are stored, no cookies are set, and nothing here goes to anyone else.
+				</p>
+			</section>
+			<section class="mx-auto max-w-6xl px-4 pt-12">
+				<div class="globe-stage" id="globe-stage" data-globe>
+					<p
+						id="globe-status"
+						class="absolute inset-0 grid place-items-center px-6 text-center font-mono text-xs text-muted-foreground"
+					>
+						loading map…
+					</p>
+				</div>
+				<p class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-muted-foreground">
+					<span>drag to rotate · scroll to zoom</span>
+					<span>
+						<span class="globe-legend-swatch" style="background: var(--signal)"></span>
+						here now
+					</span>
+					<span>
+						<span class="globe-legend-swatch" style="background: var(--trail)"></span>
+						last 24 hours
+					</span>
+					<span>the dark half of the map is the real night side</span>
+				</p>
+			</section>
+			<section class="mx-auto max-w-6xl px-4 pt-14">
+				<div class="ops-strip">
+					<div class="grid grid-cols-2 gap-x-8 px-4 md:grid-cols-4">
+						<div class="ops-metric">
+							<span class="ops-metric-label">VISITORS NOW</span>
+							<span class="ops-metric-value" data-live="true" data-metric="visitorsNow">{ fmt.Sprintf("%d", stats.VisitorsNow) }</span>
+						</div>
+						<div class="ops-metric">
+							<span class="ops-metric-label">VIEWS 24H</span>
+							<span class="ops-metric-value" data-metric="views24h">{ fmt.Sprintf("%d", stats.Views24h) }</span>
+						</div>
+						<div class="ops-metric">
+							<span class="ops-metric-label">VISITORS 24H</span>
+							<span class="ops-metric-value" data-metric="visitors24h">{ fmt.Sprintf("%d", stats.Visitors24h) }</span>
+						</div>
+						<div class="ops-metric">
+							<span class="ops-metric-label">COUNTRIES 24H</span>
+							<span class="ops-metric-value" data-metric="countries24h">{ fmt.Sprintf("%d", stats.Countries24h) }</span>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section class="mx-auto max-w-6xl px-4 pt-16 pb-24 md:pb-32">
+				<div class="grid gap-12 md:grid-cols-2">
+					<div>
+						<h2 class="font-mono text-xs tracking-[0.18em] text-muted-foreground">WHERE FROM — LAST 24H</h2>
+						if len(stats.TopCountries) == 0 {
+							<p class="mt-6 text-base text-muted-foreground">Nobody yet today. You're the first.</p>
+						} else {
+							<ul class="mt-6 divide-y divide-border border-y border-border">
+								for _, country := range stats.TopCountries {
+									<li class="flex items-center justify-between gap-4 py-3">
+										<span class="flex items-center gap-3">
+											<span aria-hidden="true">{ country.Flag }</span>
+											<span class="font-mono text-sm">{ country.Code }</span>
+										</span>
+										<span class="font-mono text-sm tabular-nums text-muted-foreground">{ fmt.Sprintf("%d", country.Visits) }</span>
+									</li>
+								}
+							</ul>
+						}
+					</div>
+					<div>
+						<h2 class="font-mono text-xs tracking-[0.18em] text-muted-foreground">WHAT THEY READ — LAST 24H</h2>
+						if len(stats.TopPaths) == 0 {
+							<p class="mt-6 text-base text-muted-foreground">No page views recorded in the window.</p>
+						} else {
+							<ul class="mt-6 divide-y divide-border border-y border-border">
+								for _, path := range stats.TopPaths {
+									<li class="flex items-center justify-between gap-4 py-3">
+										<a href={ templ.SafeURL(path.Path) } class="truncate font-mono text-sm underline underline-offset-4 transition-colors hover:text-muted-foreground">{ path.Path }</a>
+										<span class="font-mono text-sm tabular-nums text-muted-foreground">{ fmt.Sprintf("%d", path.Visits) }</span>
+									</li>
+								}
+							</ul>
+						}
+					</div>
+				</div>
+				<p class="mt-14 max-w-2xl text-sm leading-6 text-muted-foreground">
+					How this works: the server salts and hashes each visitor's address, looks the network up
+					to a city, rounds the coordinates to a ~55km cell, and throws the address away. Rows are
+					deleted after 24 hours. Rotating the salt unlinks everything stored before it.
+				</p>
+			</section>
+		</div>
+		@templ.Raw(`<script type="importmap">{"imports":{"three":"/assets/static/vendor/three/three.module.min.js","three/webgpu":"/assets/static/vendor/three/webgpu-stub.js","three/examples/jsm/":"/assets/static/vendor/three/addons/"}}</script>`)
+		<script type="module" src="/assets/static/globe.js"></script>
+	}
+}

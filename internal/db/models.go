@@ -27,6 +27,15 @@ type ClientUser struct {
 	ProjectStatus string
 }
 
+type GeoCache struct {
+	Prefix      string
+	CountryCode string
+	City        string
+	Lat         float64
+	Lon         float64
+	CreatedAt   string
+}
+
 type ProposalLead struct {
 	ID          string
 	Name        string
@@ -36,5 +45,16 @@ type ProposalLead struct {
 	Budget      sql.NullString
 	Timeline    sql.NullString
 	Details     string
+	CreatedAt   string
+}
+
+type Visit struct {
+	ID          int64
+	VisitorHash string
+	CountryCode string
+	City        string
+	Lat         float64
+	Lon         float64
+	Path        string
 	CreatedAt   string
 }
