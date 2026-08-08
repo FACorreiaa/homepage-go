@@ -94,6 +94,11 @@
   --signal: oklch(0.62 0.15 152);
   --signal-dim: oklch(0.72 0.09 152);
   --trail: oklch(0.66 0.12 72);
+
+  /* Go's brand cyan, for the gopher in the landing scene. A fixed brand colour
+     rather than a theme token, so it is the same in both themes — but declared
+     here so the scene reads it the same way it reads everything else. */
+  --go: oklch(0.72 0.13 217);
 }
 
 .dark {
@@ -127,6 +132,7 @@
   --signal: oklch(0.78 0.17 152);
   --signal-dim: oklch(0.62 0.11 152);
   --trail: oklch(0.72 0.13 72);
+  --go: oklch(0.76 0.13 217);
 }
 
 @layer base {

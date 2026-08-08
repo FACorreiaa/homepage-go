@@ -95,6 +95,7 @@ function readPalette(tokenColor) {
     fg: tokenColor('--foreground', '#111111'),
     signal: tokenColor('--signal', '#22c55e'),
     trail: tokenColor('--trail', '#d99a2b'),
+    go: tokenColor('--go', '#00add8'),
   };
 }
 
@@ -160,13 +161,100 @@ function buildDevice(THREE, palette) {
 }
 
 /**
- * Station two — the server. Pull back and the slab is one node in a grid. Rows
- * breathe on a slow wave so the grid reads as running, not as wallpaper.
+ * Station two — Go. The gopher, built out of primitives rather than loaded from
+ * a model: this site ships no image or mesh bytes, and a recognisable gopher is
+ * mostly spheres anyway. It sits in a grid of server nodes, because this is the
+ * altitude where the CV says Go and Vapor on the server.
  */
 function buildServer(THREE, palette) {
   const group = new THREE.Group();
   group.position.y = STATIONS.server.groupY;
 
+  // --- the gopher ---------------------------------------------------------
+  const gopher = new THREE.Group();
+  // Out past the 6xl content column, in the page gutter, like the device above.
+  gopher.position.set(6.6, 1.2, 1.5);
+  gopher.scale.setScalar(0.78);
+
+  const skin = tag(
+    new THREE.MeshBasicMaterial({ color: palette.go, transparent: true, opacity: 0.38, wireframe: true }),
+    'go',
+  );
+  // Fixed, deliberately untagged: the gopher looks like the gopher in both
+  // themes. Tagging these as 'fg' turned the eyes black in light mode.
+  const white = new THREE.MeshBasicMaterial({ color: 0xf2f4f6 });
+  const dark = new THREE.MeshBasicMaterial({ color: 0x15181d });
+
+  const sphere = (r, seg = 18) => new THREE.SphereGeometry(r, seg, Math.max(8, seg / 2));
+
+  // Body: one tall rounded mass. The gopher is mostly torso.
+  const body = new THREE.Mesh(sphere(1.5, 24), skin);
+  body.scale.set(0.82, 1, 0.72);
+  gopher.add(body);
+
+  // Ears, small and high on the sides.
+  for (const side of [-1, 1]) {
+    const ear = new THREE.Mesh(sphere(0.3, 12), skin);
+    ear.position.set(side * 1.06, 1.12, 0);
+    ear.scale.set(1, 1, 0.5);
+    gopher.add(ear);
+  }
+
+  // Eyes: the feature that makes it read as the gopher and not a rodent.
+  // Each gets an outline ring, because near-white eyes on the light theme's
+  // near-white page are otherwise just two floating pupils.
+  const outlineMat = new THREE.LineBasicMaterial({ color: 0x15181d, transparent: true, opacity: 0.55 });
+  const ringPoints = (radius) =>
+    Array.from({ length: 41 }, (_, i) => {
+      const a = (i / 40) * Math.PI * 2;
+      return new THREE.Vector3(Math.cos(a) * radius, Math.sin(a) * radius, 0);
+    });
+
+  for (const side of [-1, 1]) {
+    const eye = new THREE.Mesh(sphere(0.42, 16), white);
+    eye.position.set(side * 0.44, 0.62, 0.92);
+    gopher.add(eye);
+
+    const outline = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(ringPoints(0.42)),
+      outlineMat,
+    );
+    outline.position.set(side * 0.44, 0.62, 1.24);
+    gopher.add(outline);
+
+    const pupil = new THREE.Mesh(sphere(0.19, 12), dark);
+    pupil.position.set(side * 0.3, 0.62, 1.22);
+    gopher.add(pupil);
+  }
+
+  // Snout and the two front teeth.
+  const snout = new THREE.Mesh(sphere(0.26, 14), white);
+  snout.position.set(0, 0.16, 1.06);
+  snout.scale.set(1.25, 0.8, 0.7);
+  gopher.add(snout);
+
+  for (const side of [-1, 1]) {
+    const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.2, 0.06), white);
+    tooth.position.set(side * 0.08, -0.1, 1.16);
+    gopher.add(tooth);
+  }
+
+  // Arms and feet.
+  for (const side of [-1, 1]) {
+    const arm = new THREE.Mesh(sphere(0.24, 12), skin);
+    arm.position.set(side * 1.2, -0.25, 0.3);
+    arm.scale.set(0.8, 1.5, 0.8);
+    gopher.add(arm);
+
+    const foot = new THREE.Mesh(sphere(0.3, 12), skin);
+    foot.position.set(side * 0.5, -1.5, 0.34);
+    foot.scale.set(1.1, 0.55, 1.35);
+    gopher.add(foot);
+  }
+
+  group.add(gopher);
+
+  // --- the rack it stands in ----------------------------------------------
   const count = GRID_COLS * GRID_COLS;
   const mesh = new THREE.InstancedMesh(
     new THREE.BoxGeometry(0.42, 0.42, 0.42),
@@ -192,8 +280,7 @@ function buildServer(THREE, palette) {
   mesh.instanceMatrix.needsUpdate = true;
   group.add(mesh);
 
-  // Traffic between nodes. Straight segments, because this is a network, not a
-  // decoration — the arcs belong to the cluster below.
+  // Traffic between nodes. Straight segments, because this is a network.
   const linePositions = [];
   for (let n = 0; n < 26; n++) {
     const a = Math.floor(Math.random() * count);
@@ -226,6 +313,10 @@ function buildServer(THREE, palette) {
     }
     mesh.instanceMatrix.needsUpdate = true;
     traffic.material.opacity = 0.2 + Math.sin(t * 2.2) * 0.09;
+
+    // The gopher looks around and bobs. Small amplitudes — it is background.
+    gopher.rotation.y = -0.35 + Math.sin(t * 0.4) * 0.35;
+    gopher.position.y = 1.2 + Math.sin(t * 1.1) * 0.12;
   };
 
   return group;
@@ -297,9 +388,51 @@ function buildCluster(THREE, palette) {
   });
 
   group.add(new THREE.Points(geometry, material));
+
+  // The helm. Kubernetes' mark is a seven-spoke ship's wheel, and seven is the
+  // whole joke, so the geometry is built from a heptagon rather than a circle.
+  const helm = new THREE.Group();
+  const SPOKES = 7;
+  const outer = 3.2;
+  const inner = 1.15;
+
+  const heptagon = (radius) =>
+    Array.from({ length: SPOKES + 1 }, (_, i) => {
+      const a = (i / SPOKES) * Math.PI * 2 + Math.PI / 2;
+      return new THREE.Vector3(Math.cos(a) * radius, Math.sin(a) * radius, 0);
+    });
+
+  const helmLine = tag(
+    new THREE.LineBasicMaterial({ color: palette.signal, transparent: true, opacity: 0.55 }),
+    'signal',
+  );
+
+  helm.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(heptagon(outer)), helmLine));
+  helm.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(heptagon(inner)), helmLine));
+
+  // Spokes out to each vertex, each capped with the handle the mark has.
+  const spokeEnds = [];
+  for (let i = 0; i < SPOKES; i++) {
+    const a = (i / SPOKES) * Math.PI * 2 + Math.PI / 2;
+    const dir = new THREE.Vector3(Math.cos(a), Math.sin(a), 0);
+    spokeEnds.push(dir.clone().multiplyScalar(inner), dir.clone().multiplyScalar(outer * 1.24));
+  }
+  helm.add(
+    new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(spokeEnds), helmLine),
+  );
+
+  // Out in the gutter and set back, like the gopher above: the project cards
+  // own the middle of this station.
+  helm.position.set(8.2, -2.6, -9);
+  helm.scale.setScalar(0.72);
+  group.add(helm);
+
+
   group.userData.tick = (t) => {
     material.uniforms.uTime.value = t;
     group.rotation.y = t * 0.035;
+    // A wheel at the helm turns slowly and steadily. Nothing dramatic.
+    helm.rotation.z = -t * 0.09;
   };
   group.userData.material = material;
 
