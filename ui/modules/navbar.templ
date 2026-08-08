@@ -7,7 +7,7 @@ templ Navbar(activePage string) {
 				<span class="grid h-9 w-9 place-items-center rounded-full bg-foreground text-sm text-background">FC</span>
 				<span class="hidden text-sm text-muted-foreground sm:inline">Software Studio</span>
 			</a>
-			<div class="hidden items-center gap-1 md:flex">
+			<div class="hidden items-center gap-1 lg:flex">
 				@navLink("/projects", "Projects", activePage == "projects")
 				@navLink("/about", "About", activePage == "about")
 				@navLink("/curriculum", "CV", activePage == "curriculum")
@@ -15,6 +15,7 @@ templ Navbar(activePage string) {
 				@navLink("/blog", "Blog", activePage == "blog")
 				@navLink("/bookmarks", "Garden", activePage == "bookmarks")
 				@navLink("/play", "Play", activePage == "play")
+				@navLink("/stats", "Live", activePage == "stats")
 				<div class="mx-2 h-5 w-px bg-border"></div>
 				<a href="https://github.com/FACorreiaa" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
 					@UIIcon("github", "h-4 w-4")
@@ -28,7 +29,7 @@ templ Navbar(activePage string) {
 					@UIIcon("arrow-right", "h-4 w-4")
 				</a>
 			</div>
-			<div class="flex items-center gap-2 md:hidden" x-data="{ open: false }">
+			<div class="flex items-center gap-2 lg:hidden" x-data="{ open: false }">
 				<button onclick="toggleTheme()" aria-label="Toggle theme" class="rounded-full p-2 hover:bg-accent">
 					@UIIcon("sun", "hidden h-4 w-4 dark:block")
 					@UIIcon("moon", "block h-4 w-4 dark:hidden")
@@ -77,6 +78,7 @@ templ Navbar(activePage string) {
 						@mobileNavLink("/blog", "Blog", activePage == "blog")
 						@mobileNavLink("/bookmarks", "Garden", activePage == "bookmarks")
 						@mobileNavLink("/play", "Play", activePage == "play")
+						@mobileNavLink("/stats", "Live", activePage == "stats")
 						<div class="mt-2 flex flex-col gap-2 border-t border-border pt-4">
 							<a href="/proposal" @click="open=false" class="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-4 py-2 text-center text-sm font-semibold text-background">
 								Request proposal

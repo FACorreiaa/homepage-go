@@ -16,13 +16,13 @@ templ Stats(stats service.StatsSnapshot) {
 		<div class="public-shell min-h-screen">
 			<section class="mx-auto max-w-6xl px-4 pt-24 md:pt-32">
 				<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">SITE TELEMETRY — LIVE</p>
-				<h1 class="section-title mt-6 max-w-3xl font-semibold">Who's here right now.</h1>
-				<p class="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">
+				<h1 class="hero-title mt-6 max-w-4xl font-semibold">Who's here right now.</h1>
+				<p class="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
 					Every dot is a real visit to this site in the last 24 hours, placed at city resolution.
 					No IP addresses are stored, no cookies are set, and nothing here goes to anyone else.
 				</p>
 			</section>
-			<section class="mx-auto max-w-6xl px-4 pt-12">
+			<section class="mx-auto max-w-6xl px-4 pt-14">
 				<div class="globe-stage" id="globe-stage" data-globe>
 					<p
 						id="globe-status"
@@ -31,71 +31,52 @@ templ Stats(stats service.StatsSnapshot) {
 						loading map…
 					</p>
 				</div>
-				<p class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-xs text-muted-foreground">
-					<span>drag to rotate · scroll to zoom</span>
-					<span>
+				<ul class="globe-legend">
+					<li>drag to rotate · scroll to zoom</li>
+					<li>
 						<span class="globe-legend-swatch" style="background: var(--signal)"></span>
 						here now
-					</span>
-					<span>
+					</li>
+					<li>
 						<span class="globe-legend-swatch" style="background: var(--trail)"></span>
 						last 24 hours
-					</span>
-					<span>the dark half of the map is the real night side</span>
-				</p>
+					</li>
+					<li>the dark half of the map is the real night side</li>
+				</ul>
 			</section>
-			<section class="mx-auto max-w-6xl px-4 pt-14">
-				<div class="ops-strip">
-					<div class="grid grid-cols-2 gap-x-8 px-4 md:grid-cols-4">
-						<div class="ops-metric">
-							<span class="ops-metric-label">VISITORS NOW</span>
-							<span class="ops-metric-value" data-live="true" data-metric="visitorsNow">{ fmt.Sprintf("%d", stats.VisitorsNow) }</span>
-						</div>
-						<div class="ops-metric">
-							<span class="ops-metric-label">VIEWS 24H</span>
-							<span class="ops-metric-value" data-metric="views24h">{ fmt.Sprintf("%d", stats.Views24h) }</span>
-						</div>
-						<div class="ops-metric">
-							<span class="ops-metric-label">VISITORS 24H</span>
-							<span class="ops-metric-value" data-metric="visitors24h">{ fmt.Sprintf("%d", stats.Visitors24h) }</span>
-						</div>
-						<div class="ops-metric">
-							<span class="ops-metric-label">COUNTRIES 24H</span>
-							<span class="ops-metric-value" data-metric="countries24h">{ fmt.Sprintf("%d", stats.Countries24h) }</span>
-						</div>
-					</div>
-				</div>
-			</section>
+			@statsOpsStrip(stats)
 			<section class="mx-auto max-w-6xl px-4 pt-16 pb-24 md:pb-32">
-				<div class="grid gap-12 md:grid-cols-2">
-					<div>
-						<h2 class="font-mono text-xs tracking-[0.18em] text-muted-foreground">WHERE FROM — LAST 24H</h2>
+				<div class="grid gap-6 md:grid-cols-2">
+					<div class="stat-panel" data-reveal>
+						<h2 class="stat-panel-title">WHERE FROM — LAST 24H</h2>
 						if len(stats.TopCountries) == 0 {
-							<p class="mt-6 text-base text-muted-foreground">Nobody yet today. You're the first.</p>
+							<p class="stat-panel-empty">Nobody yet today. You're the first.</p>
 						} else {
-							<ul class="mt-6 divide-y divide-border border-y border-border">
+							<ul class="stat-list">
 								for _, country := range stats.TopCountries {
-									<li class="flex items-center justify-between gap-4 py-3">
-										<span class="flex items-center gap-3">
+									<li class="stat-row">
+										@statRowBar(sharePct(country.Visits, maxCountryVisits(stats.TopCountries)))
+										<span class="stat-row-label">
 											<span aria-hidden="true">{ country.Flag }</span>
 											<span class="font-mono text-sm">{ country.Code }</span>
 										</span>
-										<span class="font-mono text-sm tabular-nums text-muted-foreground">{ fmt.Sprintf("%d", country.Visits) }</span>
+										<span class="stat-row-value">{ fmt.Sprintf("%d", country.Visits) }</span>
 									</li>
 								}
 							</ul>
 						}
 					</div>
-					<div>
-						<h2 class="font-mono text-xs tracking-[0.18em] text-muted-foreground">WHAT THEY READ — LAST 24H</h2>
+					<div class="stat-panel" data-reveal>
+						<h2 class="stat-panel-title">WHAT THEY READ — LAST 24H</h2>
 						if len(stats.TopPaths) == 0 {
-							<p class="mt-6 text-base text-muted-foreground">No page views recorded in the window.</p>
+							<p class="stat-panel-empty">No page views recorded in the window.</p>
 						} else {
-							<ul class="mt-6 divide-y divide-border border-y border-border">
+							<ul class="stat-list">
 								for _, path := range stats.TopPaths {
-									<li class="flex items-center justify-between gap-4 py-3">
-										<a href={ templ.SafeURL(path.Path) } class="truncate font-mono text-sm underline underline-offset-4 transition-colors hover:text-muted-foreground">{ path.Path }</a>
-										<span class="font-mono text-sm tabular-nums text-muted-foreground">{ fmt.Sprintf("%d", path.Visits) }</span>
+									<li class="stat-row">
+										@statRowBar(sharePct(path.Visits, maxPathVisits(stats.TopPaths)))
+										<a href={ templ.SafeURL(path.Path) } class="stat-row-label truncate font-mono text-sm underline underline-offset-4 transition-colors hover:text-muted-foreground">{ path.Path }</a>
+										<span class="stat-row-value">{ fmt.Sprintf("%d", path.Visits) }</span>
 									</li>
 								}
 							</ul>
@@ -112,4 +93,65 @@ templ Stats(stats service.StatsSnapshot) {
 		@templ.Raw(`<script type="importmap">{"imports":{"three":"/assets/static/vendor/three/three.module.min.js","three/webgpu":"/assets/static/vendor/three/webgpu-stub.js","three/examples/jsm/":"/assets/static/vendor/three/addons/"}}</script>`)
 		<script type="module" src="/assets/static/globe.js"></script>
 	}
+}
+
+// statsOpsStrip mirrors the landing page's strip. It owns its own container
+// because .ops-strip is the one element on the site that breaks the page
+// gutter — nesting it inside a max-w section double-pads it and misaligns it.
+templ statsOpsStrip(stats service.StatsSnapshot) {
+	<section class="ops-strip mt-14" aria-label="Live site telemetry" data-reveal>
+		<div class="mx-auto grid max-w-6xl grid-cols-2 gap-x-8 px-4 md:grid-cols-4">
+			<div class="ops-metric">
+				<span class="ops-metric-label">VISITORS NOW</span>
+				<span class="ops-metric-value" data-live="true" data-metric="visitorsNow">{ fmt.Sprintf("%d", stats.VisitorsNow) }</span>
+			</div>
+			<div class="ops-metric">
+				<span class="ops-metric-label">VIEWS 24H</span>
+				<span class="ops-metric-value" data-metric="views24h">{ fmt.Sprintf("%d", stats.Views24h) }</span>
+			</div>
+			<div class="ops-metric">
+				<span class="ops-metric-label">VISITORS 24H</span>
+				<span class="ops-metric-value" data-metric="visitors24h">{ fmt.Sprintf("%d", stats.Visitors24h) }</span>
+			</div>
+			<div class="ops-metric">
+				<span class="ops-metric-label">COUNTRIES 24H</span>
+				<span class="ops-metric-value" data-metric="countries24h">{ fmt.Sprintf("%d", stats.Countries24h) }</span>
+			</div>
+		</div>
+	</section>
+}
+
+// statRowBar is raw markup because templ sanitises dynamic style attributes.
+// pct is produced by sharePct, which only ever emits an integer 0-100.
+func statRowBar(pct int) templ.Component {
+	return templ.Raw(fmt.Sprintf(`<span class="stat-row-bar" style="width:%d%%" aria-hidden="true"></span>`, pct))
+}
+
+// sharePct sizes a row's bar against the biggest row in its own list, so a
+// quiet day still reads as a chart rather than four near-empty slivers.
+func sharePct(visits, highest int) int {
+	if highest <= 0 || visits <= 0 {
+		return 0
+	}
+	pct := visits * 100 / highest
+	if pct > 100 {
+		return 100
+	}
+	return pct
+}
+
+func maxCountryVisits(rows []service.CountryCount) int {
+	highest := 0
+	for _, r := range rows {
+		highest = max(highest, r.Visits)
+	}
+	return highest
+}
+
+func maxPathVisits(rows []service.PathCount) int {
+	highest := 0
+	for _, r := range rows {
+		highest = max(highest, r.Visits)
+	}
+	return highest
 }

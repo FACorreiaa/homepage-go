@@ -463,6 +463,10 @@
   .globe-stage {
     position: relative;
     width: 100%;
+    /* The sphere renders centred and square. Left at the full 6xl gutter the
+       canvas spans far wider than the earth, leaving dead flanks on desktop. */
+    max-width: 56rem;
+    margin-inline: auto;
     height: clamp(24rem, 68vh, 46rem);
     overflow: hidden;
     border: 1px solid var(--border);
@@ -478,12 +482,97 @@
     touch-action: pan-y;
   }
 
+  .globe-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    max-width: 56rem;
+    margin: 1rem auto 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  .globe-legend > li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Alignment is the flex parent's job. vertical-align would be inert here. */
   .globe-legend-swatch {
-    display: inline-block;
+    flex: none;
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 9999px;
-    vertical-align: baseline;
+  }
+
+  /* Stat panels — the two data lists get the same card treatment as the globe
+     above them, so the page reads as three blocks rather than three systems. */
+  .stat-panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    background: color-mix(in oklab, var(--card) 72%, transparent);
+  }
+
+  .stat-panel > .stat-panel-title {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    color: var(--muted-foreground);
+  }
+
+  .stat-panel > .stat-panel-empty {
+    margin-top: 1.5rem;
+    font-size: 0.9375rem;
+    color: var(--muted-foreground);
+  }
+
+  .stat-list {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  /* Each row is its own bar chart: the fill sits behind the text rather than
+     beside it, so the list stays a list and still shows proportion. */
+  .stat-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    overflow: hidden;
+    border-radius: calc(var(--radius) - 0.25rem);
+    padding: 0.625rem 0.75rem;
+  }
+
+  .stat-row-bar {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    z-index: 0;
+    background: color-mix(in oklab, var(--trail) 22%, transparent);
+  }
+
+  .stat-row-label,
+  .stat-row-value {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .stat-row-value {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
   }
 }
 
