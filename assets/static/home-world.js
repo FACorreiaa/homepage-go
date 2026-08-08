@@ -1,19 +1,39 @@
 // The landing page's 3D world.
 //
 // Scrolling descends the stack the hero copy describes — device, server,
-// cluster, horizon — as one camera move through a single scene. Each DOM
-// section is a station; ScrollTrigger scrubs the camera between them.
+// cluster, horizon — as one camera move down a single scene. Each DOM section
+// is a station; ScrollTrigger scrubs the camera between them.
 //
 // Progressive enhancement, and aggressively so. The server-rendered page is the
 // real landing page: it converts, it is what a crawler reads, and it is what
-// most visitors get. This file is decoration that has to earn its 850KB, so it
+// most visitors get. This file is decoration that has to earn its bytes, so it
 // declines to load itself whenever that trade looks bad — see shouldRun below.
 //
 // Nothing here may change layout. The canvas is fixed, behind the content, and
 // aria-hidden; if every line of this file failed the page would be unchanged
-// apart from a flat background.
+// apart from a flat background. Everything is procedural — no textures, no
+// models, no image bytes at all.
 
 const stage = document.querySelector('[data-world]');
+
+// Where each station sits on the camera's descent, and how the camera frames it.
+// The stations stack down -Y in the order the copy introduces them. Each one
+// carries its own camera height and aim rather than sharing a single tilt: a
+// grid seen from its own altitude is edge-on and reads as nothing, while the
+// device wants to be looked at almost level.
+//
+//   groupY — where the geometry lives
+//   camY/camZ — where the camera sits at that station
+//   lookY — the height the camera aims at, which is what sets the tilt
+const STATIONS = {
+  device: { groupY: 0, camY: 0, camZ: 9, lookY: -1 },
+  server: { groupY: -34, camY: -28, camZ: 12, lookY: -37 },
+  cluster: { groupY: -76, camY: -76, camZ: 11, lookY: -79 },
+  horizon: { groupY: -122, camY: -114, camZ: 16, lookY: -131 },
+};
+
+const GRID_COLS = 20; // 400 instanced nodes
+const POD_COUNT = 8000;
 
 /**
  * Whether the scene is worth loading at all. Four ways to say no, and the page
@@ -45,25 +65,343 @@ function whenIdle(fn) {
 }
 
 /**
- * Smooth scrolling. Deliberately separate from the WebGL scene: Lenis is 18KB
+ * Smooth scrolling. Deliberately independent of the WebGL scene: Lenis is 18KB
  * and improves the page on its own, so it runs even if three.js never loads.
- * Kept off touch, where the platform's own scrolling is better than ours.
+ * Touch is left alone — the platform's own scrolling is better than ours.
  */
 function startLenis() {
   if (typeof Lenis !== 'function') return null;
 
-  const lenis = new Lenis({ autoRaf: true });
+  const hasGsap = typeof gsap === 'object' && typeof ScrollTrigger === 'function';
+
+  // With GSAP present, Lenis is driven from the gsap ticker instead of its own
+  // rAF. One clock for scroll, tweens and rendering keeps the camera from
+  // lagging the text by a frame.
+  const lenis = new Lenis({ autoRaf: !hasGsap });
+  if (hasGsap) {
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
   // The scroll-to-top button in the layout looks for this.
   window.__lenis = lenis;
   return lenis;
 }
 
+/** Reads the site's design tokens. They are oklch(), so the browser resolves them. */
+function readPalette(tokenColor) {
+  return {
+    fg: tokenColor('--foreground', '#111111'),
+    signal: tokenColor('--signal', '#22c55e'),
+    trail: tokenColor('--trail', '#d99a2b'),
+  };
+}
+
 /**
- * Builds the scene. Imported lazily so three.js is never on the critical path —
- * the hero has painted long before this runs.
+ * Marks which design token a material is painted from, so the theme toggle can
+ * repaint the scene by walking it rather than by remembering child indices.
+ */
+function tag(material, role) {
+  material.userData.role = role;
+  return material;
+}
+
+/**
+ * Station one — the device. A single slab alone in the void, ringed by an
+ * orbit. The whole stack starts as one object on someone's desk.
+ */
+function buildDevice(THREE, palette) {
+  const group = new THREE.Group();
+  // Offset right: the hero headline owns the left half of the viewport, so the
+  // one discrete object in the scene sits in the space the text leaves.
+  group.position.set(4.6, STATIONS.device.groupY - 0.6, 0);
+
+  const slab = new THREE.Mesh(
+    new THREE.BoxGeometry(1.15, 2.3, 0.1),
+    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.14 }), 'fg'),
+  );
+  group.add(slab);
+
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(slab.geometry),
+    tag(new THREE.LineBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.85 }), 'fg'),
+  );
+  group.add(edges);
+
+  // A screen, lit. This is the only emissive thing at this altitude.
+  const screen = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.92, 2.0),
+    tag(new THREE.MeshBasicMaterial({ color: palette.signal, transparent: true, opacity: 0.1 }), 'signal'),
+  );
+  screen.position.z = 0.055;
+  group.add(screen);
+
+  // The orbit ring reads as latitude — this thing is somewhere real.
+  const ring = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(
+      Array.from({ length: 97 }, (_, i) => {
+        const a = (i / 96) * Math.PI * 2;
+        return new THREE.Vector3(Math.cos(a) * 2.5, 0, Math.sin(a) * 2.5);
+      }),
+    ),
+    tag(new THREE.LineBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.28 }), 'fg'),
+  );
+  ring.rotation.x = 0.42;
+  group.add(ring);
+
+  group.userData.tick = (t) => {
+    group.rotation.y = Math.sin(t * 0.25) * 0.35;
+    ring.rotation.z = t * 0.06;
+    screen.material.opacity = 0.08 + Math.sin(t * 1.6) * 0.03;
+  };
+
+  return group;
+}
+
+/**
+ * Station two — the server. Pull back and the slab is one node in a grid. Rows
+ * breathe on a slow wave so the grid reads as running, not as wallpaper.
+ */
+function buildServer(THREE, palette) {
+  const group = new THREE.Group();
+  group.position.y = STATIONS.server.groupY;
+
+  const count = GRID_COLS * GRID_COLS;
+  const mesh = new THREE.InstancedMesh(
+    new THREE.BoxGeometry(0.42, 0.42, 0.42),
+    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.16, wireframe: true }), 'fg'),
+    count,
+  );
+
+  const dummy = new THREE.Object3D();
+  const offsets = new Float32Array(count);
+  let i = 0;
+  for (let x = 0; x < GRID_COLS; x++) {
+    for (let z = 0; z < GRID_COLS; z++) {
+      const px = (x - GRID_COLS / 2) * 1.15;
+      const pz = (z - GRID_COLS / 2) * 1.15;
+      dummy.position.set(px, 0, pz);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+      // Phase by distance from centre so the wave travels outward.
+      offsets[i] = Math.hypot(px, pz) * 0.22;
+      i++;
+    }
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+  group.add(mesh);
+
+  // Traffic between nodes. Straight segments, because this is a network, not a
+  // decoration — the arcs belong to the cluster below.
+  const linePositions = [];
+  for (let n = 0; n < 26; n++) {
+    const a = Math.floor(Math.random() * count);
+    const b = Math.floor(Math.random() * count);
+    const ax = ((a / GRID_COLS | 0) - GRID_COLS / 2) * 1.15;
+    const az = ((a % GRID_COLS) - GRID_COLS / 2) * 1.15;
+    const bx = ((b / GRID_COLS | 0) - GRID_COLS / 2) * 1.15;
+    const bz = ((b % GRID_COLS) - GRID_COLS / 2) * 1.15;
+    linePositions.push(ax, 0.3, az, bx, 0.3, bz);
+  }
+  const traffic = new THREE.LineSegments(
+    new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3)),
+    tag(new THREE.LineBasicMaterial({ color: palette.signal, transparent: true, opacity: 0.3 }), 'signal'),
+  );
+  group.add(traffic);
+
+  const dummyTick = new THREE.Object3D();
+  group.userData.tick = (t) => {
+    let k = 0;
+    for (let x = 0; x < GRID_COLS; x++) {
+      for (let z = 0; z < GRID_COLS; z++) {
+        const px = (x - GRID_COLS / 2) * 1.15;
+        const pz = (z - GRID_COLS / 2) * 1.15;
+        dummyTick.position.set(px, Math.sin(t * 0.9 - offsets[k]) * 0.22, pz);
+        dummyTick.rotation.y = t * 0.08;
+        dummyTick.updateMatrix();
+        mesh.setMatrixAt(k, dummyTick.matrix);
+        k++;
+      }
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+    traffic.material.opacity = 0.2 + Math.sin(t * 2.2) * 0.09;
+  };
+
+  return group;
+}
+
+/**
+ * Station three — the cluster. Drop through the grid into the pods themselves:
+ * a field of points, too many to count, which is the point.
+ */
+function buildCluster(THREE, palette) {
+  const group = new THREE.Group();
+  group.position.y = STATIONS.cluster.groupY;
+
+  const positions = new Float32Array(POD_COUNT * 3);
+  const seeds = new Float32Array(POD_COUNT);
+  for (let i = 0; i < POD_COUNT; i++) {
+    // Cylindrical shell, so the camera falls through the middle of it.
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 4 + Math.random() * 13;
+    positions[i * 3] = Math.cos(angle) * radius;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 34;
+    positions[i * 3 + 2] = Math.sin(angle) * radius;
+    seeds[i] = Math.random();
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('aSeed', new THREE.Float32BufferAttribute(seeds, 1));
+
+  // Additive so density reads as brightness — a thick part of the field glows
+  // without needing a bloom pass, which would double the frame cost.
+  const material = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    uniforms: {
+      uTime: { value: 0 },
+      uCold: { value: palette.trail },
+      uHot: { value: palette.signal },
+      uScale: { value: 300 },
+    },
+    vertexShader: `
+      attribute float aSeed;
+      uniform float uTime;
+      uniform float uScale;
+      varying float vHeat;
+      void main() {
+        vec3 p = position;
+        p.y += sin(uTime * 0.5 + aSeed * 12.0) * 0.5;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        // A pod is "hot" in bursts, so the field flickers like real traffic.
+        vHeat = smoothstep(0.72, 1.0, fract(aSeed * 7.3 + uTime * 0.12));
+        gl_PointSize = (0.012 + vHeat * 0.02) * uScale / max(-mv.z, 0.001);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uCold;
+      uniform vec3 uHot;
+      varying float vHeat;
+      void main() {
+        // Round the square point sprite off.
+        float d = length(gl_PointCoord - vec2(0.5));
+        if (d > 0.5) discard;
+        float core = smoothstep(0.5, 0.0, d);
+        gl_FragColor = vec4(mix(uCold, uHot, vHeat), core * (0.25 + vHeat * 0.6));
+      }
+    `,
+  });
+
+  group.add(new THREE.Points(geometry, material));
+  group.userData.tick = (t) => {
+    material.uniforms.uTime.value = t;
+    group.rotation.y = t * 0.035;
+  };
+  group.userData.material = material;
+
+  return group;
+}
+
+/**
+ * Station four — the horizon. Everything recedes to a ground plane and a line.
+ * The scene goes quiet where the page asks for a decision.
+ */
+function buildHorizon(THREE, palette) {
+  const group = new THREE.Group();
+  group.position.y = STATIONS.horizon.groupY;
+
+  const grid = new THREE.GridHelper(120, 60, palette.fg, palette.fg);
+  grid.material.transparent = true;
+  grid.material.opacity = 0.14;
+  tag(grid.material, 'fg');
+  grid.position.y = -6;
+  group.add(grid);
+
+  const horizon = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-60, -6, -60),
+      new THREE.Vector3(60, -6, -60),
+    ]),
+    tag(new THREE.LineBasicMaterial({ color: palette.signal, transparent: true, opacity: 0.5 }), 'signal'),
+  );
+  group.add(horizon);
+
+  group.userData.tick = (t) => {
+    // The grid drifts toward the viewer, one cell per cycle, so the ground
+    // reads as moving without the camera having to.
+    grid.position.z = (t * 0.6) % 2;
+    horizon.material.opacity = 0.35 + Math.sin(t * 0.8) * 0.15;
+  };
+
+  return group;
+}
+
+/**
+ * Scrubs the camera down the stations. One timeline over the whole document:
+ * each station's DOM section owns a slice of it, so the camera and the text
+ * arrive together however long the sections turn out to be.
+ */
+function wireScrollTriggers(gsap, ScrollTrigger, camera, focus) {
+  const order = ['device', 'server', 'cluster', 'horizon'];
+  const sections = order
+    .map((name) => ({ name, el: document.querySelector(`[data-world-station="${name}"]`) }))
+    .filter((s) => s.el);
+
+  if (sections.length < 2) return;
+
+  const timeline = gsap.timeline({
+    scrollTrigger: {
+      trigger: document.body,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1.1, // Lags the scroll slightly; the camera has weight.
+      invalidateOnRefresh: true,
+    },
+  });
+
+  // Proportional segments, so a longer section is a longer part of the descent.
+  const tops = sections.map((s) => s.el.offsetTop);
+  const span = Math.max(1, tops[tops.length - 1] - tops[0]);
+
+  for (let i = 1; i < sections.length; i++) {
+    const from = STATIONS[sections[i - 1].name];
+    const target = STATIONS[sections[i].name];
+    const share = (tops[i] - tops[i - 1]) / span;
+    const at = i === 1 ? 0 : '>';
+
+    // fromTo, not to: a bare .to() infers its start from wherever the camera
+    // happens to be when the segment first renders, which makes the descent
+    // depend on history — seek backwards and it starts from the wrong station.
+    // Naming both ends makes the path total and reversible.
+    timeline.fromTo(
+      camera.position,
+      { y: from.camY, z: from.camZ },
+      { y: target.camY, z: target.camZ, duration: share, ease: 'none' },
+      at,
+    );
+    // Same slot, so the aim arrives with the position rather than trailing it.
+    timeline.fromTo(
+      focus,
+      { y: from.lookY },
+      { y: target.lookY, duration: share, ease: 'none' },
+      '<',
+    );
+  }
+
+  return timeline;
+}
+
+/**
+ * Builds the scene. three.js is imported lazily so 720KB never touches the
+ * critical path — the hero has painted long before this runs.
  */
 async function startWorld() {
   const THREE = await import('three');
+  const { tokenColor } = await import('./three-utils.js');
 
   const canvas = document.createElement('canvas');
   canvas.className = 'world-canvas';
@@ -80,9 +418,27 @@ async function startWorld() {
   renderer.setClearColor(0x000000, 0);
   stage.appendChild(canvas);
 
+  // Claim the page background only now that there is definitely a scene to put
+  // there. .public-shell paints a gradient that ends in an opaque --background,
+  // which would otherwise cover the canvas everywhere below the fold. Every
+  // bail-out above this line leaves that gradient exactly as it is.
+  document.documentElement.classList.add('world-on');
+
+  let palette = readPalette(tokenColor);
+
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
-  camera.position.set(0, 0, 8);
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 300);
+  camera.position.set(0, STATIONS.device.camY, STATIONS.device.camZ);
+  // Tweened alongside the camera so the tilt changes between stations too.
+  const focus = new THREE.Vector3(0, STATIONS.device.lookY, 0);
+
+  const groups = [
+    buildDevice(THREE, palette),
+    buildServer(THREE, palette),
+    buildCluster(THREE, palette),
+    buildHorizon(THREE, palette),
+  ];
+  groups.forEach((g) => scene.add(g));
 
   function resize() {
     const w = window.innerWidth;
@@ -91,18 +447,56 @@ async function startWorld() {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
+    // Point size is given in world units and projected here, so the pods stay
+    // the same physical size across viewport and DPR changes.
+    const cluster = groups[2];
+    cluster.userData.material.uniforms.uScale.value =
+      renderer.domElement.height / (2 * Math.tan((camera.fov * Math.PI) / 360));
   }
   resize();
   window.addEventListener('resize', resize, { passive: true });
 
-  // Nothing is in the scene yet — this draws a transparent frame. The scaffold
-  // ships before the geometry so the bail-outs can be verified in isolation.
+  const clock = new THREE.Clock();
   function render() {
+    if (document.hidden) return;
+    const t = clock.getElapsedTime();
+    for (const g of groups) g.userData.tick?.(t);
+    camera.lookAt(focus);
     renderer.render(scene, camera);
   }
-  render();
 
-  window.__world = { THREE, renderer, scene, camera, render };
+  if (typeof gsap === 'object' && typeof ScrollTrigger === 'function') {
+    wireScrollTriggers(gsap, ScrollTrigger, camera, focus);
+    gsap.ticker.add(render);
+  } else {
+    // No GSAP: no camera move, but the scene still breathes.
+    renderer.setAnimationLoop(render);
+  }
+
+  // The theme toggle swaps every token underneath us. Re-resolve rather than
+  // keeping a second copy of the palette in JS, which would drift from
+  // input.css the first time a colour changes there.
+  const themeObserver = new MutationObserver(() => {
+    palette = readPalette(tokenColor);
+    applyPalette(scene, groups, palette);
+  });
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+  window.__world = { THREE, renderer, scene, camera, groups, render };
+}
+
+/** Repaints existing materials from a freshly resolved palette, by role. */
+function applyPalette(scene, groups, palette) {
+  scene.traverse((object) => {
+    const role = object.material?.userData?.role;
+    if (role && palette[role]) object.material.color.set(palette[role]);
+  });
+
+  // The pod field is a shader, so its colours are uniforms rather than a
+  // material colour and the traversal above cannot reach them.
+  const uniforms = groups[2].userData.material.uniforms;
+  uniforms.uCold.value = palette.trail;
+  uniforms.uHot.value = palette.signal;
 }
 
 function boot() {

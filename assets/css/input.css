@@ -529,6 +529,24 @@
     z-index: 1;
   }
 
+  /* .public-shell's gradient resolves to an opaque --background below the fold,
+     which would hide the canvas completely. Stand it down — but only once
+     home-world.js has confirmed a scene is actually running, so every bail-out
+     keeps the normal page background rather than a flat void. */
+  .world-on .world-shell,
+  .world-on .world-shell::before {
+    background: none;
+  }
+
+  /* The stage is a positioned element, so it paints above the backgrounds of
+     everything that is not positioned — the footer included, where the scene
+     bled straight over an opaque panel. Lifting the footer into its own
+     stacking context puts it back on top of the canvas. */
+  .world-on footer {
+    position: relative;
+    z-index: 1;
+  }
+
   /* Stat panels — the two data lists get the same card treatment as the globe
      above them, so the page reads as three blocks rather than three systems. */
   .stat-panel {
