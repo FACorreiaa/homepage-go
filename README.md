@@ -12,7 +12,34 @@ task dev
 
 Open `http://localhost:7331` for templ live preview or `http://localhost:8090` for the app.
 
-## VPS Deployment
+## Deployment
+
+Production runs on k3s, reconciled by ArgoCD from
+[`LuminaVault/LuminaVaultInfra`](https://github.com/LuminaVault/LuminaVaultInfra).
+Merging to `main` is the whole deploy: CI builds the image, pushes it to GHCR,
+and commits the new tag into the infra repo.
+
+**See [`docs/deployment.md`](docs/deployment.md)** for deploying a code change,
+adding env vars and secrets, changing resources, rolling back, and
+troubleshooting.
+
+---
+
+# Legacy — decommissioned VPS setup
+
+> [!WARNING]
+> **Everything below this line is history, kept for reference only.**
+>
+> The single-VPS Docker Compose deployment was retired in `173c83a` when
+> production moved to k3s + ArgoCD. There is no VPS to SSH into, the SSH deploy
+> workflow is gone, and the `Caddyfile` is no longer read by anything — Traefik
+> terminates TLS and applies the security headers now.
+>
+> `docker compose` is still useful for running the full stack locally. The
+> `scripts/` referenced below and the vault-sync systemd units in `deploy/` are
+> not part of the current deployment path.
+
+## VPS Deployment (legacy)
 
 ### 1) Clone on VPS
 
@@ -82,7 +109,7 @@ docker compose ps
 `studio_data` is the persistent Docker volume used for SQLite and blog stats. You
 do not need a host folder at `/var/lib/facorreia-site`.
 
-## Production
+## Production (legacy)
 
 The production compose file runs the Go app on port `8090`, stores SQLite and
 blog analytics in a named Docker volume, and mounts the vault read-only.
@@ -133,7 +160,7 @@ journalctl -u facorreia-vault-sync -n 50 --no-pager
 find /opt/facorreia-site-go/vault/raw -type f -name '*.md' | wc -l
 ```
 
-## Simple Personal-Site Infra
+## Simple Personal-Site Infra (legacy)
 
 Keep the production setup intentionally small:
 
@@ -153,7 +180,7 @@ Set `BACKUP_DIR=/path/to/backups` to write outside the repo. Schedule that
 script with cron or a systemd timer on the VPS. For this site, that is enough
 operational machinery unless traffic or lead volume changes materially.
 
-## Cutover Checks
+## Cutover Checks (legacy)
 
 Validate a copied Swift SQLite database before switching traffic:
 
