@@ -80,9 +80,14 @@ function sunDirection(date) {
 }
 
 async function loadLandPoints() {
-  const image = new Image();
-  image.src = MASK_URL;
-  await image.decode();
+  // Decoded via createImageBitmap rather than an Image element. HTMLImageElement
+  // .decode() never settles for this mask when the element is not in the
+  // document — not a rejection, a hang — which stalled the whole globe behind a
+  // permanent "loading map…" with no error anywhere. createImageBitmap decodes
+  // off the main thread and, crucially, actually rejects when it fails.
+  const response = await fetch(MASK_URL);
+  if (!response.ok) throw new Error(`land mask ${response.status}`);
+  const image = await createImageBitmap(await response.blob());
 
   const canvas = document.createElement('canvas');
   canvas.width = image.width;
@@ -90,6 +95,7 @@ async function loadLandPoints() {
 
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(image, 0, 0);
+  image.close();
   const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
   const positions = [];

@@ -203,6 +203,19 @@ func setupAssets(mux *http.ServeMux) {
 	isProd := goEnv == "" || goEnv == "production"
 	isDev := !isProd
 
+	var files http.Handler
+	if isDev {
+		// Read from disk so the Tailwind watcher's output is picked up live.
+		files = http.FileServer(http.Dir("./assets"))
+	} else {
+		files = http.FileServer(http.FS(assets.Assets))
+	}
+
+	// The cache header is chosen before StripPrefix runs, so the allowlist can
+	// be written as the URLs a browser actually requests. Matching after the
+	// strip would silently never fire: r.URL.Path is "css/output.css" by then,
+	// and every asset would fall through to immutable — including the three
+	// that must stay revalidated because they change without changing name.
 	assetHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isDev {
 			w.Header().Set("Cache-Control", "no-store")
@@ -214,14 +227,8 @@ func setupAssets(mux *http.ServeMux) {
 				w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 			}
 		}
-		var h http.Handler
-		if isDev {
-			h = http.FileServer(http.Dir("./assets"))
-		} else {
-			h = http.FileServer(http.FS(assets.Assets))
-		}
-		h.ServeHTTP(w, r)
+		http.StripPrefix("/assets/", files).ServeHTTP(w, r)
 	})
-	mux.Handle("GET /assets/", http.StripPrefix("/assets/", assetHandler))
+	mux.Handle("GET /assets/", assetHandler)
 	utils.SetupScriptRoutes(mux, isDev)
 }
