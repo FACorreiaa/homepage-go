@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"myapp/assets"
 	"myapp/internal/handler"
 
 	"github.com/stretchr/testify/assert"
@@ -91,6 +92,8 @@ func TestHomeWorldScaffold(t *testing.T) {
 	assert.Less(t, gsap, scrollTrigger, "gsap must be ordered before ScrollTrigger")
 
 	assert.Contains(t, body, "vendor/lenis/lenis.min.js")
+	// The gopher module pulls in the GLB and GLTFLoader at runtime, so the page
+	// only has to carry the module itself.
 
 	// Fingerprinted, so match the path and assert the cache buster separately.
 	assert.Regexp(t, `<script type="module" src="/assets/static/home-world\.js\?v=[0-9a-f]{10}">`, body)
@@ -121,4 +124,18 @@ func TestHomeRendersWithoutScripts(t *testing.T) {
 	assert.Contains(t, withoutScripts, "One engineer, the whole stack, in production.")
 	assert.Contains(t, withoutScripts, `href="/proposal"`)
 	assert.Contains(t, withoutScripts, "project-showcase-card")
+}
+
+// The gopher mesh and its loader are the largest things the landing page pulls
+// in, and they are exactly the kind of asset that gets pinned by accident. Only
+// vendored libraries and fonts may be immutable; the model is neither.
+func TestGopherAssetsAreNotPinned(t *testing.T) {
+	for _, path := range []string{
+		"/assets/static/models/gopher.glb",
+		"/assets/static/gopher.js",
+	} {
+		assert.False(t, assets.IsImmutable(path), "%s must revalidate", path)
+	}
+	// The loader is version-pinned in its path, so it may be cached forever.
+	assert.True(t, assets.IsImmutable("/assets/static/vendor/three/addons/loaders/GLTFLoader.js"))
 }

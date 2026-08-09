@@ -16,6 +16,8 @@ external origin is blocked outright.
 | GSAP | 3.15.0 | `cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js` | `window.gsap` |
 | ScrollTrigger | 3.15.0 | `cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js` | `window.ScrollTrigger` |
 | Lenis | 1.3.26 | `cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js` | `globalThis.Lenis` |
+| GLTFLoader | three 0.180.0 | `unpkg.com/three@0.180.0/examples/jsm/loaders/GLTFLoader.js` | ES module |
+| BufferGeometryUtils | three 0.180.0 | `unpkg.com/three@0.180.0/examples/jsm/utils/BufferGeometryUtils.js` | ES module |
 | Alpine | *(see file)* | — | `window.Alpine` |
 | htmx | *(see file)* | — | `window.htmx` |
 
@@ -29,5 +31,13 @@ external origin is blocked outright.
   full notice is in the `@license` banner at the top of each minified file. That
   banner is why these files are not re-minified or stripped.
 - Lenis is MIT; `lenis/LICENSE` is the upstream file.
+- **GLTFLoader must match the vendored three revision (r180).** A loader from a
+  different release will fail on symbols three no longer exports. It also is not
+  self-contained: it imports `toTrianglesDrawMode` from
+  `addons/utils/BufferGeometryUtils.js`, so that file is vendored alongside it
+  or the module fails to load with a bare "failed to fetch" and no further clue.
+- three's `examples/jsm` ships unminified, so these two are 112KB and 35KB
+  rather than the ~50KB a minified loader would be. That matches the other
+  addons already here (OrbitControls and friends), so they are left as shipped.
 - The `//# sourceMappingURL` comment was removed from `lenis.min.js`. The `.map`
   file is not vendored, so leaving it would 404 in devtools on every page load.

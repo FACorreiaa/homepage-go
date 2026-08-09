@@ -112,31 +112,11 @@ function tag(material, role) {
  * Station one — the device. A single slab alone in the void, ringed by an
  * orbit. The whole stack starts as one object on someone's desk.
  */
-function buildDevice(THREE, palette) {
+function buildDevice(THREE, palette, character) {
   const group = new THREE.Group();
   // Offset right: the hero headline owns the left half of the viewport, so the
   // one discrete object in the scene sits in the space the text leaves.
   group.position.set(4.6, STATIONS.device.groupY - 0.6, 0);
-
-  const slab = new THREE.Mesh(
-    new THREE.BoxGeometry(1.15, 2.3, 0.1),
-    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.14 }), 'fg'),
-  );
-  group.add(slab);
-
-  const edges = new THREE.LineSegments(
-    new THREE.EdgesGeometry(slab.geometry),
-    tag(new THREE.LineBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.85 }), 'fg'),
-  );
-  group.add(edges);
-
-  // A screen, lit. This is the only emissive thing at this altitude.
-  const screen = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.92, 2.0),
-    tag(new THREE.MeshBasicMaterial({ color: palette.signal, transparent: true, opacity: 0.1 }), 'signal'),
-  );
-  screen.position.z = 0.055;
-  group.add(screen);
 
   // The orbit ring reads as latitude — this thing is somewhere real.
   const ring = new THREE.Line(
@@ -151,10 +131,16 @@ function buildDevice(THREE, palette) {
   ring.rotation.x = 0.42;
   group.add(ring);
 
+  // The coder sits inside the ring, at the desk.
+  if (character) {
+    character.position.set(0.2, -1.9, 1.2);
+    group.add(character);
+  }
+
   group.userData.tick = (t) => {
-    group.rotation.y = Math.sin(t * 0.25) * 0.35;
+    group.rotation.y = Math.sin(t * 0.25) * 0.18;
     ring.rotation.z = t * 0.06;
-    screen.material.opacity = 0.08 + Math.sin(t * 1.6) * 0.03;
+    character?.userData.tick?.(t);
   };
 
   return group;
@@ -166,93 +152,16 @@ function buildDevice(THREE, palette) {
  * mostly spheres anyway. It sits in a grid of server nodes, because this is the
  * altitude where the CV says Go and Vapor on the server.
  */
-function buildServer(THREE, palette) {
+function buildServer(THREE, palette, character) {
   const group = new THREE.Group();
   group.position.y = STATIONS.server.groupY;
 
-  // --- the gopher ---------------------------------------------------------
-  const gopher = new THREE.Group();
-  // Out past the 6xl content column, in the page gutter, like the device above.
-  gopher.position.set(6.6, 1.2, 1.5);
-  gopher.scale.setScalar(0.78);
-
-  const skin = tag(
-    new THREE.MeshBasicMaterial({ color: palette.go, transparent: true, opacity: 0.38, wireframe: true }),
-    'go',
-  );
-  // Fixed, deliberately untagged: the gopher looks like the gopher in both
-  // themes. Tagging these as 'fg' turned the eyes black in light mode.
-  const white = new THREE.MeshBasicMaterial({ color: 0xf2f4f6 });
-  const dark = new THREE.MeshBasicMaterial({ color: 0x15181d });
-
-  const sphere = (r, seg = 18) => new THREE.SphereGeometry(r, seg, Math.max(8, seg / 2));
-
-  // Body: one tall rounded mass. The gopher is mostly torso.
-  const body = new THREE.Mesh(sphere(1.5, 24), skin);
-  body.scale.set(0.82, 1, 0.72);
-  gopher.add(body);
-
-  // Ears, small and high on the sides.
-  for (const side of [-1, 1]) {
-    const ear = new THREE.Mesh(sphere(0.3, 12), skin);
-    ear.position.set(side * 1.06, 1.12, 0);
-    ear.scale.set(1, 1, 0.5);
-    gopher.add(ear);
+  // The runner stands in the rack. Its own tick is driven from ours below.
+  if (character) {
+    character.position.set(6.4, -1.4, 1.5);
+    character.userData.baseY = -1.4;
+    group.add(character);
   }
-
-  // Eyes: the feature that makes it read as the gopher and not a rodent.
-  // Each gets an outline ring, because near-white eyes on the light theme's
-  // near-white page are otherwise just two floating pupils.
-  const outlineMat = new THREE.LineBasicMaterial({ color: 0x15181d, transparent: true, opacity: 0.55 });
-  const ringPoints = (radius) =>
-    Array.from({ length: 41 }, (_, i) => {
-      const a = (i / 40) * Math.PI * 2;
-      return new THREE.Vector3(Math.cos(a) * radius, Math.sin(a) * radius, 0);
-    });
-
-  for (const side of [-1, 1]) {
-    const eye = new THREE.Mesh(sphere(0.42, 16), white);
-    eye.position.set(side * 0.44, 0.62, 0.92);
-    gopher.add(eye);
-
-    const outline = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(ringPoints(0.42)),
-      outlineMat,
-    );
-    outline.position.set(side * 0.44, 0.62, 1.24);
-    gopher.add(outline);
-
-    const pupil = new THREE.Mesh(sphere(0.19, 12), dark);
-    pupil.position.set(side * 0.3, 0.62, 1.22);
-    gopher.add(pupil);
-  }
-
-  // Snout and the two front teeth.
-  const snout = new THREE.Mesh(sphere(0.26, 14), white);
-  snout.position.set(0, 0.16, 1.06);
-  snout.scale.set(1.25, 0.8, 0.7);
-  gopher.add(snout);
-
-  for (const side of [-1, 1]) {
-    const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.2, 0.06), white);
-    tooth.position.set(side * 0.08, -0.1, 1.16);
-    gopher.add(tooth);
-  }
-
-  // Arms and feet.
-  for (const side of [-1, 1]) {
-    const arm = new THREE.Mesh(sphere(0.24, 12), skin);
-    arm.position.set(side * 1.2, -0.25, 0.3);
-    arm.scale.set(0.8, 1.5, 0.8);
-    gopher.add(arm);
-
-    const foot = new THREE.Mesh(sphere(0.3, 12), skin);
-    foot.position.set(side * 0.5, -1.5, 0.34);
-    foot.scale.set(1.1, 0.55, 1.35);
-    gopher.add(foot);
-  }
-
-  group.add(gopher);
 
   // --- the rack it stands in ----------------------------------------------
   const count = GRID_COLS * GRID_COLS;
@@ -313,10 +222,7 @@ function buildServer(THREE, palette) {
     }
     mesh.instanceMatrix.needsUpdate = true;
     traffic.material.opacity = 0.2 + Math.sin(t * 2.2) * 0.09;
-
-    // The gopher looks around and bobs. Small amplitudes — it is background.
-    gopher.rotation.y = -0.35 + Math.sin(t * 0.4) * 0.35;
-    gopher.position.y = 1.2 + Math.sin(t * 1.1) * 0.12;
+    character?.userData.tick?.(t);
   };
 
   return group;
@@ -326,7 +232,7 @@ function buildServer(THREE, palette) {
  * Station three — the cluster. Drop through the grid into the pods themselves:
  * a field of points, too many to count, which is the point.
  */
-function buildCluster(THREE, palette) {
+function buildCluster(THREE, palette, character) {
   const group = new THREE.Group();
   group.position.y = STATIONS.cluster.groupY;
 
@@ -387,7 +293,8 @@ function buildCluster(THREE, palette) {
     `,
   });
 
-  group.add(new THREE.Points(geometry, material));
+  const pods = new THREE.Points(geometry, material);
+  group.add(pods);
 
   // The helm. Kubernetes' mark is a seven-spoke ship's wheel, and seven is the
   // whole joke, so the geometry is built from a heptagon rather than a circle.
@@ -428,11 +335,19 @@ function buildCluster(THREE, palette) {
   group.add(helm);
 
 
+  // The professor explains the cluster, standing under the helm.
+  if (character) {
+    character.position.set(7.0, -4.2, -4.0);
+    group.add(character);
+  }
+
   group.userData.tick = (t) => {
     material.uniforms.uTime.value = t;
-    group.rotation.y = t * 0.035;
+    // Only the pod field spins; the professor would spin with it otherwise.
+    pods.rotation.y = t * 0.035;
     // A wheel at the helm turns slowly and steadily. Nothing dramatic.
     helm.rotation.z = -t * 0.09;
+    character?.userData.tick?.(t);
   };
   group.userData.material = material;
 
@@ -535,6 +450,7 @@ function wireScrollTriggers(gsap, ScrollTrigger, camera, focus) {
 async function startWorld() {
   const THREE = await import('three');
   const { tokenColor } = await import('./three-utils.js');
+  const { loadGopher, makeGopher } = await import('./gopher.js');
 
   const canvas = document.createElement('canvas');
   canvas.className = 'world-canvas';
@@ -565,10 +481,35 @@ async function startWorld() {
   // Tweened alongside the camera so the tilt changes between stations too.
   const focus = new THREE.Vector3(0, STATIONS.device.lookY, 0);
 
+  // Lights. Until now every material in this scene was MeshBasicMaterial and
+  // there were no lights at all, which is exactly why the old procedural gopher
+  // read as a flat silhouette. The model is Lambert-shaded and needs these.
+  scene.add(new THREE.AmbientLight(0xffffff, 1.7));
+  const key = new THREE.DirectionalLight(0xffffff, 2.4);
+  key.position.set(4, 6, 6);
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0x99ddff, 1.1);
+  rim.position.set(-5, 2, -4);
+  scene.add(rim);
+
+  // One mesh, cloned three times. If it fails to load the stations still build
+  // — they simply have no character in them.
+  let characters = { coder: null, runner: null, professor: null };
+  try {
+    await loadGopher(THREE);
+    characters = {
+      coder: makeGopher(THREE, palette, 'coder', { scale: 1.5, opacity: 0.92 }),
+      runner: makeGopher(THREE, palette, 'runner', { scale: 1.8, opacity: 0.9 }),
+      professor: makeGopher(THREE, palette, 'professor', { scale: 1.6, opacity: 0.92 }),
+    };
+  } catch {
+    /* no gopher; the scene is still a scene */
+  }
+
   const groups = [
-    buildDevice(THREE, palette),
-    buildServer(THREE, palette),
-    buildCluster(THREE, palette),
+    buildDevice(THREE, palette, characters.coder),
+    buildServer(THREE, palette, characters.runner),
+    buildCluster(THREE, palette, characters.professor),
     buildHorizon(THREE, palette),
   ];
   groups.forEach((g) => scene.add(g));
