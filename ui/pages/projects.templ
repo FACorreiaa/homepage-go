@@ -33,7 +33,7 @@ templ Projects(trust []model.TrustItem, projects []model.ProjectItem) {
 							<a href="/curriculum" class="underline underline-offset-4 transition-colors hover:text-foreground">view CV</a>
 						</p>
 					</div>
-					<div class="divide-y divide-border rounded-lg border border-border bg-card/72 backdrop-blur">
+					<div class="divide-y divide-border rounded-2xl border border-border bg-card/72 backdrop-blur">
 						for _, item := range trust {
 							<div class="flex items-center justify-between gap-5 px-5 py-4">
 								<span class="font-mono text-xs text-muted-foreground">{ item.Label }</span>
@@ -43,250 +43,30 @@ templ Projects(trust []model.TrustItem, projects []model.ProjectItem) {
 					</div>
 				</div>
 			</section>
-			<section id="case-studies" class="mx-auto max-w-6xl px-4 pt-24 md:pt-36">
-				{{ featured := featuredOf(projects) }}
-				<div class="max-w-3xl border-b border-border pb-6">
-					<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">CASE STUDY INDEX — { fmt.Sprintf("%02d", len(featured)) }</p>
-					<h2 class="section-title mt-4 font-semibold">Selected case studies</h2>
-					<p class="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">Products and platforms where I owned meaningful parts of design, implementation, delivery, or infrastructure.</p>
-				</div>
-				<div class="mt-10 space-y-6">
-					for i, p := range featured {
-						<article class={ "project-showcase-card group grid gap-0 overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent/40 " + showcaseLayout(i) } data-reveal>
-							<a href={ templ.SafeURL("/projects/" + p.Slug) } class={ "block h-full " + visualOrder(i) } aria-label={ "View " + p.Title + " case study" }>
-								@projectVisual(p, i, "h-full min-h-[18rem]")
-							</a>
-							<div class={ "flex flex-col justify-center p-6 md:p-9 " + contentOrder(i) }>
-								<div class="flex flex-wrap items-center gap-x-5 gap-y-3">
-									<span class="project-index">{ fmt.Sprintf("%02d", i+1) }</span>
-									<div class="flex flex-wrap gap-2">
-										<span class="project-meta-chip">{ p.RoleTag }</span>
-										<span class="project-meta-chip">{ p.Category }</span>
-										<span class="project-meta-chip text-foreground">{ p.Status }</span>
-									</div>
-								</div>
-								<h3 class="mt-5 text-3xl font-semibold tracking-normal md:text-5xl">
-									<a href={ templ.SafeURL("/projects/" + p.Slug) }>{ p.Title }</a>
-								</h3>
-								<p class="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">{ p.Description }</p>
-								if len(p.Metrics) > 0 {
-									<div class="mt-6 grid grid-cols-2 gap-4 border-t border-border pt-5 sm:grid-cols-3">
-										for _, m := range p.Metrics {
-											<div>
-												<p class="font-mono text-2xl font-semibold tabular-nums">{ m.Value }</p>
-												<p class="mt-1 text-xs text-muted-foreground">{ m.Label }</p>
-											</div>
-										}
-									</div>
-								}
-								if p.Testimonial.Quote != "" {
-									<blockquote class="mt-5 max-w-2xl border-l border-border pl-4">
-										<p class="text-sm leading-6 text-foreground/82">“{ p.Testimonial.Quote }”</p>
-										<footer class="mt-2 text-xs text-muted-foreground">— { p.Testimonial.Author }, { p.Testimonial.Role }</footer>
-									</blockquote>
-								} else if p.Outcome != "" {
-									<p class="mt-5 max-w-2xl border-l border-border pl-4 text-sm leading-6 text-foreground/82">{ p.Outcome }</p>
-								}
-								<div class="mt-7 flex flex-wrap gap-2">
-									for _, tag := range topTags(p.Tags, 5) {
-										<span class="rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">{ tag }</span>
-									}
-								</div>
-								if p.GithubLink == "Private" {
-									<p class="mt-4 font-mono text-[11px] text-muted-foreground">Private repository — walkthrough available on request</p>
-								}
-								<div class="mt-8 flex flex-wrap items-center gap-3">
-									<a href={ templ.SafeURL("/projects/" + p.Slug) } class="inline-flex items-center gap-2 text-sm font-semibold">
-										View case study
-										@modules.UIIcon("arrow-right", "h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-1")
-									</a>
-									if p.HasLiveLink {
-										<a href={ templ.SafeURL(p.LiveLink) } target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-semibold transition hover:bg-accent">
-											Website
-											@modules.UIIcon("external", "h-3.5 w-3.5")
-										</a>
-									}
-									if p.AppStoreLink != "" {
-										<a href={ templ.SafeURL(p.AppStoreLink) } target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-semibold transition hover:bg-accent">
-											App Store
-											@modules.UIIcon("external", "h-3.5 w-3.5")
-										</a>
-									}
-								</div>
-							</div>
-						</article>
-					}
-				</div>
+
+			<section id="case-studies" class="px-4 pt-24 md:pt-36">
+				@modules.FeaturedProjectsSection(
+					modules.FeaturedOf(projects),
+					"Featured projects",
+					"A curated selection of products I own in production",
+					"Web, iOS, and backend systems where I owned design through deployment — not a slice of the stack.",
+					false,
+				)
 			</section>
+
 			<section class="mx-auto max-w-6xl px-4 pb-32 pt-24 md:pb-44 md:pt-32">
-				{{ rest := restOf(projects) }}
-				{{ featuredCount := len(featuredOf(projects)) }}
-				<div class="max-w-3xl border-b border-border pb-6">
+				{{ rest := modules.RestOf(projects) }}
+				<div class="mx-auto max-w-3xl text-center md:mx-0 md:max-w-3xl md:text-left">
 					<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">INDEX — { fmt.Sprintf("%02d", len(rest)) } MORE</p>
 					<h2 class="section-title mt-4 font-semibold">Additional work</h2>
-					<p class="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">A compact record of client systems, mobile products, and private infrastructure work.</p>
+					<p class="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:mx-0 mx-auto">A compact record of client systems, mobile products, and private infrastructure work.</p>
 				</div>
-				<div class="mt-10 grid gap-4 md:grid-cols-2">
+				<div class="mt-10 grid gap-5 md:grid-cols-2 md:gap-6">
 					for i, p := range rest {
-						<a href={ templ.SafeURL("/projects/" + p.Slug) } class="group flex min-h-56 flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/25 hover:bg-accent/45" data-reveal>
-							if p.ScreenshotAsset != "" {
-								<div class="relative aspect-[2/1] overflow-hidden border-b border-border">
-									<img src={ p.ScreenshotAsset } alt={ screenshotAlt(p) } loading="lazy" class="h-full w-full object-cover object-top motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-[1.02]"/>
-								</div>
-							}
-							<div class="flex flex-1 flex-col p-5">
-								<div class="flex items-start justify-between gap-4">
-									<div class="flex items-center gap-3">
-										@projectMiniMark(p, i)
-										<div>
-											<p class="text-lg font-semibold">{ p.Title }</p>
-											<p class="mt-1 text-xs font-medium text-muted-foreground">{ displayGroup(p) }</p>
-										</div>
-									</div>
-									<div class="flex items-center gap-3">
-										<span class="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{ p.Status }</span>
-										<span class="font-mono text-[11px] tabular-nums text-muted-foreground/70">{ fmt.Sprintf("%02d", featuredCount+i+1) }</span>
-									</div>
-								</div>
-								<p class="mt-5 line-clamp-3 text-sm leading-6 text-muted-foreground">{ p.Description }</p>
-								<div class="mt-auto flex items-end justify-between gap-4 pt-6">
-									<div class="flex flex-wrap gap-2">
-										for _, tag := range topTags(p.Tags, 3) {
-											<span class="rounded-md bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">{ tag }</span>
-										}
-									</div>
-									@modules.UIIcon("arrow-right", "h-4 w-4 shrink-0 text-muted-foreground motion-safe:transition-transform motion-safe:group-hover:translate-x-1 group-hover:text-foreground")
-								</div>
-							</div>
-						</a>
+						@modules.ProjectIndexCard(p, i)
 					}
 				</div>
 			</section>
 		</div>
 	}
-}
-
-templ projectVisual(p model.ProjectItem, i int, class string) {
-	<div class={ "project-art-shell texture-noise " + projectToneClass(i) + " " + class }>
-		<div class="project-art-grid"></div>
-		if p.ScreenshotAsset != "" {
-			<div class="relative z-10 h-full w-full p-5 md:p-7">
-				<img src={ p.ScreenshotAsset } alt={ screenshotAlt(p) } loading={ lazyAfter(i) } fetchpriority={ priorityFor(i) } class="h-full w-full rounded-md border border-foreground/12 object-cover shadow-lg"/>
-			</div>
-		} else {
-			<div class="relative z-10 flex flex-col items-center text-center">
-				<div class="project-app-mark h-28 w-28 md:h-32 md:w-32">
-					if p.LogoAsset != "" {
-						<img src={ p.LogoAsset } alt={ p.Title + " app mark" } width="160" height="160" loading={ lazyAfter(i) } fetchpriority={ priorityFor(i) } class="h-full w-full object-cover"/>
-					} else {
-						<span class="font-mono text-3xl font-semibold">{ p.Icon }</span>
-					}
-				</div>
-				<p class="mt-5 max-w-[18rem] text-sm font-medium text-foreground/78">{ p.Category }</p>
-			</div>
-		}
-	</div>
-}
-
-templ projectMiniMark(p model.ProjectItem, i int) {
-	<div class={ "project-mini-mark " + projectToneClass(i) }>
-		if p.LogoAsset != "" {
-			<img src={ p.LogoAsset } alt="" width="44" height="44" loading="lazy" class="h-full w-full object-cover"/>
-		} else {
-			<span class="font-mono text-xs font-semibold">{ p.Icon }</span>
-		}
-	</div>
-}
-
-func featuredOf(projects []model.ProjectItem) []model.ProjectItem {
-	var out []model.ProjectItem
-	for _, p := range projects {
-		if p.Featured {
-			out = append(out, p)
-		}
-	}
-	return out
-}
-
-func restOf(projects []model.ProjectItem) []model.ProjectItem {
-	var out []model.ProjectItem
-	for _, p := range projects {
-		if !p.Featured {
-			out = append(out, p)
-		}
-	}
-	return out
-}
-
-func topTags(tags []string, limit int) []string {
-	if len(tags) <= limit {
-		return tags
-	}
-	return tags[:limit]
-}
-
-func displayGroup(p model.ProjectItem) string {
-	if p.DisplayGroup != "" {
-		return p.DisplayGroup
-	}
-	return p.Category
-}
-
-// Featured cards alternate art/content sides on md+ screens.
-func showcaseLayout(i int) string {
-	if i%2 == 1 {
-		return "md:grid-cols-[0.58fr_0.42fr]"
-	}
-	return "md:grid-cols-[0.42fr_0.58fr]"
-}
-
-func visualOrder(i int) string {
-	if i%2 == 1 {
-		return "md:order-2"
-	}
-	return ""
-}
-
-func contentOrder(i int) string {
-	if i%2 == 1 {
-		return "md:order-1"
-	}
-	return ""
-}
-
-func screenshotAlt(p model.ProjectItem) string {
-	if p.ScreenshotAlt != "" {
-		return p.ScreenshotAlt
-	}
-	return p.Title + " product screenshot"
-}
-
-func projectToneClass(i int) string {
-	switch i % 5 {
-	case 0:
-		return "project-tone-slate"
-	case 1:
-		return "project-tone-emerald"
-	case 2:
-		return "project-tone-ink"
-	case 3:
-		return "project-tone-rust"
-	default:
-		return "project-tone-steel"
-	}
-}
-
-// The first case-study image is likely the LCP element, so load it eagerly.
-func lazyAfter(i int) string {
-	if i == 0 {
-		return "eager"
-	}
-	return "lazy"
-}
-
-func priorityFor(i int) string {
-	if i == 0 {
-		return "high"
-	}
-	return "auto"
 }

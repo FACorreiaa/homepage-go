@@ -119,9 +119,9 @@ function tag(material, role) {
  */
 function buildDevice(THREE, palette, character) {
   const group = new THREE.Group();
-  // Offset right: the hero headline owns the left half of the viewport, so the
-  // one discrete object in the scene sits in the space the text leaves.
-  group.position.set(4.6, STATIONS.device.groupY - 0.6, 0);
+  // Framed on the camera's look-at (x=0). A light right bias keeps the coder
+  // from sitting dead under the hero headline while still reading as centered.
+  group.position.set(1.1, STATIONS.device.groupY - 0.6, 0);
 
   // The orbit ring reads as latitude — this thing is somewhere real.
   const ring = new THREE.Line(
@@ -138,7 +138,7 @@ function buildDevice(THREE, palette, character) {
 
   // The coder sits inside the ring, at the desk.
   if (character) {
-    character.position.set(0.2, -1.9, 1.2);
+    character.position.set(0, -1.9, 1.2);
     group.add(character);
   }
 
@@ -161,9 +161,9 @@ function buildServer(THREE, palette, character) {
   const group = new THREE.Group();
   group.position.y = STATIONS.server.groupY;
 
-  // The runner stands in the rack. Its own tick is driven from ours below.
+  // The runner stands in the centre of the rack — same axis the camera looks at.
   if (character) {
-    character.position.set(6.4, -1.4, 1.5);
+    character.position.set(0.4, -1.4, 1.5);
     character.userData.baseY = -1.4;
     group.add(character);
   }
@@ -333,16 +333,16 @@ function buildCluster(THREE, palette, character) {
     new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(spokeEnds), helmLine),
   );
 
-  // Out in the gutter and set back, like the gopher above: the project cards
-  // own the middle of this station.
-  helm.position.set(8.2, -2.6, -9);
+  // Slightly right of centre and set back so the wheel frames the professor
+  // without drifting into the far gutter.
+  helm.position.set(1.6, -2.6, -9);
   helm.scale.setScalar(0.72);
   group.add(helm);
 
 
   // The professor explains the cluster, standing under the helm.
   if (character) {
-    character.position.set(7.0, -4.2, -4.0);
+    character.position.set(0.6, -4.2, -4.0);
     group.add(character);
   }
 

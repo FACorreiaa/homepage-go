@@ -45,8 +45,14 @@ func TestHomeConversionPaths(t *testing.T) {
 func TestHomeFeaturedWork(t *testing.T) {
 	body := renderHome(t)
 
-	cards := strings.Count(body, "project-showcase-card")
+	// Count card roots, not the --flagship modifier which also contains the class name.
+	cards := strings.Count(body, `class="project-feature-card project-showcase-card`)
 	assert.Equal(t, 3, cards, "landing page shows exactly three featured projects")
+	assert.Equal(t, 3, strings.Count(body, "project-showcase-card"))
+
+	// Flagship + 2-col grid: first card is full-bleed.
+	assert.Contains(t, body, "project-feature-card--flagship")
+	assert.Contains(t, body, "Featured projects")
 
 	// Every card must link to its case study. Deep links are the whole point of
 	// the section, and they are easy to lose when the markup is restructured.

@@ -65,51 +65,14 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 					</div>
 				</div>
 			</section>
-			<section class="mx-auto max-w-6xl px-4 pt-24 md:pt-32" data-world-station="cluster">
-				<div class="max-w-3xl border-b border-border pb-6">
-					<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">SELECTED WORK</p>
-					<h2 class="section-title mt-4 font-semibold">Three I own in production.</h2>
-					<p class="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">
-						Products where I wrote the app, the backend, and the deployment that keeps them up.
-						The full index has twelve more.
-					</p>
-				</div>
-				<div class="mt-10 space-y-6">
-					for i, p := range featured {
-						<article class={ "project-showcase-card group grid gap-0 overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent/40 " + showcaseLayout(i) } data-reveal>
-							<a href={ templ.SafeURL("/projects/" + p.Slug) } class={ "block h-full " + visualOrder(i) } aria-label={ "View " + p.Title + " case study" }>
-								@projectVisual(p, i, "h-full min-h-[18rem]")
-							</a>
-							<div class={ "flex flex-col justify-center p-6 md:p-9 " + contentOrder(i) }>
-								<div class="flex flex-wrap items-center gap-x-5 gap-y-3">
-									<p class="font-mono text-xs tracking-[0.16em] text-muted-foreground">{ displayGroup(p) }</p>
-									if p.Status != "" {
-										<span class="project-meta-chip">{ p.Status }</span>
-									}
-								</div>
-								<h3 class="mt-4 text-3xl font-semibold md:text-4xl">{ p.Title }</h3>
-								<p class="mt-4 text-base leading-7 text-muted-foreground">{ p.Description }</p>
-								<div class="mt-6 flex flex-wrap gap-2">
-									for _, tag := range topTags(p.Tags, 4) {
-										<span class="project-meta-chip">{ tag }</span>
-									}
-								</div>
-								<div class="mt-7">
-									<a href={ templ.SafeURL("/projects/" + p.Slug) } class="inline-flex items-center gap-2 text-sm font-semibold underline underline-offset-4 transition-colors hover:text-muted-foreground">
-										View case study
-										@modules.UIIcon("arrow-right", "h-4 w-4")
-									</a>
-								</div>
-							</div>
-						</article>
-					}
-				</div>
-				<div class="mt-10">
-					<a href="/projects" class="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-accent active:scale-[0.97]">
-						See all work
-						@modules.UIIcon("arrow-right", "h-4 w-4")
-					</a>
-				</div>
+			<section class="px-4 pt-24 md:pt-32" data-world-station="cluster">
+				@modules.FeaturedProjectsSection(
+					featured,
+					"Featured projects",
+					"A curated selection of products I own in production",
+					"Products where I wrote the app, the backend, and the deployment that keeps them up.",
+					true,
+				)
 			</section>
 			<div class="pb-24 md:pb-32" data-world-station="horizon"></div>
 		</div>
