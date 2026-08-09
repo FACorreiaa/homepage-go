@@ -401,46 +401,44 @@ function wireScrollTriggers(gsap, ScrollTrigger, camera, focus) {
 
   if (sections.length < 2) return;
 
-  const timeline = gsap.timeline({
-    scrollTrigger: {
-      trigger: document.body,
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 1.1, // Lags the scroll slightly; the camera has weight.
-      invalidateOnRefresh: true,
-    },
-  });
-
-  // Proportional segments, so a longer section is a longer part of the descent.
-  const tops = sections.map((s) => s.el.offsetTop);
-  const span = Math.max(1, tops[tops.length - 1] - tops[0]);
-
+  // One trigger per leg rather than one timeline across the whole page.
+  //
+  // A single timeline has to bake each leg's share of the scroll from the
+  // stations' offsetTop at build time, and those go stale the moment the
+  // document reflows — fonts landing and the scroll reveals firing were enough
+  // to leave the camera 10 units short of the cluster while its copy was
+  // already on screen. invalidateOnRefresh re-measures the trigger, not the
+  // durations inside it.
+  //
+  // Binding each leg to its own pair of station elements means the mapping is
+  // the DOM's, not a snapshot of it, and it re-measures for free on resize.
   for (let i = 1; i < sections.length; i++) {
     const from = STATIONS[sections[i - 1].name];
-    const target = STATIONS[sections[i].name];
-    const share = (tops[i] - tops[i - 1]) / span;
-    const at = i === 1 ? 0 : '>';
+    const to = STATIONS[sections[i].name];
+
+    const leg = gsap.timeline({
+      scrollTrigger: {
+        trigger: sections[i - 1].el,
+        start: 'top top',
+        endTrigger: sections[i].el,
+        end: 'top top',
+        scrub: 1.1, // Lags the scroll slightly; the camera has weight.
+        invalidateOnRefresh: true,
+      },
+    });
 
     // fromTo, not to: a bare .to() infers its start from wherever the camera
-    // happens to be when the segment first renders, which makes the descent
-    // depend on history — seek backwards and it starts from the wrong station.
-    // Naming both ends makes the path total and reversible.
-    timeline.fromTo(
+    // happens to be when the leg first renders, so scrolling up would start the
+    // leg from the wrong station. Naming both ends makes each leg total.
+    leg.fromTo(
       camera.position,
       { y: from.camY, z: from.camZ },
-      { y: target.camY, z: target.camZ, duration: share, ease: 'none' },
-      at,
+      { y: to.camY, z: to.camZ, ease: 'none', duration: 1 },
+      0,
     );
     // Same slot, so the aim arrives with the position rather than trailing it.
-    timeline.fromTo(
-      focus,
-      { y: from.lookY },
-      { y: target.lookY, duration: share, ease: 'none' },
-      '<',
-    );
+    leg.fromTo(focus, { y: from.lookY }, { y: to.lookY, ease: 'none', duration: 1 }, 0);
   }
-
-  return timeline;
 }
 
 /**
