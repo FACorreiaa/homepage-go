@@ -10,6 +10,10 @@ patterns=(
   'blog_stats.json'
   'vault/raw/*.md'
   'vault/raw/**/*.md'
+  # air's scratch dir. tmp/main is a compiled binary; it was tracked for a long
+  # time and is most of why .git is 81MB.
+  'tmp/*'
+  'tmp/**'
 )
 
 bad=0

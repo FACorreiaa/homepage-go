@@ -13,3 +13,8 @@ app.db-wal
 app.db-journal
 .DS_Store
 visit-salt
+
+# air's scratch directory. tmp/main is a ~34MB compiled binary that every local
+# `go run` rewrites, so tracking it dirtied the tree constantly and is most of
+# why .git grew to 81MB.
+tmp/
