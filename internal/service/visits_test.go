@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -422,4 +423,53 @@ func TestSnapshotWithoutDatabaseStillReportsOps(t *testing.T) {
 	assert.Equal(t, "EU", snap.ServingFrom)
 	assert.Positive(t, snap.Uptime)
 	assert.Zero(t, snap.Views24h)
+}
+
+// The two providers disagree about field names — country_code vs countryCode,
+// city vs cityName — so the parsers are pinned against real response bodies.
+// Getting this wrong looks exactly like a provider being down.
+func TestGeoProviderParsers(t *testing.T) {
+	bodies := map[string]string{
+		"ipwho.is": `{"ip":"177.71.207.1","success":true,"country":"Brazil",
+			"country_code":"BR","region":"Sao Paulo","city":"Sao Paulo",
+			"latitude":-23.5558,"longitude":-46.6396}`,
+		"freeipapi.com": `{"ipVersion":4,"ipAddress":"177.71.207.1","latitude":-23.5558,
+			"longitude":-46.6396,"countryName":"Brazil","countryCode":"BR","cityName":"Sao Paulo"}`,
+	}
+
+	for _, provider := range geoProviders {
+		t.Run(provider.name, func(t *testing.T) {
+			body, ok := bodies[provider.name]
+			require.True(t, ok, "no sample body for %s", provider.name)
+
+			got, ok := provider.parse([]byte(body))
+			require.True(t, ok, "a good response must parse")
+			assert.Equal(t, "BR", got.countryCode)
+			assert.Equal(t, "Sao Paulo", got.city)
+			assert.InDelta(t, -23.5558, got.lat, 0.0001)
+			assert.InDelta(t, -46.6396, got.lon, 0.0001)
+
+			assert.Contains(t, provider.url("1.2.3.4"), "1.2.3.4")
+			assert.True(t, strings.HasPrefix(provider.url("1.2.3.4"), "https://"),
+				"plain HTTP is what broke this: ip-api's free tier is HTTP-only "+
+					"and its HTTPS endpoint answers 403 without a paid key")
+		})
+	}
+}
+
+// A refusal must not be mistaken for a location.
+func TestGeoProviderParsersRejectFailures(t *testing.T) {
+	for _, tc := range []struct{ name, body string }{
+		{"ipwho.is refusal", `{"ip":"1.2.3.4","success":false,"message":"Reserved range"}`},
+		{"ip-api style refusal", `{"status":"fail"}`},
+		{"empty object", `{}`},
+		{"not json", `<html>rate limited</html>`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, provider := range geoProviders {
+				_, ok := provider.parse([]byte(tc.body))
+				assert.False(t, ok, "%s must reject %s", provider.name, tc.name)
+			}
+		})
+	}
 }

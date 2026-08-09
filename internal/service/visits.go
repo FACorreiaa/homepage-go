@@ -7,6 +7,8 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"math"
 	"net"
@@ -117,7 +119,10 @@ func NewVisitTracker(q *db.Queries) *VisitTracker {
 		subs:        map[chan VisitPing]struct{}{},
 		geoMem:      map[string]geoResult{},
 		inflight:    map[string]struct{}{},
-		// ip-api.com allows 45 requests/minute on the free tier. Stay under it.
+		// A budget for whichever provider answers, not for a particular one.
+		// Lookups are keyed by /24, so this is far more headroom than a personal
+		// site needs — it exists so a burst of new networks cannot spend a free
+		// tier in one go.
 		bucket:   newTokenBucket(40, time.Minute),
 		warnedAt: map[string]time.Time{},
 	}
@@ -388,43 +393,128 @@ func (t *VisitTracker) rememberGeo(prefix string, result geoResult) {
 	t.mu.Unlock()
 }
 
+// geoProvider is one upstream that can turn an address into a place.
+//
+// There are two of them because the original single provider, ip-api.com,
+// stopped answering in production while working fine from a laptop. Its free
+// tier is HTTP-only — the HTTPS endpoint answers 403 {"status":"fail"} without
+// a paid key — and it is known to refuse datacenter ranges, which is what the
+// site runs on. Both providers below are HTTPS and need no key.
+type geoProvider struct {
+	name  string
+	url   func(ip string) string
+	parse func(body []byte) (geoResult, bool)
+}
+
+var geoProviders = []geoProvider{
+	{
+		name: "ipwho.is",
+		url:  func(ip string) string { return "https://ipwho.is/" + ip },
+		parse: func(body []byte) (geoResult, bool) {
+			var d struct {
+				Success     bool    `json:"success"`
+				CountryCode string  `json:"country_code"`
+				City        string  `json:"city"`
+				Latitude    float64 `json:"latitude"`
+				Longitude   float64 `json:"longitude"`
+			}
+			if err := json.Unmarshal(body, &d); err != nil || !d.Success {
+				return geoResult{}, false
+			}
+			return newGeoResult(d.CountryCode, d.City, d.Latitude, d.Longitude)
+		},
+	},
+	{
+		name: "freeipapi.com",
+		url:  func(ip string) string { return "https://freeipapi.com/api/json/" + ip },
+		parse: func(body []byte) (geoResult, bool) {
+			var d struct {
+				CountryCode string  `json:"countryCode"`
+				CityName    string  `json:"cityName"`
+				Latitude    float64 `json:"latitude"`
+				Longitude   float64 `json:"longitude"`
+			}
+			if err := json.Unmarshal(body, &d); err != nil {
+				return geoResult{}, false
+			}
+			return newGeoResult(d.CountryCode, d.CityName, d.Latitude, d.Longitude)
+		},
+	},
+}
+
+// newGeoResult normalises whatever a provider returned, and rejects anything
+// missing the one field the map cannot do without.
+func newGeoResult(countryCode, city string, lat, lon float64) (geoResult, bool) {
+	if len(countryCode) != 2 {
+		return geoResult{}, false
+	}
+	city = strings.TrimSpace(city)
+	if city == "" {
+		city = "Unknown"
+	}
+	return geoResult{
+		countryCode: strings.ToUpper(countryCode),
+		city:        city,
+		lat:         lat,
+		lon:         lon,
+	}, true
+}
+
+// lookupUpstream asks each provider in turn and takes the first useful answer.
+// Every failure is logged with its reason: the previous version returned a bare
+// false on all six of its failure paths, so a provider that had started
+// refusing us was indistinguishable from a visitor with no location.
 func (t *VisitTracker) lookupUpstream(ctx context.Context, ip string) (geoResult, bool) {
-	url := "http://ip-api.com/json/" + ip + "?fields=status,countryCode,city,lat,lon"
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	for _, provider := range geoProviders {
+		result, ok := t.askProvider(ctx, provider, ip)
+		if ok {
+			return result, true
+		}
+	}
+	return geoResult{}, false
+}
+
+func (t *VisitTracker) askProvider(ctx context.Context, provider geoProvider, ip string) (geoResult, bool) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, provider.url(ip), nil)
 	if err != nil {
+		t.warn(provider.name + ": building the request failed: " + err.Error())
 		return geoResult{}, false
 	}
 
 	resp, err := t.client.Do(req)
 	if err != nil {
+		t.warn(provider.name + ": unreachable: " + err.Error())
 		return geoResult{}, false
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	var decoded struct {
-		Status      string  `json:"status"`
-		CountryCode string  `json:"countryCode"`
-		City        string  `json:"city"`
-		Lat         float64 `json:"lat"`
-		Lon         float64 `json:"lon"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&decoded); err != nil {
+	// Bounded: a provider having a bad day should not hand us a large body.
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 8<<10))
+	if err != nil {
+		t.warn(provider.name + ": reading the response failed: " + err.Error())
 		return geoResult{}, false
 	}
-	if decoded.Status != "success" || len(decoded.CountryCode) != 2 {
+	if resp.StatusCode != http.StatusOK {
+		t.warn(fmt.Sprintf("%s: HTTP %d: %s", provider.name, resp.StatusCode, snippet(body)))
 		return geoResult{}, false
 	}
 
-	city := strings.TrimSpace(decoded.City)
-	if city == "" {
-		city = "Unknown"
+	result, ok := provider.parse(body)
+	if !ok {
+		t.warn(provider.name + ": unusable answer: " + snippet(body))
+		return geoResult{}, false
 	}
-	return geoResult{
-		countryCode: strings.ToUpper(decoded.CountryCode),
-		city:        city,
-		lat:         decoded.Lat,
-		lon:         decoded.Lon,
-	}, true
+	return result, true
+}
+
+// snippet keeps a provider's complaint short enough to log.
+func snippet(body []byte) string {
+	const limit = 160
+	text := strings.Join(strings.Fields(string(body)), " ")
+	if len(text) > limit {
+		return text[:limit] + "…"
+	}
+	return text
 }
 
 func (t *VisitTracker) push(ping VisitPing) {
