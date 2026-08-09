@@ -10,7 +10,8 @@ import (
 )
 
 const countCountriesSince = `-- name: CountCountriesSince :one
-SELECT COUNT(DISTINCT country_code) FROM visits WHERE created_at >= datetime('now', ?)
+SELECT COUNT(DISTINCT country_code) FROM visits
+WHERE created_at >= datetime('now', ?) AND country_code <> ''
 `
 
 func (q *Queries) CountCountriesSince(ctx context.Context, datetime interface{}) (int64, error) {
@@ -74,7 +75,7 @@ func (q *Queries) GetGeoCache(ctx context.Context, prefix string) (GeoCache, err
 const listRecentVisits = `-- name: ListRecentVisits :many
 SELECT visitor_hash, country_code, city, lat, lon, path, created_at
 FROM visits
-WHERE created_at >= datetime('now', ?)
+WHERE created_at >= datetime('now', ?) AND country_code <> ''
 ORDER BY created_at DESC
 LIMIT ?
 `
@@ -126,6 +127,7 @@ func (q *Queries) ListRecentVisits(ctx context.Context, arg ListRecentVisitsPara
 }
 
 const recordVisit = `-- name: RecordVisit :exec
+
 INSERT INTO visits (visitor_hash, country_code, city, lat, lon, path)
 VALUES (?, ?, ?, ?, ?, ?)
 `
@@ -139,6 +141,10 @@ type RecordVisitParams struct {
 	Path        string
 }
 
+// A visit whose address could not be geolocated is still a page view: it counts
+// toward views, visitors and paths, and is stored with an empty country_code.
+// The three queries that feed the map and the country list filter those out,
+// because a dot at 0,0 is the Gulf of Guinea and a blank flag is not a country.
 func (q *Queries) RecordVisit(ctx context.Context, arg RecordVisitParams) error {
 	_, err := q.db.ExecContext(ctx, recordVisit,
 		arg.VisitorHash,
@@ -154,7 +160,7 @@ func (q *Queries) RecordVisit(ctx context.Context, arg RecordVisitParams) error 
 const topCountriesSince = `-- name: TopCountriesSince :many
 SELECT country_code, COUNT(*) AS visits
 FROM visits
-WHERE created_at >= datetime('now', ?)
+WHERE created_at >= datetime('now', ?) AND country_code <> ''
 GROUP BY country_code
 ORDER BY visits DESC, country_code ASC
 LIMIT ?

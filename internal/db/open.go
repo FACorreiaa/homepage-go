@@ -15,6 +15,15 @@ func Open(path string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// An in-memory database belongs to its connection, so a pool of them is a
+	// pool of different databases: the schema lands on whichever connection ran
+	// it and every other one sees "no such table". Pinning to a single
+	// connection makes ":memory:" behave like the file database it stands in
+	// for in tests. Harmless in production, where the path is a real file and
+	// the app runs one replica against one RWO volume anyway.
+	db.SetMaxOpenConns(1)
+
 	if _, err = db.Exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;`); err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"net"
 	"net/http"
@@ -251,12 +252,70 @@ func TestRecordPlotsNothingForPrivateAddresses(t *testing.T) {
 		tracker.Touch(r)
 		tracker.Record(r)
 	}
+	waitForVisits(t, tracker, 3)
 
-	// The visits are real people, so they count as live, but a LAN address
-	// cannot be placed on the globe and must never reach the geo provider.
+	// A LAN address cannot be placed on the globe and must never reach the geo
+	// provider — but it is still a real person reading a real page.
 	assert.Equal(t, 3, tracker.visitorsNow())
-	assert.Empty(t, tracker.Recent(10), "private addresses must not produce dots")
-	assert.Empty(t, tracker.VisitsInWindow(t.Context(), 10), "and must not be persisted")
+	assert.Empty(t, tracker.Recent(10), "unlocatable addresses must not produce dots")
+	assert.Empty(t, tracker.VisitsInWindow(t.Context(), 10), "and must not reach the globe payload")
+
+	snap := tracker.Snapshot(t.Context())
+	assert.Equal(t, 3, snap.Views24h, "an unplaceable visit is still a page view")
+	assert.Equal(t, 3, snap.Visitors24h)
+	assert.Zero(t, snap.Countries24h, "but it belongs to no country")
+	assert.Empty(t, snap.TopCountries, "and must never show a blank flag")
+	require.Len(t, snap.TopPaths, 1, "the path is known even when the place is not")
+	assert.Equal(t, "/", snap.TopPaths[0].Path)
+	assert.Equal(t, 3, snap.TopPaths[0].Visits)
+}
+
+// A geo outage must cost the dot and nothing else. Before this, resolveAndStore
+// returned before the insert, so an unreachable provider silently zeroed every
+// figure on /stats while VISITORS NOW kept working — which is exactly how it
+// failed in production.
+func TestLocatedAndUnlocatedVisitsCoexist(t *testing.T) {
+	tracker, _ := trackerWithDB(t)
+
+	// Loopback resolves to Porto without touching the network; a LAN address
+	// cannot resolve at all.
+	for _, ip := range []string{"127.0.0.1", "10.0.0.4"} {
+		r := htmlRequest("GET", "/projects", browserUA)
+		r.Header.Set("X-Forwarded-For", ip)
+		tracker.Record(r)
+	}
+	waitForVisits(t, tracker, 2)
+
+	snap := tracker.Snapshot(t.Context())
+	assert.Equal(t, 2, snap.Views24h, "both are page views")
+	assert.Equal(t, 1, snap.Countries24h, "only one of them has a country")
+	require.Len(t, snap.TopCountries, 1)
+	assert.Equal(t, "PT", snap.TopCountries[0].Code)
+
+	dots := tracker.VisitsInWindow(t.Context(), 10)
+	require.Len(t, dots, 1, "only the located visit is a dot")
+	assert.Equal(t, "PT", dots[0].CountryCode)
+}
+
+// waitForVisits blocks until the expected number of rows have been written.
+// Record hands off to a goroutine, so the count is not there on return.
+func waitForVisits(t *testing.T, tracker *VisitTracker, want int) {
+	t.Helper()
+	for range 100 {
+		if tracker.countVisits(t.Context()) >= want {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Fatalf("timed out waiting for %d visits, saw %d", want, tracker.countVisits(t.Context()))
+}
+
+func (t *VisitTracker) countVisits(ctx context.Context) int {
+	n, err := t.q.CountVisitsSince(ctx, statsWindow)
+	if err != nil {
+		return 0
+	}
+	return int(n)
 }
 
 // The live figure has to include the person loading the page that displays it,

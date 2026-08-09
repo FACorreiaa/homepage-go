@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"log"
 	"math"
 	"net"
 	"net/http"
@@ -99,6 +100,9 @@ type VisitTracker struct {
 	snapAt    time.Time
 
 	bucket *tokenBucket
+
+	warnMu   sync.Mutex
+	warnedAt map[string]time.Time
 }
 
 func NewVisitTracker(q *db.Queries) *VisitTracker {
@@ -114,7 +118,8 @@ func NewVisitTracker(q *db.Queries) *VisitTracker {
 		geoMem:      map[string]geoResult{},
 		inflight:    map[string]struct{}{},
 		// ip-api.com allows 45 requests/minute on the free tier. Stay under it.
-		bucket: newTokenBucket(40, time.Minute),
+		bucket:   newTokenBucket(40, time.Minute),
+		warnedAt: map[string]time.Time{},
 	}
 }
 
@@ -234,21 +239,40 @@ func (t *VisitTracker) resolveAndStore(ip net.IP, hash, path string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
 
-	geo, ok := t.geoFor(ctx, ip)
-	if !ok {
-		return
+	// A failed lookup costs the dot on the map, not the page view. This used to
+	// return here, which meant an unreachable geo provider silently zeroed every
+	// figure on /stats — views, visitors, countries and the path list — while
+	// VISITORS NOW carried on working because it never needs a location. The
+	// whole page read as "no traffic" for as long as the provider was down.
+	geo, located := t.geoFor(ctx, ip)
+	if !located {
+		t.warn("geo lookup failed; recording visit without a location")
 	}
 
-	lat, lon := coarsen(geo.lat, geo.lon, hash)
+	var lat, lon float64
+	if located {
+		lat, lon = coarsen(geo.lat, geo.lon, hash)
+	}
 
 	if err := t.q.RecordVisit(ctx, db.RecordVisitParams{
 		VisitorHash: hash,
+		// An empty country code is the "unlocated" marker. The queries behind
+		// the map and the country list filter on it; the counts do not.
 		CountryCode: geo.countryCode,
 		City:        geo.city,
 		Lat:         lat,
 		Lon:         lon,
 		Path:        path,
 	}); err != nil {
+		t.warn("recording visit failed: " + err.Error())
+		return
+	}
+
+	t.invalidateSnapshot()
+
+	// Only a located visit is a dot. Pushing an unlocated one would land it at
+	// 0,0, which is a real place in the Gulf of Guinea.
+	if !located {
 		return
 	}
 
@@ -262,7 +286,30 @@ func (t *VisitTracker) resolveAndStore(ip net.IP, hash, path string) {
 	}
 	t.push(ping)
 	t.broadcast(ping)
-	t.invalidateSnapshot()
+}
+
+// warn logs at most once a minute per message. Every failure path in this file
+// used to be a bare return, which is exactly why a dead geo provider went
+// unnoticed in production: the page showed zeros and nothing anywhere said why.
+// Throttled because these fire once per visit when the provider is down.
+func (t *VisitTracker) warn(message string) {
+	if t == nil {
+		return
+	}
+	t.warnMu.Lock()
+	last, seen := t.warnedAt[message]
+	now := time.Now()
+	if seen && now.Sub(last) < time.Minute {
+		t.warnMu.Unlock()
+		return
+	}
+	if t.warnedAt == nil {
+		t.warnedAt = map[string]time.Time{}
+	}
+	t.warnedAt[message] = now
+	t.warnMu.Unlock()
+
+	log.Printf("visits: %s", message)
 }
 
 // geoFor resolves an address to a city, checking the in-memory cache, then the
