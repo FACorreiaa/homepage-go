@@ -90,12 +90,17 @@ function startLenis() {
 }
 
 /** Reads the site's design tokens. They are oklch(), so the browser resolves them. */
-function readPalette(tokenColor) {
+function readPalette(THREE, tokenColor) {
+  const go = tokenColor('--go', '#00add8');
   return {
     fg: tokenColor('--foreground', '#111111'),
     signal: tokenColor('--signal', '#22c55e'),
     trail: tokenColor('--trail', '#d99a2b'),
-    go: tokenColor('--go', '#00add8'),
+    go,
+    // The gopher's pale belly. Derived rather than its own token: it is only
+    // ever a tint of the body, and computing it here means the theme repaint
+    // reaches it like every other role.
+    'go-belly': go.clone().lerp(new THREE.Color(0xffffff), 0.62),
   };
 }
 
@@ -471,7 +476,7 @@ async function startWorld() {
   // bail-out above this line leaves that gradient exactly as it is.
   document.documentElement.classList.add('world-on');
 
-  let palette = readPalette(tokenColor);
+  let palette = readPalette(THREE, tokenColor);
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 300);
@@ -496,9 +501,9 @@ async function startWorld() {
   try {
     await loadGopher(THREE);
     characters = {
-      coder: makeGopher(THREE, palette, 'coder', { scale: 1.5, opacity: 0.92 }),
-      runner: makeGopher(THREE, palette, 'runner', { scale: 1.8, opacity: 0.9 }),
-      professor: makeGopher(THREE, palette, 'professor', { scale: 1.6, opacity: 0.92 }),
+      coder: makeGopher(THREE, palette, 'coder', { scale: 1.7 }),
+      runner: makeGopher(THREE, palette, 'runner', { scale: 1.7 }),
+      professor: makeGopher(THREE, palette, 'professor', { scale: 1.7 }),
     };
   } catch {
     /* no gopher; the scene is still a scene */
@@ -549,7 +554,7 @@ async function startWorld() {
   // keeping a second copy of the palette in JS, which would drift from
   // input.css the first time a colour changes there.
   const themeObserver = new MutationObserver(() => {
-    palette = readPalette(tokenColor);
+    palette = readPalette(THREE, tokenColor);
     applyPalette(scene, groups, palette);
   });
   themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });

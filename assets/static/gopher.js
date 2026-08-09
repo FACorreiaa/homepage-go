@@ -37,19 +37,57 @@ export async function loadGopher(THREE) {
 }
 
 /** Paints a clone's three meshes and tags the body so the theme can repaint it. */
-function paint(THREE, root, palette, opacity) {
+function paint(THREE, root, palette) {
   root.traverse((object) => {
     if (!object.isMesh) return;
     const fixed = FIXED[object.name];
-    const material = new THREE.MeshLambertMaterial({
-      color: fixed ?? palette.go,
-      transparent: opacity < 1,
-      opacity,
-    });
+    // Opaque on purpose. Transparency here sorts per object, not per triangle,
+    // so at 0.9 the far side of the body bled through the near side as muddy
+    // patches across the belly. Restraint comes from size and placement.
+    const material = new THREE.MeshLambertMaterial({ color: fixed ?? palette.go });
     // Only the body follows a token; see FIXED above.
     if (!fixed) material.userData.role = 'go';
     object.material = material;
   });
+}
+
+/**
+ * The pale belly, which the mesh does not have and which is the most
+ * recognisable thing about the gopher after its eyes. A flattened sphere
+ * bulging just proud of the lower front, tinted toward white so it reads in
+ * both themes without being a second colour to maintain.
+ */
+function buildBelly(THREE, palette) {
+  // readPalette derives 'go-belly' so the theme repaint reaches this too.
+  const colour = palette['go-belly'] ?? palette.go.clone().lerp(new THREE.Color(0xffffff), 0.62);
+  const material = new THREE.MeshLambertMaterial({ color: colour });
+  material.userData.role = 'go-belly';
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.235, 24, 18), material);
+  belly.scale.set(1.0, 0.94, 0.52);
+  belly.position.set(0, 0.315, 0.25);
+  return belly;
+}
+
+/**
+ * Motion marks. Both reference images put speed lines behind the gopher, and
+ * the Go logo itself carries them — it is the cheapest way to say "running"
+ * for a model that cannot move its legs.
+ */
+function buildSpeedLines(THREE, palette) {
+  const group = new THREE.Group();
+  const material = new THREE.MeshLambertMaterial({ color: palette.go });
+  material.userData.role = 'go';
+  const rows = [
+    { y: 0.72, len: 0.5, x: -0.62 },
+    { y: 0.52, len: 0.72, x: -0.72 },
+    { y: 0.32, len: 0.44, x: -0.6 },
+  ];
+  for (const row of rows) {
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(row.len, 0.035, 0.035), material);
+    bar.position.set(row.x, row.y, -0.1);
+    group.add(bar);
+  }
+  return group;
 }
 
 /**
@@ -124,10 +162,13 @@ function buildGlasses(THREE, palette) {
 function buildPointer(THREE, palette) {
   const material = new THREE.MeshLambertMaterial({ color: palette.fg });
   material.userData.role = 'fg';
-  const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1.1, 6), material);
-  stick.rotation.z = 0.72;
-  stick.rotation.x = -0.1;
-  return stick;
+  const group = new THREE.Group();
+  const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.0075, 0.0075, 0.62, 6), material);
+  // Rotate about the lower end so it pivots from the paw, not its middle.
+  stick.position.y = 0.31;
+  group.add(stick);
+  group.rotation.z = -0.55;
+  return group;
 }
 
 /**
@@ -136,11 +177,12 @@ function buildPointer(THREE, palette) {
  *
  * @param {'coder'|'runner'|'professor'} persona
  */
-export function makeGopher(THREE, palette, persona, { scale = 2.6, opacity = 1 } = {}) {
+export function makeGopher(THREE, palette, persona, { scale = 2.6 } = {}) {
   const group = new THREE.Group();
 
   const model = template.clone(true);
-  paint(THREE, model, palette, opacity);
+  paint(THREE, model, palette);
+  model.add(buildBelly(THREE, palette));
   model.scale.setScalar(scale);
   group.add(model);
 
@@ -148,9 +190,12 @@ export function makeGopher(THREE, palette, persona, { scale = 2.6, opacity = 1 }
     const laptop = buildLaptop(THREE, palette);
     laptop.scale.setScalar(scale);
     // On the ground in front of the gopher, angled up toward it.
-    laptop.scale.multiplyScalar(0.72);
-    laptop.position.set(0.02 * scale, 0.03 * scale, 0.46 * scale);
-    laptop.rotation.y = Math.PI - 0.5;
+    laptop.scale.multiplyScalar(1.05);
+    laptop.position.set(-0.02 * scale, -0.02 * scale, 0.82 * scale);
+    // Screen toward the viewer, gopher behind it — the arrangement in the
+    // reference. Turning it the physically-correct way round means the mark on
+    // it is never seen, and a blank lid is not worth drawing.
+    laptop.rotation.y = 0.22;
     group.add(laptop);
     // Leaning in over the keyboard.
     model.rotation.x = 0.16;
@@ -169,16 +214,25 @@ export function makeGopher(THREE, palette, persona, { scale = 2.6, opacity = 1 }
 
     const pointer = buildPointer(THREE, palette);
     pointer.scale.setScalar(scale);
-    // Held out to the side, clear of the head rather than across it.
-    pointer.position.set(0.62 * scale, 0.34 * scale, 0.16 * scale);
+    // At the right paw, raised — the reference gopher holds it up, not out.
+    // The body is only 0.35 half-wide, so anything past that floats free.
+    pointer.position.set(0.325 * scale, 0.4 * scale, 0.26 * scale);
     group.add(pointer);
 
     group.userData.tick = (t) => {
       group.rotation.y = 0.25 + Math.sin(t * 0.3) * 0.18;
-      pointer.rotation.z = 0.72 + Math.sin(t * 0.9) * 0.1; // gesturing
+      pointer.rotation.z = -0.55 + Math.sin(t * 0.9) * 0.12; // gesturing
     };
   } else {
+    const speed = buildSpeedLines(THREE, palette);
+    speed.scale.setScalar(scale);
+    group.add(speed);
     group.userData.tick = (t) => {
+      // The marks pulse rather than translate; a trailing line that moves reads
+      // as debris, one that flickers reads as speed.
+      speed.children.forEach((bar, i) => {
+        bar.scale.x = 0.75 + Math.sin(t * 3.2 + i * 1.1) * 0.35;
+      });
       group.rotation.y = -0.35 + Math.sin(t * 0.4) * 0.35;
       group.position.y = group.userData.baseY + Math.sin(t * 1.1) * 0.1;
     };
