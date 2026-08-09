@@ -2,82 +2,69 @@ package modules
 
 templ Footer() {
 	<footer class="mt-auto border-t border-border bg-foreground text-background">
-		<div class="mx-auto max-w-6xl px-4 py-18 md:py-24">
-			<div class="texture-noise relative grid gap-10 border-b border-background/12 pb-14 md:grid-cols-[1.35fr_0.65fr] md:items-end">
-				<div>
-					<p class="inline-flex items-center gap-2.5 font-mono text-xs tracking-[0.18em] text-background/60">
-						<span class="status-dot" aria-hidden="true"></span>
-						AVAILABLE FOR SELECT PRODUCT WORK — REMOTE
+		<div class="mx-auto max-w-6xl px-4 py-16 md:py-20">
+			<div class="grid gap-12 md:grid-cols-[1.35fr_1fr_1fr_1fr] md:gap-10 lg:gap-16">
+				<div class="max-w-sm">
+					<a href="/" class="inline-flex items-center gap-3" aria-label="FACorreia home">
+						<span class="footer-mark" aria-hidden="true"></span>
+						<span class="text-xl font-semibold tracking-tight text-background">FACorreia</span>
+					</a>
+					<p class="mt-5 text-sm leading-6 text-background/65">
+						Independent product engineering for polished web apps, high-performance iOS products, and the backends behind them.
 					</p>
-					<p class="mt-5 max-w-4xl text-[clamp(2.25rem,5vw,4.5rem)] font-semibold leading-[0.98] tracking-normal">Have a product that needs senior engineering taste?</p>
-					<p class="mt-5 max-w-2xl text-base leading-7 text-background/72">One senior engineer across iOS, web, and backend — from first commit to production.</p>
-				</div>
-				<div class="flex flex-col gap-3 sm:flex-row md:flex-col">
-					<a href="/proposal" class="inline-flex items-center justify-center gap-2 rounded-full bg-background px-6 py-3 text-center text-sm font-semibold text-foreground transition hover:opacity-90 active:scale-[0.97]">
-						Request proposal
-						@UIIcon("arrow-right", "h-4 w-4")
-					</a>
-					<a href="mailto:fernandocorreia316@gmail.com" class="inline-flex items-center justify-center gap-2 rounded-full border border-background/25 px-6 py-3 text-center text-sm font-semibold text-background transition hover:bg-background/10 active:scale-[0.97]">
-						Email Fernando
-						@UIIcon("mail", "h-4 w-4")
-					</a>
-					<a href="/curriculum" class="text-center text-sm text-background/72 transition-colors hover:text-background sm:self-center md:self-auto md:text-left">
-						Hiring for a full-time role? View my CV →
-					</a>
-				</div>
-			</div>
-			<div class="grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
-				<div>
-					<a href="/" class="inline-flex items-center gap-3 font-semibold">
-						<span class="grid h-9 w-9 place-items-center rounded-full bg-background text-sm text-foreground">FC</span>
-						<span>Software Studio</span>
-					</a>
-					<p class="mt-5 max-w-xs text-sm leading-6 text-background/72">Independent product engineering for polished web apps, high-performance iOS apps, and the backends behind them.</p>
-				</div>
-				<div>
-					<p class="mb-4 font-mono text-[11px] uppercase tracking-wider text-background/55">Explore</p>
-					<nav class="space-y-2.5">
-						for _, l := range [][]string{{"Projects", "/projects"}, {"About", "/about"}, {"CV", "/curriculum"}, {"Stack", "/stack"}, {"Blog", "/blog"}, {"Garden", "/bookmarks"}} {
-							<a href={ templ.SafeURL(l[1]) } class="block text-sm text-background/72 transition-colors hover:text-background">{ l[0] }</a>
-						}
-					</nav>
-				</div>
-				<div>
-					<p class="mb-4 font-mono text-[11px] uppercase tracking-wider text-background/55">Work</p>
-					<nav class="space-y-2.5">
-						for _, s := range []string{"Web applications", "iOS products", "Backend platforms", "Product systems"} {
-							<a href="/proposal" class="block text-sm text-background/72 transition-colors hover:text-background">{ s }</a>
-						}
-					</nav>
-				</div>
-				<div>
-					<p class="mb-4 font-mono text-[11px] uppercase tracking-wider text-background/55">Contact</p>
-					<a href="mailto:fernandocorreia316@gmail.com" class="block text-sm text-background/72 transition-colors hover:text-background">fernandocorreia316@gmail.com</a>
-					<a href="/curriculum" class="mt-2.5 block text-sm text-background/72 transition-colors hover:text-background">View CV</a>
-					<p class="mt-2.5 text-sm text-background/72">Portugal, remote</p>
-					<div class="mt-5 flex gap-3">
-						<a href="https://github.com/FACorreiaa" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="grid h-9 w-9 place-items-center rounded-full border border-background/15 text-background/72 transition-colors hover:border-background/40 hover:text-background">
-							@UIIcon("github", "h-4 w-4")
+					<div class="mt-7 flex items-center gap-4">
+						<a href="https://github.com/FACorreiaa" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="text-background/70 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">
+							@UIIcon("github", "h-5 w-5")
 						</a>
-						<a href="https://www.linkedin.com/in/fernando-correia-ab018079/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="grid h-9 w-9 place-items-center rounded-full border border-background/15 text-background/72 transition-colors hover:border-background/40 hover:text-background">
-							@UIIcon("linkedin", "h-4 w-4")
+						<a href="https://www.linkedin.com/in/fernando-correia-ab018079/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="text-background/70 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">
+							@UIIcon("linkedin", "h-5 w-5")
+						</a>
+						<a href="mailto:fernandocorreia316@gmail.com" aria-label="Email Fernando" class="text-background/70 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">
+							@UIIcon("mail", "h-5 w-5")
 						</a>
 					</div>
 				</div>
+
+				<div>
+					<p class="mb-5 text-sm font-semibold text-background">Explore</p>
+					<nav class="space-y-3" aria-label="Explore">
+						for _, l := range [][]string{{"Projects", "/projects"}, {"About", "/about"}, {"Stack", "/stack"}, {"Blog", "/blog"}, {"Garden", "/bookmarks"}} {
+							<a href={ templ.SafeURL(l[1]) } class="block text-sm text-background/60 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">{ l[0] }</a>
+						}
+					</nav>
+				</div>
+
+				<div>
+					<p class="mb-5 text-sm font-semibold text-background">Services</p>
+					<nav class="space-y-3" aria-label="Services">
+						for _, s := range [][]string{{"Web applications", "/proposal"}, {"iOS products", "/proposal"}, {"Backend platforms", "/proposal"}, {"Product systems", "/proposal"}} {
+							<a href={ templ.SafeURL(s[1]) } class="block text-sm text-background/60 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">{ s[0] }</a>
+						}
+					</nav>
+				</div>
+
+				<div>
+					<p class="mb-5 text-sm font-semibold text-background">Company</p>
+					<nav class="space-y-3" aria-label="Company">
+						for _, l := range [][]string{{"Request proposal", "/proposal"}, {"Curriculum", "/curriculum"}, {"Contact", "mailto:fernandocorreia316@gmail.com"}, {"Live traffic", "/stats"}} {
+							<a href={ templ.SafeURL(l[1]) } class="block text-sm text-background/60 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">{ l[0] }</a>
+						}
+					</nav>
+				</div>
 			</div>
-			<p class="footer-watermark" aria-hidden="true">FC — SOFTWARE STUDIO</p>
-			<div class="flex flex-col items-center justify-between gap-4 border-t border-background/12 pt-8 md:flex-row">
-				<p class="text-sm text-background/60">© 2026 FC Software Studio. All rights reserved.</p>
-				<p class="font-mono text-xs text-background/60">Built with Go, templ, HTMX, SQLite</p>
+
+			<div class="mt-14 border-t border-background/10 pt-8">
+				<p class="text-center text-sm text-background/50">© 2026 FACorreia. All rights reserved.</p>
+				<p class="mt-3 text-center font-mono text-xs text-background/40">Built with Go, templ, HTMX, SQLite</p>
+				// The Go Gopher is CC BY 4.0, which requires attribution — see
+				// assets/static/models/LICENSE.md. The 3D model itself is CC0.
+				<p class="mt-5 text-center font-mono text-xs leading-5 text-background/35">
+					The Go Gopher on the landing page is by
+					<a href="https://go.dev/blog/gopher" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 transition-colors hover:text-background/55">Renée French</a>,
+					licensed
+					<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 transition-colors hover:text-background/55">CC BY 4.0</a>.
+				</p>
 			</div>
-			// The Go Gopher is CC BY 4.0, which requires attribution — see
-			// assets/static/models/LICENSE.md. The 3D model itself is CC0.
-			<p class="mt-6 font-mono text-xs text-background/45">
-				The Go Gopher on the landing page is by
-				<a href="https://go.dev/blog/gopher" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 transition-colors hover:text-background/70">Renée French</a>,
-				licensed
-				<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 transition-colors hover:text-background/70">CC BY 4.0</a>.
-			</p>
 		</div>
 	</footer>
 }

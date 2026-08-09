@@ -358,15 +358,20 @@
     }
   }
 
-  .footer-watermark {
-    font-family: var(--font-mono);
-    font-size: clamp(4rem, 14vw, 12rem);
-    line-height: 0.85;
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-    overflow: hidden;
-    user-select: none;
-    color: color-mix(in oklab, var(--background) 7%, transparent);
+  /* Brand mark for footer — open gold ring (artist-style reference), no mega-watermark. */
+  .footer-mark {
+    display: inline-block;
+    height: 1.75rem;
+    width: 1.75rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background: conic-gradient(
+      from 200deg,
+      oklch(0.8 0.12 78) 0deg 250deg,
+      transparent 250deg 360deg
+    );
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
   }
 
   .status-dot {
