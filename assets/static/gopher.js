@@ -1,6 +1,6 @@
-// The gopher, and the three characters it plays.
+// The gopher, and the four characters it plays.
 //
-// One mesh, loaded once, cloned three times. The personas are placement,
+// One mesh, loaded once, cloned per persona. The personas are placement,
 // rotation and props — the model is a 3D-print model with no rig, so nothing
 // here bends its arms.
 //
@@ -171,11 +171,132 @@ function buildPointer(THREE, palette) {
   return group;
 }
 
+
+/**
+ * Ninja gear from the IMG_5927 reference: hood, open-eye wrap, trailing scarf,
+ * torso gi bands, and a thin katana. Same primitive discipline as the glasses
+ * and pointer — the mesh has no rig, so costume is placement, not deformation.
+ * Dark gear tracks foreground so light mode does not leave a pure-black hole.
+ */
+function ninjaCloth(THREE, palette, opacity = 0.92) {
+  const cloth = new THREE.MeshLambertMaterial({ color: palette.fg, transparent: true, opacity });
+  cloth.userData.role = 'fg';
+  return cloth;
+}
+
+function buildNinjaMask(THREE, palette) {
+  const mask = new THREE.Group();
+  const cloth = ninjaCloth(THREE, palette, 0.93);
+
+  // Hood cap over the crown. Flattened so the ears still poke free.
+  const hood = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), cloth);
+  hood.scale.set(1.05, 0.72, 1.0);
+  hood.position.set(0, 0.16, -0.02);
+  mask.add(hood);
+
+  // Side panels of the eye band — gap on the midline so mesh pupils stay visible.
+  for (const side of [-1, 1]) {
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.14, 0.3), cloth);
+    panel.position.set(side * 0.16, 0.02, 0.04);
+    mask.add(panel);
+  }
+
+  // Thin bridge above the eyes so the two panels still read as one wrap.
+  const brow = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.05, 0.28), cloth);
+  brow.position.set(0, 0.08, 0.03);
+  mask.add(brow);
+
+  // Lower face wrap — gi collar / mouth cover without burying the belly.
+  const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.13, 0.3), cloth);
+  jaw.position.set(0, -0.13, 0.05);
+  mask.add(jaw);
+
+  // Scarf knot + tail trailing off the left side of the head (reference side).
+  const knot = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.1), cloth);
+  knot.position.set(-0.28, 0.04, -0.02);
+  knot.rotation.z = 0.25;
+  mask.add(knot);
+
+  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.08, 0.06), cloth);
+  tail.position.set(-0.42, 0.0, -0.06);
+  tail.rotation.z = 0.4;
+  tail.rotation.y = 0.35;
+  mask.add(tail);
+
+  const tailTip = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.06, 0.05), cloth);
+  tailTip.position.set(-0.58, -0.06, -0.1);
+  tailTip.rotation.z = 0.75;
+  mask.add(tailTip);
+
+  return mask;
+}
+
+/**
+ * Cross-chest gi bands + a waist belt. Sells the full-body dark silhouette of
+ * the reference without recolouring the GLB body mesh.
+ */
+function buildNinjaGi(THREE, palette) {
+  const gi = new THREE.Group();
+  const cloth = ninjaCloth(THREE, palette, 0.9);
+
+  // Diagonal wrap, viewer-left shoulder down to right hip.
+  const sashA = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.42), cloth);
+  sashA.position.set(-0.02, 0.42, 0.08);
+  sashA.rotation.z = 0.55;
+  gi.add(sashA);
+
+  // Crossing band the other way — thinner so the pale belly still peeks.
+  const sashB = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.5, 0.4), cloth);
+  sashB.position.set(0.02, 0.4, 0.06);
+  sashB.rotation.z = -0.5;
+  gi.add(sashB);
+
+  // Torso panel behind the sashes so the midsection reads dark, not bare cyan.
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.38, 0.36), cloth);
+  torso.position.set(0, 0.38, 0.02);
+  gi.add(torso);
+
+  // Waist belt.
+  const belt = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.4), cloth);
+  belt.position.set(0, 0.18, 0.04);
+  gi.add(belt);
+
+  return gi;
+}
+
+/** Thin katana: blade, guard, handle. Held upright from the right paw. */
+function buildKatana(THREE, palette) {
+  const katana = new THREE.Group();
+  const steel = new THREE.MeshLambertMaterial({ color: palette.fg, transparent: true, opacity: 0.75 });
+  steel.userData.role = 'fg';
+  const grip = new THREE.MeshLambertMaterial({ color: palette.fg });
+  grip.userData.role = 'fg';
+
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.72, 0.01), steel);
+  blade.position.y = 0.42;
+  katana.add(blade);
+
+  const guard = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.016, 0.04), grip);
+  guard.position.y = 0.06;
+  katana.add(guard);
+
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.016, 0.14, 8), grip);
+  handle.position.y = -0.02;
+  katana.add(handle);
+
+  // Tip cap so the blade does not read as a flat bar end-on.
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.012, 0.05, 6), steel);
+  tip.position.y = 0.8;
+  katana.add(tip);
+
+  return katana;
+}
+
 /**
  * Builds one gopher in a given role. Returns a group whose userData.tick, if
  * present, animates it — the caller drives it from the scene clock.
  *
- * @param {'coder'|'runner'|'professor'} persona
+ * @param {'coder'|'runner'|'professor'|'ninja'} persona
  */
 export function makeGopher(THREE, palette, persona, { scale = 2.6 } = {}) {
   const group = new THREE.Group();
@@ -222,6 +343,35 @@ export function makeGopher(THREE, palette, persona, { scale = 2.6 } = {}) {
     group.userData.tick = (t) => {
       group.rotation.y = 0.25 + Math.sin(t * 0.3) * 0.18;
       pointer.rotation.z = -0.55 + Math.sin(t * 0.9) * 0.12; // gesturing
+    };
+  } else if (persona === 'ninja') {
+    const mask = buildNinjaMask(THREE, palette);
+    mask.scale.setScalar(scale);
+    // Eye height matches the professor glasses; mask sits a touch proud of the pupils.
+    mask.position.set(0, 0.77 * scale, 0.34 * scale);
+    group.add(mask);
+
+    const gi = buildNinjaGi(THREE, palette);
+    gi.scale.setScalar(scale);
+    // Torso props are authored in model-local units with y≈0 at the feet of the
+    // unit mesh; scaling the whole group matches the body scale.
+    group.add(gi);
+
+    const katana = buildKatana(THREE, palette);
+    katana.scale.setScalar(scale);
+    // Right paw, blade up — the reference holds it nearly vertical.
+    katana.position.set(0.34 * scale, 0.28 * scale, 0.22 * scale);
+    katana.rotation.z = -0.18;
+    katana.rotation.x = 0.08;
+    group.add(katana);
+
+    // Slight lean into a ready stance.
+    model.rotation.x = 0.06;
+    group.userData.tick = (t) => {
+      group.rotation.y = 0.15 + Math.sin(t * 0.28) * 0.14;
+      const base = group.userData.baseY ?? 0;
+      group.position.y = base + Math.sin(t * 1.05) * 0.04;
+      katana.rotation.z = -0.18 + Math.sin(t * 0.7) * 0.06;
     };
   } else {
     const speed = buildSpeedLines(THREE, palette);

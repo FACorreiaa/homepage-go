@@ -11,8 +11,8 @@
 //
 // Nothing here may change layout. The canvas is fixed, behind the content, and
 // aria-hidden; if every line of this file failed the page would be unchanged
-// apart from a flat background. Everything is procedural — no textures, no
-// models, no image bytes at all.
+// apart from a flat background. Geometry is mostly procedural; the only mesh bytes are the shared
+// gopher GLB cloned into station personas.
 
 const stage = document.querySelector('[data-world]');
 
@@ -32,7 +32,7 @@ const STATIONS = {
   horizon: { groupY: -122, camY: -114, camZ: 16, lookY: -131 },
 };
 
-const GRID_COLS = 20; // 400 instanced nodes
+const GRID_COLS = 20; // lattice footprint; center hole + kind filter reduce live instances
 const POD_COUNT = 8000;
 
 /**
@@ -152,10 +152,9 @@ function buildDevice(THREE, palette, character) {
 }
 
 /**
- * Station two — Go. The gopher, built out of primitives rather than loaded from
- * a model: this site ships no image or mesh bytes, and a recognisable gopher is
- * mostly spheres anyway. It sits in a grid of server nodes, because this is the
- * altitude where the CV says Go and Vapor on the server.
+ * Station two — Go on the server. The runner stands in a field of network
+ * nodes: mostly quiet wireframe lattice, with nested frames and small energy
+ * cores so the rack reads as infrastructure rather than a cube demo.
  */
 function buildServer(THREE, palette, character) {
   const group = new THREE.Group();
@@ -168,65 +167,131 @@ function buildServer(THREE, palette, character) {
     group.add(character);
   }
 
-  // --- the rack it stands in ----------------------------------------------
-  const count = GRID_COLS * GRID_COLS;
-  const mesh = new THREE.InstancedMesh(
-    new THREE.BoxGeometry(0.42, 0.42, 0.42),
-    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.16, wireframe: true }), 'fg'),
-    count,
+  const spacing = 1.15;
+  const cols = GRID_COLS;
+  const half = cols / 2;
+  // Soft hole so the character is not buried under equal-weight lattice.
+  const CLEAR_R = 2.55;
+
+  // Stable hash — layout must not reshuffle every reload.
+  const hash01 = (n) => {
+    const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  };
+
+  const cells = [];
+  for (let x = 0; x < cols; x++) {
+    for (let z = 0; z < cols; z++) {
+      const px = (x - half) * spacing;
+      const pz = (z - half) * spacing;
+      const dist = Math.hypot(px, pz);
+      if (dist < CLEAR_R) continue;
+
+      const h = hash01(x * 73 + z * 19 + 3);
+      // Depth falloff: far ring stays quieter so fork panels stay readable.
+      const falloff = THREE.MathUtils.clamp(1.15 - dist * 0.045, 0.42, 1);
+      let kind = 'box';
+      if (h > 0.88) kind = 'core';
+      else if (h > 0.72) kind = 'nested';
+      else if (h > 0.48) kind = 'octa';
+
+      cells.push({
+        px,
+        pz,
+        dist,
+        kind,
+        falloff,
+        phase: dist * 0.22,
+        spin: (hash01(x * 11 + z * 29) - 0.5) * 0.4,
+      });
+    }
+  }
+
+  // Nested = outer box + inner octa only (not also a full octa cell).
+  const boxes = cells.filter((c) => c.kind === 'box' || c.kind === 'nested');
+  const octas = cells.filter((c) => c.kind === 'octa');
+  const cores = cells.filter((c) => c.kind === 'core');
+  const nested = cells.filter((c) => c.kind === 'nested');
+
+  const boxMesh = new THREE.InstancedMesh(
+    new THREE.BoxGeometry(0.4, 0.4, 0.4),
+    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.12, wireframe: true }), 'fg'),
+    Math.max(boxes.length, 1),
+  );
+  const octaMesh = new THREE.InstancedMesh(
+    new THREE.OctahedronGeometry(0.28, 0),
+    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.11, wireframe: true }), 'fg'),
+    Math.max(octas.length, 1),
+  );
+  const nestedMesh = new THREE.InstancedMesh(
+    new THREE.OctahedronGeometry(0.16, 0),
+    tag(new THREE.MeshBasicMaterial({ color: palette.go, transparent: true, opacity: 0.18, wireframe: true }), 'go'),
+    Math.max(nested.length, 1),
+  );
+  const coreMesh = new THREE.InstancedMesh(
+    new THREE.IcosahedronGeometry(0.07, 0),
+    tag(new THREE.MeshBasicMaterial({ color: palette.go, transparent: true, opacity: 0.55 }), 'go'),
+    Math.max(cores.length, 1),
   );
 
   const dummy = new THREE.Object3D();
-  const offsets = new Float32Array(count);
-  let i = 0;
-  for (let x = 0; x < GRID_COLS; x++) {
-    for (let z = 0; z < GRID_COLS; z++) {
-      const px = (x - GRID_COLS / 2) * 1.15;
-      const pz = (z - GRID_COLS / 2) * 1.15;
-      dummy.position.set(px, 0, pz);
+  const place = (mesh, list, scaleFor) => {
+    list.forEach((cell, i) => {
+      const s = scaleFor(cell);
+      dummy.position.set(cell.px, 0, cell.pz);
+      dummy.scale.setScalar(s);
+      dummy.rotation.set(0, cell.spin, 0);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
-      // Phase by distance from centre so the wave travels outward.
-      offsets[i] = Math.hypot(px, pz) * 0.22;
-      i++;
-    }
-  }
-  mesh.instanceMatrix.needsUpdate = true;
-  group.add(mesh);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.count = list.length;
+    group.add(mesh);
+  };
 
-  // Traffic between nodes. Straight segments, because this is a network.
+  place(boxMesh, boxes, (c) => c.falloff);
+  place(octaMesh, octas, (c) => c.falloff);
+  place(nestedMesh, nested, (c) => c.falloff);
+  place(coreMesh, cores, (c) => c.falloff * 0.95);
+
+  // Traffic biased toward core nodes when possible — purposeful links, not pure noise.
   const linePositions = [];
-  for (let n = 0; n < 26; n++) {
-    const a = Math.floor(Math.random() * count);
-    const b = Math.floor(Math.random() * count);
-    const ax = ((a / GRID_COLS | 0) - GRID_COLS / 2) * 1.15;
-    const az = ((a % GRID_COLS) - GRID_COLS / 2) * 1.15;
-    const bx = ((b / GRID_COLS | 0) - GRID_COLS / 2) * 1.15;
-    const bz = ((b % GRID_COLS) - GRID_COLS / 2) * 1.15;
-    linePositions.push(ax, 0.3, az, bx, 0.3, bz);
+  const coreOrAll = cores.length >= 2 ? cores : cells;
+  const pick = (n) => coreOrAll[Math.floor(hash01(n + 9) * coreOrAll.length) % coreOrAll.length];
+  for (let n = 0; n < 28; n++) {
+    const a = pick(n * 2);
+    const b = pick(n * 2 + 1);
+    if (!a || !b || a === b) continue;
+    linePositions.push(a.px, 0.28, a.pz, b.px, 0.28, b.pz);
   }
   const traffic = new THREE.LineSegments(
     new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3)),
-    tag(new THREE.LineBasicMaterial({ color: palette.signal, transparent: true, opacity: 0.3 }), 'signal'),
+    tag(new THREE.LineBasicMaterial({ color: palette.signal, transparent: true, opacity: 0.28 }), 'signal'),
   );
   group.add(traffic);
 
-  const dummyTick = new THREE.Object3D();
-  group.userData.tick = (t) => {
-    let k = 0;
-    for (let x = 0; x < GRID_COLS; x++) {
-      for (let z = 0; z < GRID_COLS; z++) {
-        const px = (x - GRID_COLS / 2) * 1.15;
-        const pz = (z - GRID_COLS / 2) * 1.15;
-        dummyTick.position.set(px, Math.sin(t * 0.9 - offsets[k]) * 0.22, pz);
-        dummyTick.rotation.y = t * 0.08;
-        dummyTick.updateMatrix();
-        mesh.setMatrixAt(k, dummyTick.matrix);
-        k++;
-      }
-    }
+  const waveDummy = new THREE.Object3D();
+  const wave = (mesh, list, t, rotMul, yAmp, extraRot = 0) => {
+    list.forEach((cell, i) => {
+      const s = cell.falloff * (mesh === coreMesh ? 0.95 + Math.sin(t * 2.1 + cell.phase) * 0.12 : 1);
+      waveDummy.position.set(cell.px, Math.sin(t * 0.9 - cell.phase) * yAmp, cell.pz);
+      waveDummy.scale.setScalar(Math.max(s, 0.2));
+      waveDummy.rotation.set(extraRot * t, cell.spin + t * rotMul, extraRot * t * 0.6);
+      waveDummy.updateMatrix();
+      mesh.setMatrixAt(i, waveDummy.matrix);
+    });
     mesh.instanceMatrix.needsUpdate = true;
-    traffic.material.opacity = 0.2 + Math.sin(t * 2.2) * 0.09;
+  };
+
+  group.userData.tick = (t) => {
+    wave(boxMesh, boxes, t, 0.08, 0.2);
+    wave(octaMesh, octas, t, 0.11, 0.22, 0.05);
+    wave(nestedMesh, nested, t, -0.16, 0.18, 0.12);
+    wave(coreMesh, cores, t, 0.2, 0.16, 0.15);
+    // Pulse core material opacity as a field, not per-instance (InstancedMesh shares one material).
+    coreMesh.material.opacity = 0.42 + Math.sin(t * 2.0) * 0.14;
+    nestedMesh.material.opacity = 0.14 + Math.sin(t * 1.3) * 0.05;
+    traffic.material.opacity = 0.18 + Math.sin(t * 2.2) * 0.08;
     character?.userData.tick?.(t);
   };
 
@@ -361,9 +426,10 @@ function buildCluster(THREE, palette, character) {
 
 /**
  * Station four — the horizon. Everything recedes to a ground plane and a line.
- * The scene goes quiet where the page asks for a decision.
+ * The scene goes quiet where the page asks for a decision. The ninja stands
+ * here: production shipped, still watching the perimeter.
  */
-function buildHorizon(THREE, palette) {
+function buildHorizon(THREE, palette, character) {
   const group = new THREE.Group();
   group.position.y = STATIONS.horizon.groupY;
 
@@ -383,11 +449,19 @@ function buildHorizon(THREE, palette) {
   );
   group.add(horizon);
 
+  if (character) {
+    // Slightly right of centre, feet clear of the drifting grid.
+    character.position.set(1.4, -4.35, 0.6);
+    character.userData.baseY = -4.35;
+    group.add(character);
+  }
+
   group.userData.tick = (t) => {
     // The grid drifts toward the viewer, one cell per cycle, so the ground
     // reads as moving without the camera having to.
     grid.position.z = (t * 0.6) % 2;
     horizon.material.opacity = 0.35 + Math.sin(t * 0.8) * 0.15;
+    character?.userData.tick?.(t);
   };
 
   return group;
@@ -495,15 +569,16 @@ async function startWorld() {
   rim.position.set(-5, 2, -4);
   scene.add(rim);
 
-  // One mesh, cloned three times. If it fails to load the stations still build
+  // One mesh, cloned per persona. If it fails to load the stations still build
   // — they simply have no character in them.
-  let characters = { coder: null, runner: null, professor: null };
+  let characters = { coder: null, runner: null, professor: null, ninja: null };
   try {
     await loadGopher(THREE);
     characters = {
       coder: makeGopher(THREE, palette, 'coder', { scale: 1.7 }),
       runner: makeGopher(THREE, palette, 'runner', { scale: 1.7 }),
       professor: makeGopher(THREE, palette, 'professor', { scale: 1.7 }),
+      ninja: makeGopher(THREE, palette, 'ninja', { scale: 1.6 }),
     };
   } catch {
     /* no gopher; the scene is still a scene */
@@ -513,7 +588,7 @@ async function startWorld() {
     buildDevice(THREE, palette, characters.coder),
     buildServer(THREE, palette, characters.runner),
     buildCluster(THREE, palette, characters.professor),
-    buildHorizon(THREE, palette),
+    buildHorizon(THREE, palette, characters.ninja),
   ];
   groups.forEach((g) => scene.add(g));
 
