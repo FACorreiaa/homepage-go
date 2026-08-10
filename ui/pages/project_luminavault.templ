@@ -7,7 +7,13 @@ import (
 )
 
 templ ProjectLuminavault(p model.ProjectItem) {
-	@layouts.BaseLayout(layouts.LayoutProps{Title: "LuminaVault | FC Software Studio", ActivePage: "projects", Description: "Your second brain, built to think with you."}) {
+	@layouts.BaseLayout(layouts.LayoutProps{
+		Title:       "LuminaVault | FC Software Studio",
+		ActivePage:  "projects",
+		Description: "Your second brain, built to think with you.",
+		OGImage:     p.LogoAsset,
+		ExtraJSONLD: layouts.ProjectJSONLD(p.Slug, p.Title, p.Description, p.LogoAsset),
+	}) {
 		<div class="public-shell min-h-screen">
 			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32">
 				<a href="/projects" class="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">

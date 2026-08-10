@@ -7,7 +7,13 @@ import (
 )
 
 templ ProjectDetail(d model.ProjectDetailData) {
-	@layouts.BaseLayout(layouts.LayoutProps{Title: d.Project.Title + " | FC Software Studio", ActivePage: "projects"}) {
+	@layouts.BaseLayout(layouts.LayoutProps{
+		Title:       d.Project.Title + " | FC Software Studio",
+		ActivePage:  "projects",
+		Description: d.Project.Description,
+		OGImage:     d.Project.LogoAsset,
+		ExtraJSONLD: layouts.ProjectJSONLD(d.Project.Slug, d.Project.Title, d.Project.Description, d.Project.LogoAsset),
+	}) {
 		<div class="public-shell min-h-screen">
 			<section class="mx-auto max-w-7xl px-4 py-20 md:py-32">
 				<a href="/projects" class="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">

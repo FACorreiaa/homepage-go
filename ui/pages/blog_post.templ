@@ -6,7 +6,13 @@ import (
 )
 
 templ BlogPost(post db.BlogPost, htmlContent string) {
-	@layouts.BaseLayout(layouts.LayoutProps{Title: post.Title + " | FC Software Studio", ActivePage: "blog", Description: post.Summary, OGType: "article"}) {
+	@layouts.BaseLayout(layouts.LayoutProps{
+		Title:       post.Title + " | FC Software Studio",
+		ActivePage:  "blog",
+		Description: post.Summary,
+		OGType:      "article",
+		ExtraJSONLD: layouts.BlogPostJSONLD(post.Slug, post.Title, post.Summary, post.Category, post.Date, post.UpdatedAt, ""),
+	}) {
 		<div class="public-shell min-h-screen">
 			<article class="mx-auto max-w-5xl px-4 py-20 md:py-32">
 				<a href="/blog" class="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">

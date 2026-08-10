@@ -12,6 +12,10 @@ type LayoutProps struct {
 	OGType      string
 	ActivePage  string
 
+	// ExtraJSONLD is one or more full <script type="application/ld+json">…</script>
+	// blocks (page-specific BlogPosting, BreadcrumbList, etc.). Safe to leave empty.
+	ExtraJSONLD string
+
 	// SmoothScroll hands scrolling to Lenis on this page. Two things in the
 	// layout fight it and have to stand down when it is set: the native
 	// scroll-behavior on <html>, and the scroll-to-top button's window.scrollTo.
@@ -34,7 +38,7 @@ func (p LayoutProps) title() string {
 
 func (p LayoutProps) description() string {
 	if p.Description == "" {
-		return "FC Software Studio builds polished web apps, high-performance iOS apps, and custom product engineering services."
+		return "FC Software Studio - Fernando Correia. Go backends, SwiftUI iOS apps, and Kubernetes production systems for product teams."
 	}
 	return p.Description
 }
@@ -62,17 +66,27 @@ templ BaseLayout(props LayoutProps) {
 			<title>{ props.title() }</title>
 			<meta name="description" content={ props.description() }/>
 			<meta name="author" content="Fernando Correia"/>
+			<meta name="robots" content="index,follow,max-image-preview:large"/>
+			<meta name="googlebot" content="index,follow"/>
 			<link rel="canonical" href={ canonicalURL(ctx) }/>
+			<meta property="og:site_name" content="FC Software Studio"/>
+			<meta property="og:locale" content="en_US"/>
 			<meta property="og:url" content={ canonicalURL(ctx) }/>
 			<meta property="og:title" content={ props.title() }/>
 			<meta property="og:description" content={ props.description() }/>
 			<meta property="og:type" content={ props.ogType() }/>
 			<meta property="og:image" content={ props.ogImage() }/>
+			<meta property="og:image:alt" content={ props.title() }/>
 			<meta name="twitter:card" content="summary_large_image"/>
 			<meta name="twitter:title" content={ props.title() }/>
 			<meta name="twitter:description" content={ props.description() }/>
 			<meta name="twitter:image" content={ props.ogImage() }/>
 			<meta name="theme-color" content="#0f172a"/>
+			// Person + WebSite JSON-LD for brand/person entity.
+			@templ.Raw(`<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://facorreia.com/#website","url":"https://facorreia.com/","name":"FC Software Studio","description":"Portugal-based product engineering studio. Go backends, SwiftUI iOS apps, Kubernetes production systems.","inLanguage":"en","publisher":{"@id":"https://facorreia.com/#person"}},{"@type":"Person","@id":"https://facorreia.com/#person","name":"Fernando Correia","url":"https://facorreia.com/","jobTitle":"Software Engineer","address":{"@type":"PostalAddress","addressLocality":"Porto","addressCountry":"PT"},"sameAs":["https://github.com/FACorreiaa"],"knowsAbout":["Go","Swift","SwiftUI","Kubernetes","product engineering","backend systems"]},{"@type":"ProfessionalService","@id":"https://facorreia.com/#studio","name":"FC Software Studio","url":"https://facorreia.com/","image":"https://facorreia.com/assets/static/icon-512.png","areaServed":"Worldwide","availableLanguage":["en","pt"],"founder":{"@id":"https://facorreia.com/#person"}}]}</script>`)
+			if props.ExtraJSONLD != "" {
+				@templ.Raw(props.ExtraJSONLD)
+			}
 			<link rel="icon" type="image/png" sizes="192x192" href="/assets/static/icon-192.png"/>
 			<link rel="apple-touch-icon" href="/assets/static/icon-192.png"/>
 			<link rel="manifest" href="/assets/static/manifest.json"/>
