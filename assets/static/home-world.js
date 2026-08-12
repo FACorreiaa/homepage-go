@@ -11,8 +11,8 @@
 //
 // Nothing here may change layout. The canvas is fixed, behind the content, and
 // aria-hidden; if every line of this file failed the page would be unchanged
-// apart from a flat background. Geometry is mostly procedural; the only mesh bytes are the shared
-// gopher GLB cloned into station personas.
+// apart from a flat background. The language graph lives in home-graph.js. The
+// only mesh bytes are the shared gopher GLB cloned into station personas.
 
 const stage = document.querySelector('[data-world]');
 
@@ -31,9 +31,6 @@ const STATIONS = {
   cluster: { groupY: -76, camY: -76, camZ: 11, lookY: -79 },
   horizon: { groupY: -122, camY: -114, camZ: 16, lookY: -131 },
 };
-
-const GRID_COLS = 20; // lattice footprint; center hole + kind filter reduce live instances
-const POD_COUNT = 8000;
 
 /**
  * Whether the scene is worth loading at all. Four ways to say no, and the page
@@ -93,6 +90,7 @@ function startLenis() {
 function readPalette(THREE, tokenColor) {
   const go = tokenColor('--go', '#00add8');
   return {
+    bg: tokenColor('--background', '#111111'),
     fg: tokenColor('--foreground', '#111111'),
     signal: tokenColor('--signal', '#22c55e'),
     trail: tokenColor('--trail', '#d99a2b'),
@@ -152,146 +150,20 @@ function buildDevice(THREE, palette, character) {
 }
 
 /**
- * Station two — Go on the server. The runner stands in a field of network
- * nodes: mostly quiet wireframe lattice, with nested frames and small energy
- * cores so the rack reads as infrastructure rather than a cube demo.
+ * Station two — Go on the server. The runner stands in a hole the language
+ * graph leaves open. The rack itself is the graph, not a cube lattice.
  */
 function buildServer(THREE, palette, character) {
   const group = new THREE.Group();
   group.position.y = STATIONS.server.groupY;
 
-  // The runner stands in the centre of the rack — same axis the camera looks at.
   if (character) {
     character.position.set(0.4, -1.4, 1.5);
     character.userData.baseY = -1.4;
     group.add(character);
   }
 
-  const spacing = 1.15;
-  const cols = GRID_COLS;
-  const half = cols / 2;
-  // Soft hole so the character is not buried under equal-weight lattice.
-  const CLEAR_R = 2.55;
-
-  // Stable hash — layout must not reshuffle every reload.
-  const hash01 = (n) => {
-    const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-    return x - Math.floor(x);
-  };
-
-  const cells = [];
-  for (let x = 0; x < cols; x++) {
-    for (let z = 0; z < cols; z++) {
-      const px = (x - half) * spacing;
-      const pz = (z - half) * spacing;
-      const dist = Math.hypot(px, pz);
-      if (dist < CLEAR_R) continue;
-
-      const h = hash01(x * 73 + z * 19 + 3);
-      // Depth falloff: far ring stays quieter so fork panels stay readable.
-      const falloff = THREE.MathUtils.clamp(1.15 - dist * 0.045, 0.42, 1);
-      let kind = 'box';
-      if (h > 0.88) kind = 'core';
-      else if (h > 0.72) kind = 'nested';
-      else if (h > 0.48) kind = 'octa';
-
-      cells.push({
-        px,
-        pz,
-        dist,
-        kind,
-        falloff,
-        phase: dist * 0.22,
-        spin: (hash01(x * 11 + z * 29) - 0.5) * 0.4,
-      });
-    }
-  }
-
-  // Nested = outer box + inner octa only (not also a full octa cell).
-  const boxes = cells.filter((c) => c.kind === 'box' || c.kind === 'nested');
-  const octas = cells.filter((c) => c.kind === 'octa');
-  const cores = cells.filter((c) => c.kind === 'core');
-  const nested = cells.filter((c) => c.kind === 'nested');
-
-  const boxMesh = new THREE.InstancedMesh(
-    new THREE.BoxGeometry(0.4, 0.4, 0.4),
-    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.12, wireframe: true }), 'fg'),
-    Math.max(boxes.length, 1),
-  );
-  const octaMesh = new THREE.InstancedMesh(
-    new THREE.OctahedronGeometry(0.28, 0),
-    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.11, wireframe: true }), 'fg'),
-    Math.max(octas.length, 1),
-  );
-  const nestedMesh = new THREE.InstancedMesh(
-    new THREE.OctahedronGeometry(0.16, 0),
-    tag(new THREE.MeshBasicMaterial({ color: palette.go, transparent: true, opacity: 0.18, wireframe: true }), 'go'),
-    Math.max(nested.length, 1),
-  );
-  const coreMesh = new THREE.InstancedMesh(
-    new THREE.IcosahedronGeometry(0.07, 0),
-    tag(new THREE.MeshBasicMaterial({ color: palette.go, transparent: true, opacity: 0.55 }), 'go'),
-    Math.max(cores.length, 1),
-  );
-
-  const dummy = new THREE.Object3D();
-  const place = (mesh, list, scaleFor) => {
-    list.forEach((cell, i) => {
-      const s = scaleFor(cell);
-      dummy.position.set(cell.px, 0, cell.pz);
-      dummy.scale.setScalar(s);
-      dummy.rotation.set(0, cell.spin, 0);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
-    });
-    mesh.instanceMatrix.needsUpdate = true;
-    mesh.count = list.length;
-    group.add(mesh);
-  };
-
-  place(boxMesh, boxes, (c) => c.falloff);
-  place(octaMesh, octas, (c) => c.falloff);
-  place(nestedMesh, nested, (c) => c.falloff);
-  place(coreMesh, cores, (c) => c.falloff * 0.95);
-
-  // Traffic biased toward core nodes when possible — purposeful links, not pure noise.
-  const linePositions = [];
-  const coreOrAll = cores.length >= 2 ? cores : cells;
-  const pick = (n) => coreOrAll[Math.floor(hash01(n + 9) * coreOrAll.length) % coreOrAll.length];
-  for (let n = 0; n < 28; n++) {
-    const a = pick(n * 2);
-    const b = pick(n * 2 + 1);
-    if (!a || !b || a === b) continue;
-    linePositions.push(a.px, 0.28, a.pz, b.px, 0.28, b.pz);
-  }
-  const traffic = new THREE.LineSegments(
-    new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3)),
-    tag(new THREE.LineBasicMaterial({ color: palette.signal, transparent: true, opacity: 0.28 }), 'signal'),
-  );
-  group.add(traffic);
-
-  const waveDummy = new THREE.Object3D();
-  const wave = (mesh, list, t, rotMul, yAmp, extraRot = 0) => {
-    list.forEach((cell, i) => {
-      const s = cell.falloff * (mesh === coreMesh ? 0.95 + Math.sin(t * 2.1 + cell.phase) * 0.12 : 1);
-      waveDummy.position.set(cell.px, Math.sin(t * 0.9 - cell.phase) * yAmp, cell.pz);
-      waveDummy.scale.setScalar(Math.max(s, 0.2));
-      waveDummy.rotation.set(extraRot * t, cell.spin + t * rotMul, extraRot * t * 0.6);
-      waveDummy.updateMatrix();
-      mesh.setMatrixAt(i, waveDummy.matrix);
-    });
-    mesh.instanceMatrix.needsUpdate = true;
-  };
-
   group.userData.tick = (t) => {
-    wave(boxMesh, boxes, t, 0.08, 0.2);
-    wave(octaMesh, octas, t, 0.11, 0.22, 0.05);
-    wave(nestedMesh, nested, t, -0.16, 0.18, 0.12);
-    wave(coreMesh, cores, t, 0.2, 0.16, 0.15);
-    // Pulse core material opacity as a field, not per-instance (InstancedMesh shares one material).
-    coreMesh.material.opacity = 0.42 + Math.sin(t * 2.0) * 0.14;
-    nestedMesh.material.opacity = 0.14 + Math.sin(t * 1.3) * 0.05;
-    traffic.material.opacity = 0.18 + Math.sin(t * 2.2) * 0.08;
     character?.userData.tick?.(t);
   };
 
@@ -299,72 +171,12 @@ function buildServer(THREE, palette, character) {
 }
 
 /**
- * Station three — the cluster. Drop through the grid into the pods themselves:
- * a field of points, too many to count, which is the point.
+ * Station three — the cluster. The language graph continues through here; this
+ * group only keeps the helm and the professor.
  */
 function buildCluster(THREE, palette, character) {
   const group = new THREE.Group();
   group.position.y = STATIONS.cluster.groupY;
-
-  const positions = new Float32Array(POD_COUNT * 3);
-  const seeds = new Float32Array(POD_COUNT);
-  for (let i = 0; i < POD_COUNT; i++) {
-    // Cylindrical shell, so the camera falls through the middle of it.
-    const angle = Math.random() * Math.PI * 2;
-    const radius = 4 + Math.random() * 13;
-    positions[i * 3] = Math.cos(angle) * radius;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 34;
-    positions[i * 3 + 2] = Math.sin(angle) * radius;
-    seeds[i] = Math.random();
-  }
-
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geometry.setAttribute('aSeed', new THREE.Float32BufferAttribute(seeds, 1));
-
-  // Additive so density reads as brightness — a thick part of the field glows
-  // without needing a bloom pass, which would double the frame cost.
-  const material = new THREE.ShaderMaterial({
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    uniforms: {
-      uTime: { value: 0 },
-      uCold: { value: palette.trail },
-      uHot: { value: palette.signal },
-      uScale: { value: 300 },
-    },
-    vertexShader: `
-      attribute float aSeed;
-      uniform float uTime;
-      uniform float uScale;
-      varying float vHeat;
-      void main() {
-        vec3 p = position;
-        p.y += sin(uTime * 0.5 + aSeed * 12.0) * 0.5;
-        vec4 mv = modelViewMatrix * vec4(p, 1.0);
-        // A pod is "hot" in bursts, so the field flickers like real traffic.
-        vHeat = smoothstep(0.72, 1.0, fract(aSeed * 7.3 + uTime * 0.12));
-        gl_PointSize = (0.012 + vHeat * 0.02) * uScale / max(-mv.z, 0.001);
-        gl_Position = projectionMatrix * mv;
-      }
-    `,
-    fragmentShader: `
-      uniform vec3 uCold;
-      uniform vec3 uHot;
-      varying float vHeat;
-      void main() {
-        // Round the square point sprite off.
-        float d = length(gl_PointCoord - vec2(0.5));
-        if (d > 0.5) discard;
-        float core = smoothstep(0.5, 0.0, d);
-        gl_FragColor = vec4(mix(uCold, uHot, vHeat), core * (0.25 + vHeat * 0.6));
-      }
-    `,
-  });
-
-  const pods = new THREE.Points(geometry, material);
-  group.add(pods);
 
   // The helm. Kubernetes' mark is a seven-spoke ship's wheel, and seven is the
   // whole joke, so the geometry is built from a heptagon rather than a circle.
@@ -387,7 +199,6 @@ function buildCluster(THREE, palette, character) {
   helm.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(heptagon(outer)), helmLine));
   helm.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(heptagon(inner)), helmLine));
 
-  // Spokes out to each vertex, each capped with the handle the mark has.
   const spokeEnds = [];
   for (let i = 0; i < SPOKES; i++) {
     const a = (i / SPOKES) * Math.PI * 2 + Math.PI / 2;
@@ -398,69 +209,38 @@ function buildCluster(THREE, palette, character) {
     new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(spokeEnds), helmLine),
   );
 
-  // Slightly right of centre and set back so the wheel frames the professor
-  // without drifting into the far gutter.
   helm.position.set(1.6, -2.6, -9);
   helm.scale.setScalar(0.72);
   group.add(helm);
 
-
-  // The professor explains the cluster, standing under the helm.
   if (character) {
     character.position.set(0.6, -4.2, -4.0);
     group.add(character);
   }
 
   group.userData.tick = (t) => {
-    material.uniforms.uTime.value = t;
-    // Only the pod field spins; the professor would spin with it otherwise.
-    pods.rotation.y = t * 0.035;
-    // A wheel at the helm turns slowly and steadily. Nothing dramatic.
     helm.rotation.z = -t * 0.09;
     character?.userData.tick?.(t);
   };
-  group.userData.material = material;
 
   return group;
 }
 
 /**
- * Station four — the horizon. Everything recedes to a ground plane and a line.
- * The scene goes quiet where the page asks for a decision. The ninja stands
- * here: production shipped, still watching the perimeter.
+ * Station four — the horizon. The graph thins into a constellation here. The
+ * ninja stands in the remaining space: production shipped, still watching.
  */
 function buildHorizon(THREE, palette, character) {
   const group = new THREE.Group();
   group.position.y = STATIONS.horizon.groupY;
 
-  const grid = new THREE.GridHelper(120, 60, palette.fg, palette.fg);
-  grid.material.transparent = true;
-  grid.material.opacity = 0.14;
-  tag(grid.material, 'fg');
-  grid.position.y = -6;
-  group.add(grid);
-
-  const horizon = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(-60, -6, -60),
-      new THREE.Vector3(60, -6, -60),
-    ]),
-    tag(new THREE.LineBasicMaterial({ color: palette.signal, transparent: true, opacity: 0.5 }), 'signal'),
-  );
-  group.add(horizon);
-
   if (character) {
-    // Slightly right of centre, feet clear of the drifting grid.
     character.position.set(1.4, -4.35, 0.6);
     character.userData.baseY = -4.35;
     group.add(character);
   }
 
   group.userData.tick = (t) => {
-    // The grid drifts toward the viewer, one cell per cycle, so the ground
-    // reads as moving without the camera having to.
-    grid.position.z = (t * 0.6) % 2;
-    horizon.material.opacity = 0.35 + Math.sin(t * 0.8) * 0.15;
     character?.userData.tick?.(t);
   };
 
@@ -509,14 +289,20 @@ function wireScrollTriggers(gsap, ScrollTrigger, camera, focus) {
     // fromTo, not to: a bare .to() infers its start from wherever the camera
     // happens to be when the leg first renders, so scrolling up would start the
     // leg from the wrong station. Naming both ends makes each leg total.
+    // immediateRender is off so later legs do not snap the camera to their
+    // end state while the page is still at the hero.
     leg.fromTo(
       camera.position,
       { y: from.camY, z: from.camZ },
-      { y: to.camY, z: to.camZ, ease: 'none', duration: 1 },
+      { y: to.camY, z: to.camZ, ease: 'none', duration: 1, immediateRender: false },
       0,
     );
-    // Same slot, so the aim arrives with the position rather than trailing it.
-    leg.fromTo(focus, { y: from.lookY }, { y: to.lookY, ease: 'none', duration: 1 }, 0);
+    leg.fromTo(
+      focus,
+      { y: from.lookY },
+      { y: to.lookY, ease: 'none', duration: 1, immediateRender: false },
+      0,
+    );
   }
 }
 
@@ -528,6 +314,12 @@ async function startWorld() {
   const THREE = await import('three');
   const { tokenColor } = await import('./three-utils.js');
   const { loadGopher, makeGopher } = await import('./gopher.js');
+  const { buildGraph } = await import('./home-graph.js');
+  try {
+    await document.fonts?.ready;
+  } catch {
+    /* canvas labels fall back to ui-monospace */
+  }
 
   const canvas = document.createElement('canvas');
   canvas.className = 'world-canvas';
@@ -553,6 +345,7 @@ async function startWorld() {
   let palette = readPalette(THREE, tokenColor);
 
   const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(palette.bg, 0.034);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 300);
   camera.position.set(0, STATIONS.device.camY, STATIONS.device.camZ);
   // Tweened alongside the camera so the tilt changes between stations too.
@@ -592,6 +385,9 @@ async function startWorld() {
   ];
   groups.forEach((g) => scene.add(g));
 
+  const graph = buildGraph(THREE, palette);
+  scene.add(graph);
+
   function resize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -599,11 +395,6 @@ async function startWorld() {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
-    // Point size is given in world units and projected here, so the pods stay
-    // the same physical size across viewport and DPR changes.
-    const cluster = groups[2];
-    cluster.userData.material.uniforms.uScale.value =
-      renderer.domElement.height / (2 * Math.tan((camera.fov * Math.PI) / 360));
   }
   resize();
   window.addEventListener('resize', resize, { passive: true });
@@ -613,6 +404,7 @@ async function startWorld() {
     if (document.hidden) return;
     const t = clock.getElapsedTime();
     for (const g of groups) g.userData.tick?.(t);
+    graph.userData.tick?.(t, camera);
     camera.lookAt(focus);
     renderer.render(scene, camera);
   }
@@ -630,25 +422,21 @@ async function startWorld() {
   // input.css the first time a colour changes there.
   const themeObserver = new MutationObserver(() => {
     palette = readPalette(THREE, tokenColor);
-    applyPalette(scene, groups, palette);
+    applyPalette(scene, graph, palette);
   });
   themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
-  window.__world = { THREE, renderer, scene, camera, groups, render };
+  window.__world = { THREE, renderer, scene, camera, groups, graph, render };
 }
 
 /** Repaints existing materials from a freshly resolved palette, by role. */
-function applyPalette(scene, groups, palette) {
+function applyPalette(scene, graph, palette) {
   scene.traverse((object) => {
     const role = object.material?.userData?.role;
     if (role && palette[role]) object.material.color.set(palette[role]);
   });
-
-  // The pod field is a shader, so its colours are uniforms rather than a
-  // material colour and the traversal above cannot reach them.
-  const uniforms = groups[2].userData.material.uniforms;
-  uniforms.uCold.value = palette.trail;
-  uniforms.uHot.value = palette.signal;
+  if (scene.fog && palette.bg) scene.fog.color.copy(palette.bg);
+  graph?.userData.repaint?.(palette);
 }
 
 function boot() {
