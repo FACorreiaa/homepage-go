@@ -432,8 +432,14 @@ async function startWorld() {
 /** Repaints existing materials from a freshly resolved palette, by role. */
 function applyPalette(scene, graph, palette) {
   scene.traverse((object) => {
-    const role = object.material?.userData?.role;
-    if (role && palette[role]) object.material.color.set(palette[role]);
+    const mat = object.material;
+    if (!mat?.userData) return;
+    const role = mat.userData.role;
+    if (role && palette[role]) mat.color.set(palette[role]);
+    const emissiveRole = mat.userData.emissiveRole;
+    if (emissiveRole && palette[emissiveRole] && mat.emissive) {
+      mat.emissive.set(palette[emissiveRole]);
+    }
   });
   if (scene.fog && palette.bg) scene.fog.color.copy(palette.bg);
   graph?.userData.repaint?.(palette);

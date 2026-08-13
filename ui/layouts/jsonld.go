@@ -27,19 +27,19 @@ func BlogPostJSONLD(slug, title, summary, category, date, updatedAt, imageURL st
 
 	graph := []map[string]any{
 		{
-			"@type":            "BlogPosting",
-			"@id":              pageURL + "#article",
-			"headline":         title,
-			"description":      summary,
-			"datePublished":    published,
-			"dateModified":     modified,
-			"inLanguage":       "en",
+			"@type":               "BlogPosting",
+			"@id":                 pageURL + "#article",
+			"headline":            title,
+			"description":         summary,
+			"datePublished":       published,
+			"dateModified":        modified,
+			"inLanguage":          "en",
 			"isAccessibleForFree": true,
 			"mainEntityOfPage": map[string]any{
 				"@type": "WebPage",
 				"@id":   pageURL,
 			},
-			"url": pageURL,
+			"url":   pageURL,
 			"image": []string{imageURL},
 			"author": map[string]any{
 				"@id": personID,

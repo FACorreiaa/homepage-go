@@ -99,10 +99,10 @@ const PACKET_EDGES = [
 ];
 
 const TIER = {
-  hub: { nodeR: 0.16, sat: 2, labelH: 0.4, opacity: 0.92 },
-  primary: { nodeR: 0.12, sat: 2, labelH: 0.34, opacity: 0.8 },
-  secondary: { nodeR: 0.09, sat: 1, labelH: 0.28, opacity: 0.58 },
-  satellite: { nodeR: 0.04, sat: 0, labelH: 0, opacity: 0 },
+  hub: { nodeR: 0.22, sat: 2, labelH: 0.4, opacity: 0.92, edgeOpacity: 0.4 },
+  primary: { nodeR: 0.16, sat: 2, labelH: 0.34, opacity: 0.8, edgeOpacity: 0.32 },
+  secondary: { nodeR: 0.12, sat: 1, labelH: 0.28, opacity: 0.58, edgeOpacity: 0.28 },
+  satellite: { nodeR: 0.04, sat: 0, labelH: 0, opacity: 0.2, edgeOpacity: 0 },
 };
 
 function hash01(n) {
@@ -179,12 +179,88 @@ function makeLabel(THREE, node, palette) {
   return sprite;
 }
 
-function placeInstance(dummy, mesh, i, x, y, z, scale) {
+function placeInstance(dummy, mesh, i, x, y, z, scale, rot = null) {
   dummy.position.set(x, y, z);
   dummy.scale.setScalar(scale);
-  dummy.rotation.set(0, 0, 0);
+  if (rot) dummy.rotation.set(rot.x, rot.y, rot.z);
+  else dummy.rotation.set(0, 0, 0);
   dummy.updateMatrix();
   mesh.setMatrixAt(i, dummy.matrix);
+}
+
+function restPose(seed, tier) {
+  const hx = hash01(seed * 5);
+  const hz = hash01(seed * 7);
+  if (tier === 'primary' || tier === 'secondary') {
+    return { x: 0.42 + hx * 0.28, z: hz * 0.5 - 0.25 };
+  }
+  return { x: hx * 0.35 - 0.17, z: hz * 0.35 - 0.17 };
+}
+
+function spinRates(seed) {
+  return {
+    x: 0.06 + hash01(seed * 19) * 0.08,
+    y: 0.06 + hash01(seed * 23) * 0.08,
+    z: 0.06 + hash01(seed * 29) * 0.08,
+  };
+}
+
+function tierGeometry(THREE, tier) {
+  if (tier === 'hub') return new THREE.OctahedronGeometry(1, 0);
+  if (tier === 'primary') return new THREE.CylinderGeometry(1, 1, 0.45, 6);
+  if (tier === 'secondary') return new THREE.CylinderGeometry(1, 1, 0.18, 6);
+  return new THREE.TetrahedronGeometry(1, 0);
+}
+
+function makePhongMaterial(THREE, palette, tier) {
+  const spec = TIER[tier];
+  const role = tier === 'hub' ? 'go' : 'fg';
+  const mat = new THREE.MeshPhongMaterial({
+    color: palette[role],
+    transparent: true,
+    opacity: spec.opacity,
+    shininess: 28,
+  });
+  if (tier === 'hub') {
+    mat.emissive.copy(palette.go);
+    mat.emissiveIntensity = 0.18;
+    mat.userData.emissiveRole = 'go';
+  }
+  return tag(mat, role);
+}
+
+function makeEdgeMaterial(THREE, palette, tier) {
+  const spec = TIER[tier];
+  const role = tier === 'hub' ? 'go' : 'fg';
+  return tag(
+    new THREE.LineBasicMaterial({
+      color: palette[role],
+      transparent: true,
+      opacity: spec.edgeOpacity,
+    }),
+    role,
+  );
+}
+
+/** One labeled node: scaled group, rest-tilted pivot, lit fill + hairline edges. */
+function createLabeledNode(THREE, node, palette) {
+  const spec = TIER[node.tier];
+  const geo = tierGeometry(THREE, node.tier);
+  const nodeGroup = new THREE.Group();
+  nodeGroup.position.set(node.x, node.y, node.z);
+  nodeGroup.scale.setScalar(spec.nodeR);
+
+  const rest = restPose(node.seed, node.tier);
+  const spin = spinRates(node.seed);
+  const phase = hash01(node.seed * 31) * Math.PI * 2;
+
+  const pivot = new THREE.Group();
+  pivot.rotation.set(rest.x, 0, rest.z);
+  pivot.add(new THREE.Mesh(geo, makePhongMaterial(THREE, palette, node.tier)));
+  pivot.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 15), makeEdgeMaterial(THREE, palette, node.tier)));
+  nodeGroup.add(pivot);
+
+  return { group: nodeGroup, pivot, spin, phase, rest };
 }
 
 /**
@@ -243,44 +319,25 @@ export function buildGraph(THREE, palette) {
   }
 
   const dummy = new THREE.Object3D();
-  const geo = new THREE.IcosahedronGeometry(1, 0);
+  const satGeo = tierGeometry(THREE, 'satellite');
 
-  const hubs = placed.filter((n) => n.tier === 'hub');
-  const primaries = placed.filter((n) => n.tier === 'primary');
-  const secondaries = placed.filter((n) => n.tier === 'secondary');
+  const labeledNodes = placed
+    .filter((n) => n.tier === 'hub' || n.tier === 'primary' || n.tier === 'secondary')
+    .map((node) => {
+      const hw = createLabeledNode(THREE, node, palette);
+      group.add(hw.group);
+      return hw;
+    });
 
-  const hubMesh = new THREE.InstancedMesh(
-    geo,
-    tag(new THREE.MeshBasicMaterial({ color: palette.go, transparent: true, opacity: 0.82 }), 'go'),
-    hubs.length,
-  );
-  const primaryMesh = new THREE.InstancedMesh(
-    geo,
-    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.55 }), 'fg'),
-    primaries.length,
-  );
-  const secondaryMesh = new THREE.InstancedMesh(
-    geo,
-    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.32 }), 'fg'),
-    secondaries.length,
-  );
   const satMesh = new THREE.InstancedMesh(
-    geo,
-    tag(new THREE.MeshBasicMaterial({ color: palette.fg, transparent: true, opacity: 0.2 }), 'fg'),
+    satGeo,
+    tag(new THREE.MeshLambertMaterial({ color: palette.fg, transparent: true, opacity: TIER.satellite.opacity }), 'fg'),
     satellites.length,
   );
-
-  hubs.forEach((n, i) => placeInstance(dummy, hubMesh, i, n.x, n.y, n.z, TIER.hub.nodeR));
-  primaries.forEach((n, i) => placeInstance(dummy, primaryMesh, i, n.x, n.y, n.z, TIER.primary.nodeR));
-  secondaries.forEach((n, i) => placeInstance(dummy, secondaryMesh, i, n.x, n.y, n.z, TIER.secondary.nodeR));
   satellites.forEach((n, i) => placeInstance(dummy, satMesh, i, n.x, n.y, n.z, TIER.satellite.nodeR));
-
-  hubMesh.instanceMatrix.needsUpdate = true;
-  primaryMesh.instanceMatrix.needsUpdate = true;
-  secondaryMesh.instanceMatrix.needsUpdate = true;
   satMesh.instanceMatrix.needsUpdate = true;
 
-  group.add(hubMesh, primaryMesh, secondaryMesh, satMesh);
+  group.add(satMesh);
 
   const structure = [];
   const signal = [];
@@ -356,6 +413,22 @@ export function buildGraph(THREE, palette) {
   group.userData.tick = (t, camera) => {
     packetMat.opacity = 0.7 + Math.sin(t * 1.8) * 0.12;
     signalLines.material.opacity = 0.2 + Math.sin(t * 1.4) * 0.07;
+
+    labeledNodes.forEach(({ pivot, spin, phase, rest }) => {
+      pivot.rotation.x = rest.x + Math.sin(t * spin.x + phase) * 0.06;
+      pivot.rotation.y = t * spin.y + phase;
+      pivot.rotation.z = rest.z + Math.cos(t * spin.z + phase) * 0.05;
+    });
+
+    satellites.forEach((sat, i) => {
+      const yaw = t * 0.05 + hash01(sat.seed) * Math.PI * 2;
+      dummy.position.set(sat.x, sat.y, sat.z);
+      dummy.rotation.set(hash01(sat.seed * 3) * 0.4, yaw, hash01(sat.seed * 5) * 0.4);
+      dummy.scale.setScalar(TIER.satellite.nodeR);
+      dummy.updateMatrix();
+      satMesh.setMatrixAt(i, dummy.matrix);
+    });
+    satMesh.instanceMatrix.needsUpdate = true;
 
     const attr = packetGeo.getAttribute('position');
     packetRoutes.forEach((route, i) => {
