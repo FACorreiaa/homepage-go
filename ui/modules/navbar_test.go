@@ -64,3 +64,17 @@ func TestNavbarBreakpointIsMeasuredNotGuessed(t *testing.T) {
 	assert.Contains(t, body, `<span class="xl:hidden">Proposal</span>`)
 	assert.Contains(t, body, "xl:inline-flex", "GitHub returns at xl")
 }
+
+func TestNavbarDrawerTeleportsToBody(t *testing.T) {
+	body := renderNavbar(t, "home")
+	assert.Contains(t, body, `x-teleport="body"`)
+	assert.Contains(t, body, `id="mobile-nav"`)
+	assert.Contains(t, body, `aria-controls="mobile-nav"`)
+	assert.Contains(t, body, `@keydown.escape.window="open = false"`)
+}
+
+func TestNavbarDrawerIncludesGitHub(t *testing.T) {
+	body := renderNavbar(t, "home")
+	assert.GreaterOrEqual(t, strings.Count(body, `href="https://github.com/FACorreiaa"`), 2,
+		"GitHub should appear in the desktop bar and the mobile drawer")
+}

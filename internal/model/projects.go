@@ -13,10 +13,12 @@ type ProjectItem struct {
 	LiveLink     string
 	AppStoreLink string
 	HasLiveLink  bool
-	Featured     bool
-	Icon         string
-	LogoAsset    string
-	Status       string
+	// Featured puts a project in the first gallery on /projects and home.
+	// Use it for hosted work you have already shipped, not only public URLs.
+	Featured  bool
+	Icon      string
+	LogoAsset string
+	Status    string
 
 	// Proof slots: templates render these only when populated.
 	Metrics         []ProjectMetric

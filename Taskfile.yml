@@ -24,6 +24,22 @@ tasks:
     cmds:
       - go tool sqlc generate
 
+  hooks:
+    desc: Point this clone at versioned git hooks in .githooks
+    cmds:
+      - git config core.hooksPath .githooks
+      - chmod +x .githooks/pre-commit
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run
+
+  fmt:
+    desc: Format Go sources with gofumpt
+    cmds:
+      - gofumpt -w .
+
   dev:
     desc: Start development server with hot reload
     cmds:

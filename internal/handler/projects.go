@@ -19,6 +19,9 @@ var trustItems = []model.TrustItem{
 // Populate like:
 //
 //	Metrics: []model.ProjectMetric{{Value: "38ms", Label: "p95 API latency"}},
+//
+// Featured is the hosted-work gallery. Flip Featured to true when a product
+// should sit in that first section (Norviq, LuminaVault, and later North / Loci).
 var allProjects = []model.ProjectItem{
 	{
 		Slug:         "norviq",

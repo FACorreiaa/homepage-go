@@ -300,13 +300,27 @@
   }
 
   .project-art-stage--flagship {
-    aspect-ratio: 21 / 9;
+    aspect-ratio: 16 / 10;
     min-height: 16rem;
   }
 
+  .project-feature-split {
+    display: flex;
+    flex-direction: column;
+  }
+
   @media (min-width: 768px) {
-    .project-art-stage--flagship {
+    .project-feature-card--flagship .project-feature-split {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      align-items: stretch;
       min-height: 22rem;
+    }
+
+    .project-feature-card--flagship .project-art-stage--flagship {
+      aspect-ratio: auto;
+      min-height: 22rem;
+      height: 100%;
     }
   }
 
