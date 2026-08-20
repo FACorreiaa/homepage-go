@@ -26,6 +26,11 @@ const stage = document.querySelector('[data-world]');
 //   camY/camZ — where the camera sits at that station
 //   lookY — the height the camera aims at, which is what sets the tilt
 const STATIONS = {
+  // The cover is the flat wordmark screen. It shares the device camera exactly,
+  // so its leg of the scrub moves nothing — the world holds still underneath
+  // while the page is still just type, and only starts travelling at
+  // device -> server. It carries no geometry of its own.
+  cover: { groupY: 0, camY: 0, camZ: 9, lookY: -1 },
   device: { groupY: 0, camY: 0, camZ: 9, lookY: -1 },
   server: { groupY: -34, camY: -28, camZ: 12, lookY: -37 },
   cluster: { groupY: -76, camY: -76, camZ: 11, lookY: -79 },
@@ -253,7 +258,7 @@ function buildHorizon(THREE, palette, character) {
  * arrive together however long the sections turn out to be.
  */
 function wireScrollTriggers(gsap, ScrollTrigger, camera, focus) {
-  const order = ['device', 'server', 'cluster', 'horizon'];
+  const order = ['cover', 'device', 'server', 'cluster', 'horizon'];
   const sections = order
     .map((name) => ({ name, el: document.querySelector(`[data-world-station="${name}"]`) }))
     .filter((s) => s.el);
@@ -304,6 +309,41 @@ function wireScrollTriggers(gsap, ScrollTrigger, camera, focus) {
       0,
     );
   }
+
+  wireCoverVeil(gsap, sections);
+}
+
+/**
+ * Fades the canvas up as the cover scrolls away.
+ *
+ * The cover is meant to read as flat type on a flat background, so the scene
+ * has to be invisible there — but it still has to be running, because building
+ * it at the moment it becomes visible would stutter. So it renders behind an
+ * opacity of 0 and is revealed on the way out.
+ *
+ * Separate from the camera legs on purpose: this is the one thing that happens
+ * over the cover's own scroll, while every camera leg spans a *pair* of
+ * stations. Reversible, because scrolling back up must hide it again.
+ */
+function wireCoverVeil(gsap, sections) {
+  const cover = sections.find((s) => s.name === 'cover');
+  if (!cover) return;
+
+  gsap.fromTo(
+    stage,
+    { opacity: 0 },
+    {
+      opacity: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: cover.el,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        invalidateOnRefresh: true,
+      },
+    },
+  );
 }
 
 /**

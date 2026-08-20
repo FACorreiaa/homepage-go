@@ -191,6 +191,70 @@
     letter-spacing: 0;
   }
 
+  /* The wordmark is the whole first screen, so it is allowed to run past
+     .hero-title's ceiling. "Fernando Correia" is 16 characters: at 11vw it
+     fills a desktop line almost exactly, which is the effect, but it means the
+     upper clamp is doing real work on wide monitors. */
+  .wordmark {
+    font-size: clamp(2.75rem, 11vw, 12rem);
+    line-height: 0.86;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+
+  .wordmark-accent {
+    color: var(--trail);
+  }
+
+  .wordmark-lede {
+    font-size: clamp(1.0625rem, 1.4vw, 1.375rem);
+    line-height: 1.6;
+    color: var(--muted-foreground);
+    text-wrap: balance;
+  }
+
+  /* Keyword ticker. The track holds the item list twice and travels exactly
+     -50%, so the second copy lands where the first started and the seam never
+     shows. Duplicating in markup rather than measuring in JS keeps this a
+     stylesheet problem. */
+  .marquee {
+    overflow: hidden;
+    border-block: 1px solid var(--border);
+    padding-block: 0.6875rem;
+    /* Fade both ends so items enter and leave rather than being cut off. */
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 42s linear infinite;
+  }
+
+  .marquee-item {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+    padding-inline: 1.25rem;
+  }
+
+  /* The separator is decoration, so it is drawn rather than typed — a literal
+     bullet in the markup would be read out on every item. */
+  .marquee-item::after {
+    content: "•";
+    padding-inline-start: 1.25rem;
+    color: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+  }
+
   .section-title {
     font-size: clamp(2.5rem, 5vw, 5.75rem);
     line-height: 0.96;
@@ -590,6 +654,35 @@
     border-color: color-mix(in oklab, var(--foreground) 28%, var(--border));
   }
 
+  /* The coloured rule that turns the panels into an index. --rule defaults to
+     the ordinary border, so a panel without a modifier looks exactly as it did
+     before this existed. */
+  .fork-panel {
+    --rule: var(--border);
+    border-left: 2px solid var(--rule);
+  }
+
+  .fork-panel--trail {
+    --rule: var(--trail);
+  }
+
+  .fork-panel--go {
+    --rule: var(--go);
+  }
+
+  .fork-panel--signal {
+    --rule: var(--signal);
+  }
+
+  .fork-panel--ink {
+    --rule: color-mix(in oklab, var(--foreground) 40%, transparent);
+  }
+
+  /* The rule is the panel's identity; the hover border must not repaint it. */
+  .fork-panel:hover {
+    border-left-color: var(--rule);
+  }
+
   .fork-panel > .fork-panel-label {
     font-family: var(--font-mono);
     font-size: 0.6875rem;
@@ -755,6 +848,14 @@
   }
 }
 
+/* -50% is the whole trick: the track carries the item list twice, so half a
+   track is one full list and the loop point is invisible. */
+@keyframes marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 @keyframes status-pulse {
   from {
     transform: scale(1);
@@ -772,6 +873,11 @@
   }
 
   .status-dot::before {
+    animation: none;
+  }
+
+  /* The ticker still reads as a list of words standing still. */
+  .marquee-track {
     animation: none;
   }
 

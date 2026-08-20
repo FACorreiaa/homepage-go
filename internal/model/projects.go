@@ -25,6 +25,19 @@ type ProjectItem struct {
 	Testimonial     Testimonial
 	ScreenshotAsset string
 	ScreenshotAlt   string
+
+	// Gallery is the case-study strip on a project's detail page: a row of
+	// shots under one label and one caption. Like the other proof slots it
+	// stays empty until real images exist, and the whole section is absent
+	// when it is — never an empty frame standing in for one.
+	Gallery        []GalleryShot
+	GalleryLabel   string // right-aligned kicker, e.g. "App Store screenshots"
+	GalleryCaption string
+}
+
+type GalleryShot struct {
+	Src string // path under /assets, e.g. "/assets/static/projects/norviq-1.webp"
+	Alt string
 }
 
 type ProjectMetric struct {

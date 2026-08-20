@@ -1,0 +1,21 @@
+package modules
+
+// Marquee is a CSS-only keyword ticker. The caller's items are rendered twice
+// into one track, which is what lets the animation travel a flat -50% and land
+// the second copy exactly where the first began — no JS, no measuring, no seam.
+//
+// It is decorative: the whole strip is hidden from assistive tech rather than
+// read out twice, and it stops moving under prefers-reduced-motion.
+templ Marquee(items []string) {
+	if len(items) > 0 {
+		<div class="marquee" aria-hidden="true">
+			<div class="marquee-track">
+				for range 2 {
+					for _, item := range items {
+						<span class="marquee-item">{ item }</span>
+					}
+				}
+			</div>
+		</div>
+	}
+}
