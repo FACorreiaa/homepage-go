@@ -1,37 +1,35 @@
 #!/usr/bin/env bash
-# Format and lint Go before allowing a commit.
-# Bypass with: git commit --no-verify
+# Pre-commit: format, then lint, before anything lands in git.
+# golangci-lint version must stay in lockstep with CI (.github/workflows/).
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel)"
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
 
-if ! command -v gofumpt >/dev/null 2>&1; then
-  echo "pre-commit: gofumpt not found on PATH" >&2
-  exit 1
+# Remember what was already staged so we only re-add those after formatting.
+staged_go="$(git diff --cached --name-only --diff-filter=ACM -- '*.go' || true)"
+
+echo "pre-commit: gofumpt -w ."
+go tool gofumpt -w .
+
+# Re-stage only files that were already in the index (partial commits stay partial).
+if [[ -n "${staged_go}" ]]; then
+  while IFS= read -r f; do
+    [[ -z "${f}" ]] && continue
+    [[ -f "${f}" ]] || continue
+    git add -- "${f}"
+  done <<< "${staged_go}"
+  echo "pre-commit: re-staged previously staged .go files after gofumpt"
 fi
 
+# Fail closed if the binary is missing — a skipped lint is not a pass.
 if ! command -v golangci-lint >/dev/null 2>&1; then
-  echo "pre-commit: golangci-lint not found on PATH" >&2
+  echo "pre-commit: golangci-lint not on PATH. Install v2.13.0 to match CI:" >&2
+  echo "  https://golangci-lint.run/welcome/install/" >&2
   exit 1
 fi
 
-echo "gofumpt -w ."
-gofumpt -w .
-
-# If gofumpt rewrote staged Go files, abort so the commit does not
-# snapshot the unformatted versions still in the index.
-rewritten=0
-while IFS= read -r file; do
-  [[ -z "$file" ]] && continue
-  if ! git diff --quiet -- "$file"; then
-    echo "pre-commit: gofumpt rewrote $file — stage it and commit again" >&2
-    rewritten=1
-  fi
-done < <(git diff --cached --name-only --diff-filter=ACMR -- '*.go')
-
-if [[ "$rewritten" -ne 0 ]]; then
-  exit 1
-fi
-
-echo "golangci-lint run"
+echo "pre-commit: golangci-lint run"
 golangci-lint run
+
+echo "pre-commit: ok"
