@@ -10,7 +10,7 @@ import (
 var trustItems = []model.TrustItem{
 	{Icon: "GL", Value: "4+", Label: "Countries"},
 	{Icon: "PR", Value: "15+", Label: "Projects Delivered"},
-	{Icon: "YR", Value: "7+", Label: "Years Experience"},
+	{Icon: "YR", Value: "10+", Label: "Years Experience"},
 	{Icon: "TK", Value: "10+", Label: "Technologies"},
 }
 

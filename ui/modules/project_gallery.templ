@@ -1,0 +1,41 @@
+package modules
+
+import "myapp/internal/model"
+
+// ProjectGallery is the case-study strip: the project's name on the left, a
+// quiet kicker on the right, a row of shots, and one caption that says what the
+// set is doing. It renders nothing at all when there are no shots — an empty
+// gallery is worse than no gallery.
+//
+// The row scrolls sideways rather than reflowing, so three tall phone frames
+// stay a set of three on a narrow screen instead of becoming a stack.
+templ ProjectGallery(p model.ProjectItem) {
+	if len(p.Gallery) > 0 {
+		<section class="mx-auto max-w-7xl px-4 pb-24 md:pb-32" aria-label={ p.Title + " gallery" }>
+			<div class="flex flex-wrap items-baseline justify-between gap-4 border-b border-border pb-5">
+				<h2 class="text-2xl font-semibold md:text-3xl">{ p.Title }</h2>
+				if p.GalleryLabel != "" {
+					<p class="font-mono text-xs tracking-[0.16em] text-muted-foreground">{ p.GalleryLabel }</p>
+				}
+			</div>
+			<div class="-mx-4 mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2">
+				for _, shot := range p.Gallery {
+					<figure class="w-[72vw] shrink-0 snap-start sm:w-[46vw] lg:w-[calc((100%-2.5rem)/3)]">
+						// Always lazy: the gallery sits well below the fold on every
+						// project page, so none of these are worth the early bytes.
+						<img
+							src={ shot.Src }
+							alt={ shot.Alt }
+							loading="lazy"
+							decoding="async"
+							class="w-full rounded-lg border border-border bg-muted object-cover"
+						/>
+					</figure>
+				}
+			</div>
+			if p.GalleryCaption != "" {
+				<p class="mt-8 max-w-xl text-base leading-7 text-muted-foreground">{ p.GalleryCaption }</p>
+			}
+		</section>
+	}
+}

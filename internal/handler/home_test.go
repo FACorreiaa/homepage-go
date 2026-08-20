@@ -42,6 +42,63 @@ func TestHomeConversionPaths(t *testing.T) {
 	assert.Contains(t, body, "YOU'RE HIRING")
 }
 
+// The cover is the first thing rendered and the only thing on the first screen,
+// so it has to survive without the scene, the fonts, or anything else landing.
+func TestHomeWordmarkCover(t *testing.T) {
+	body := renderHome(t)
+
+	assert.Contains(t, body, `data-world-station="cover"`)
+	assert.Contains(t, body, `<h1 class="wordmark">`)
+
+	// The split is the whole idea: one name, two colours.
+	assert.Contains(t, body, `<span class="wordmark-accent">Correia</span>`)
+
+	// The cover must come before the station that used to be first, or the
+	// camera legs run backwards.
+	assert.Less(t,
+		strings.Index(body, `data-world-station="cover"`),
+		strings.Index(body, `data-world-station="device"`),
+		"cover station must precede device station",
+	)
+
+	// Demoted, not deleted: the old hero line is now the sub-head.
+	assert.Contains(t, body, `<h2 class="hero-title`)
+	assert.Equal(t, 1, strings.Count(body, "<h1"), "exactly one h1 on the page")
+}
+
+// The ticker loops by travelling -50% across a track that holds its items
+// twice. If the duplication ever stops happening the animation still runs, but
+// it visibly snaps — so the doubling is the thing worth asserting.
+func TestHomeMarqueeTrackIsDoubled(t *testing.T) {
+	body := renderHome(t)
+
+	assert.Contains(t, body, `class="marquee-track"`)
+	assert.Equal(t, 2, strings.Count(body, ">GO</span>"), "marquee items must be rendered twice")
+	assert.Equal(t, 2, strings.Count(body, ">KUBERNETES</span>"), "marquee items must be rendered twice")
+
+	// Decoration, and it repeats itself — it must not be read out.
+	assert.Contains(t, body, `<div class="marquee" aria-hidden="true">`)
+}
+
+// The fork panels became an index: the two conversion paths kept their copy and
+// gained two navigation siblings.
+func TestHomeIndexGrid(t *testing.T) {
+	body := renderHome(t)
+
+	assert.Equal(t, 4, strings.Count(body, `class="fork-panel fork-panel--`), "four index panels")
+
+	// Each panel carries its own rule colour; a repeated modifier means two
+	// panels are wearing the same one.
+	for _, mod := range []string{"trail", "go", "signal", "ink"} {
+		assert.Equal(t, 1, strings.Count(body, "fork-panel--"+mod), "one panel per rule colour: "+mod)
+	}
+
+	assert.Contains(t, body, `href="/blog"`)
+	assert.Contains(t, body, `href="/bookmarks"`)
+	assert.Contains(t, body, "WRITING")
+	assert.Contains(t, body, "THE ARCHIVE")
+}
+
 func TestHomeFeaturedWork(t *testing.T) {
 	body := renderHome(t)
 

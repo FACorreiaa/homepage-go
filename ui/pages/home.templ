@@ -23,11 +23,22 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 		// visitor should have it; see the bail-outs in that file.
 		<div class="world-stage" data-world aria-hidden="true"></div>
 		<div class="public-shell world-shell min-h-screen">
+			@modules.Marquee(marqueeItems)
+			// The cover is flat type and nothing else: it must paint before any of
+			// the scene's bytes matter. Its station shares the device camera, so
+			// scrolling through it moves the world not at all — see home-world.js.
+			<section class="mx-auto max-w-7xl px-4 pt-20 md:pt-28" data-world-station="cover">
+				<h1 class="wordmark">Fernando <span class="wordmark-accent">Correia</span></h1>
+				<p class="wordmark-lede mt-8 max-w-2xl">
+					I build the whole thing — the phone app, the service behind it, and the cluster
+					underneath — and then I keep it running.
+				</p>
+			</section>
 			<section class="mx-auto max-w-6xl px-4 pt-24 md:pt-32" data-world-station="device">
 				<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">PORTO, PT — SOLO PRACTICE — AVAILABLE Q4</p>
-				<h1 class="hero-title mt-6 max-w-4xl font-semibold">
+				<h2 class="hero-title mt-6 max-w-4xl font-semibold">
 					One engineer, the whole stack, in production.
-				</h1>
+				</h2>
 				<p class="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
 					I design, build, ship, and operate product systems — SwiftUI on the phone, Go and Vapor on
 					the server, Kubernetes underneath. Including this site, which is streaming you its own
@@ -37,7 +48,7 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 			@opsStrip(stats)
 			<section class="mx-auto max-w-6xl px-4 pt-20 md:pt-28" data-world-station="server">
 				<div class="grid gap-5 md:grid-cols-2">
-					<div class="fork-panel" data-reveal>
+					<div class="fork-panel fork-panel--trail" data-reveal>
 						<p class="fork-panel-label">YOU NEED A CONTRACTOR</p>
 						<p class="mt-5 text-base leading-7 text-foreground/80">
 							Ship the product with one senior engineer instead of a team you have to assemble
@@ -50,7 +61,7 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 							</a>
 						</div>
 					</div>
-					<div class="fork-panel" data-reveal>
+					<div class="fork-panel fork-panel--go" data-reveal>
 						<p class="fork-panel-label">YOU'RE HIRING</p>
 						<p class="mt-5 text-base leading-7 text-foreground/80">
 							Ten years, four countries, and case studies where I owned the thing end to end —
@@ -61,6 +72,26 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 								View CV
 								@modules.UIIcon("arrow-right", "h-4 w-4")
 							</a>
+						</div>
+					</div>
+					<div class="fork-panel fork-panel--signal" data-reveal>
+						<p class="fork-panel-label">WRITING</p>
+						<p class="mt-5 text-base leading-7 text-foreground/80">
+							Notes on architecture, iOS, and solo product work — written while the decisions
+							were still expensive, not after they got tidy.
+						</p>
+						<div class="mt-auto pt-8">
+							@indexPanelLink("/blog", "Read the blog")
+						</div>
+					</div>
+					<div class="fork-panel fork-panel--ink" data-reveal>
+						<p class="fork-panel-label">THE ARCHIVE</p>
+						<p class="mt-5 text-base leading-7 text-foreground/80">
+							An Obsidian vault of research fragments and links, indexed here as it syncs.
+							Half-formed on purpose.
+						</p>
+						<div class="mt-auto pt-8">
+							@indexPanelLink("/bookmarks", "Open the archive")
 						</div>
 					</div>
 				</div>
@@ -83,6 +114,24 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 		@templ.Raw(`<script type="importmap">{"imports":{"three":"/assets/static/vendor/three/three.module.min.js","three/webgpu":"/assets/static/vendor/three/webgpu-stub.js","three/examples/jsm/":"/assets/static/vendor/three/addons/"}}</script>`)
 		<script type="module" src={ assets.URL("static/home-world.js") }></script>
 	}
+}
+
+// marqueeItems is the stack as it actually is, not as a skills matrix. It runs
+// above the wordmark for the same reason a masthead does: it says what kind of
+// site this is before anyone reads a sentence.
+var marqueeItems = []string{
+	"GO", "SWIFTUI", "KUBERNETES", "POSTGRES", "VAPOR",
+	"HTMX", "TEMPL", "TAILWIND", "SQLITE", "HETZNER", "TERRAFORM",
+}
+
+// indexPanelLink is the quieter sibling of the two conversion CTAs: the writing
+// and archive panels are navigation, so they get an outline rather than the
+// filled button that asks for a decision.
+templ indexPanelLink(href, label string) {
+	<a href={ templ.SafeURL(href) } class="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-semibold transition hover:border-foreground/40 hover:bg-muted active:scale-[0.97]">
+		{ label }
+		@modules.UIIcon("arrow-right", "h-4 w-4")
+	</a>
 }
 
 // opsStrip is the thesis made checkable: the claim above it is "I operate what
