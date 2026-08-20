@@ -206,13 +206,6 @@
     color: var(--trail);
   }
 
-  .wordmark-lede {
-    font-size: clamp(1.0625rem, 1.4vw, 1.375rem);
-    line-height: 1.6;
-    color: var(--muted-foreground);
-    text-wrap: balance;
-  }
-
   /* Keyword ticker. The track holds the item list twice and travels exactly
      -50%, so the second copy lands where the first started and the seam never
      shows. Duplicating in markup rather than measuring in JS keeps this a

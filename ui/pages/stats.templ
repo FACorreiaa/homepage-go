@@ -17,7 +17,7 @@ templ Stats(stats service.StatsSnapshot) {
 	}) {
 		<div class="public-shell min-h-screen">
 			<section class="mx-auto max-w-6xl px-4 pt-24 md:pt-32">
-				<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">SITE TELEMETRY — LIVE</p>
+				<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">SITE TELEMETRY / LIVE</p>
 				<h1 class="hero-title mt-6 max-w-4xl font-semibold">Who's here right now.</h1>
 				<p class="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
 					Every dot is a real visit to this site in the last 24 hours, placed at city resolution.
@@ -50,7 +50,7 @@ templ Stats(stats service.StatsSnapshot) {
 			<section class="mx-auto max-w-6xl px-4 pt-16 pb-24 md:pb-32">
 				<div class="grid gap-6 md:grid-cols-2">
 					<div class="stat-panel" data-reveal>
-						<h2 class="stat-panel-title">WHERE FROM — LAST 24H</h2>
+						<h2 class="stat-panel-title">WHERE FROM / LAST 24H</h2>
 						if len(stats.TopCountries) == 0 {
 							<p class="stat-panel-empty">Nobody yet today. You're the first.</p>
 						} else {
@@ -69,7 +69,7 @@ templ Stats(stats service.StatsSnapshot) {
 						}
 					</div>
 					<div class="stat-panel" data-reveal>
-						<h2 class="stat-panel-title">WHAT THEY READ — LAST 24H</h2>
+						<h2 class="stat-panel-title">WHAT THEY READ / LAST 24H</h2>
 						if len(stats.TopPaths) == 0 {
 							<p class="stat-panel-empty">No page views recorded in the window.</p>
 						} else {

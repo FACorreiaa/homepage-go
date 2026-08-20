@@ -29,20 +29,15 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 			// scrolling through it moves the world not at all — see home-world.js.
 			<section class="mx-auto max-w-7xl px-4 pt-20 md:pt-28" data-world-station="cover">
 				<h1 class="wordmark">Fernando <span class="wordmark-accent">Correia</span></h1>
-				<p class="wordmark-lede mt-8 max-w-2xl">
-					I build the whole thing — the phone app, the service behind it, and the cluster
-					underneath — and then I keep it running.
-				</p>
 			</section>
 			<section class="mx-auto max-w-6xl px-4 pt-24 md:pt-32" data-world-station="device">
-				<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">PORTO, PT — SOLO PRACTICE — AVAILABLE Q4</p>
+				<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">PORTO, PT / SOLO PRACTICE / AVAILABLE Q4</p>
 				<h2 class="hero-title mt-6 max-w-4xl font-semibold">
 					One engineer, the whole stack, in production.
 				</h2>
 				<p class="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
-					I design, build, ship, and operate product systems — SwiftUI on the phone, Go and Vapor on
-					the server, Kubernetes underneath. Including this site, which is streaming you its own
-					telemetry right now.
+					I design, build, ship, and operate product systems: SwiftUI on the phone, Go and Vapor on
+					the server, Kubernetes underneath. This site included. The numbers below are its own.
 				</p>
 			</section>
 			@opsStrip(stats)
@@ -64,8 +59,8 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 					<div class="fork-panel fork-panel--go" data-reveal>
 						<p class="fork-panel-label">YOU'RE HIRING</p>
 						<p class="mt-5 text-base leading-7 text-foreground/80">
-							Ten years, four countries, and case studies where I owned the thing end to end —
-							not a slice of it.
+							Ten years, four countries, and case studies where I owned the whole system, not a
+							slice of it.
 						</p>
 						<div class="mt-auto pt-8">
 							<a href="/curriculum" class="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.97]">
@@ -77,8 +72,8 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 					<div class="fork-panel fork-panel--signal" data-reveal>
 						<p class="fork-panel-label">WRITING</p>
 						<p class="mt-5 text-base leading-7 text-foreground/80">
-							Notes on architecture, iOS, and solo product work — written while the decisions
-							were still expensive, not after they got tidy.
+							Notes on architecture, iOS, and solo product work, written while the decisions
+							were still open.
 						</p>
 						<div class="mt-auto pt-8">
 							@indexPanelLink("/blog", "Read the blog")
@@ -88,7 +83,6 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 						<p class="fork-panel-label">THE ARCHIVE</p>
 						<p class="mt-5 text-base leading-7 text-foreground/80">
 							An Obsidian vault of research fragments and links, indexed here as it syncs.
-							Half-formed on purpose.
 						</p>
 						<div class="mt-auto pt-8">
 							@indexPanelLink("/bookmarks", "Open the archive")
