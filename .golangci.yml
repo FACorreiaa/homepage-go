@@ -1,0 +1,32 @@
+# golangci-lint configuration.
+# Keep this thin — prefer gofmt/go vet defaults over a large rule farm.
+
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+  settings:
+    govet:
+      enable:
+        - shadow
+
+formatters:
+  enable:
+    - gofumpt
+  settings:
+    gofumpt:
+      # Without this, golangci-lint's gofumpt cannot tell that `myapp/...` is
+      # this module rather than the standard library, and merges local imports
+      # into the stdlib group — disagreeing with the `gofumpt` the hook runs,
+      # which reads the module path from go.mod. The two must agree or the
+      # hook can never be satisfied.
+      module-path: myapp
