@@ -2,6 +2,17 @@
 
 Go/templ implementation of the FC Software Studio site.
 
+> **This repository is hosted on Forgejo.** GitHub is a downstream push mirror.
+>
+> - Primary: `ssh://git@lumina-green.tail562587.ts.net:4622/facorreia/homepage-go.git`
+>   (tailnet only) — push here.
+> - Mirror: `github.com/FACorreiaa/homepage-go` — force-pushed from Forgejo, so
+>   anything committed directly on GitHub will be overwritten.
+>
+> CI still runs on GitHub Actions: the mirror push triggers the build, which pushes
+> to GHCR and commits the image tag into `LuminaVaultInfra`, where Argo CD deploys it.
+> See `docs/forgejo.md` in that repo.
+
 ## Run
 
 ```sh
