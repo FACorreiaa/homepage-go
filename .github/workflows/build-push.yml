@@ -51,8 +51,8 @@ jobs:
         run: |
           git clone "https://x-access-token:${GH_TOKEN}@github.com/LuminaVault/LuminaVaultInfra.git" infra
           cd infra
-          sed -i "s|^  tag: .*|  tag: ${GITHUB_SHA} # CI overwrites with the git SHA on each main push|" apps/facorreia/values.yaml
+          sed -i "s|^  tag: .*|  tag: ${GITHUB_SHA} # CI overwrites with the git SHA on each main push|" apps/isis/values.yaml
           git config user.name "facorreia-ci"
           git config user.email "fernandocorreia316@gmail.com"
-          git commit -am "facorreia → ${GITHUB_SHA:0:12} (homepage-go@${GITHUB_SHA})"
+          git commit -am "isis → ${GITHUB_SHA:0:12} (homepage-go@${GITHUB_SHA})"
           git push
