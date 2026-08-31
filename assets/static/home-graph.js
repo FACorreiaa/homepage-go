@@ -2,24 +2,21 @@
 // the CV, laid out by hand and connected by claimed relationships.
 //
 // This is decoration for home-world.js. Positions are authored and stable —
-// nothing here runs a force simulation, and nothing here listens to scroll.
-// The camera ride stays in home-world.js.
+// nothing here runs a force simulation. The camera ride stays in home-world.js;
+// this file only reads how far along it is so a constellation can brighten as
+// the camera reaches it.
+//
+// Nodes sit in the gutters of each station's X/Y plane. The ride travels -Z,
+// so a station is a volume the camera flies through, not a floor it looks down on.
 
-// Y of each station's group, mirrored from STATIONS in home-world.js so this
-// file can place nodes without importing the scene. If a station moves, both
-// tables have to move.
-const STATION_Y = {
-  device: 0,
-  server: -34,
-  cluster: -76,
-  horizon: -122,
-};
+import { STATIONS } from './home-path.js';
 
 const CLEAR_R = 2.8;
 
 /**
- * Labeled nodes. Coordinates are in the station's XZ plane; negative Z is
- * toward the camera. Hubs are the three languages the site is hired for.
+ * Labeled nodes. x is the gutter (negative left). yOff is height. z is a small
+ * authored offset along the path, applied on top of the station's z.
+ * Hubs are the three languages the site is hired for.
  */
 const NODES = [
   // device — sparse arc in the gutters, not on the headline
@@ -53,6 +50,11 @@ const NODES = [
   { id: 'linux', label: 'Linux', tier: 'secondary', station: 'horizon', x: 1.4, z: -7.2, yOff: -0.55 },
   { id: 'kubernetes', label: 'Kubernetes', tier: 'primary', station: 'horizon', x: 6.4, z: -4.2, yOff: 0.4 },
   { id: 'mssql', label: 'MSSQL', tier: 'secondary', station: 'horizon', x: -4.8, z: 1.6, yOff: -0.25 },
+
+  // horizon — the products, a quieter constellation of their own
+  { id: 'norviq', label: 'Norviq', tier: 'product', station: 'horizon', x: -7.4, z: 2.2, yOff: 1.2 },
+  { id: 'luminavault', label: 'LuminaVault', tier: 'product', station: 'horizon', x: 7.6, z: 1.6, yOff: 0.9 },
+  { id: 'hermes', label: 'Hermes', tier: 'product', station: 'horizon', x: 5.2, z: 3.0, yOff: -1.6 },
 ];
 
 // Claimed relationships, not random pairs. Cross-station edges are what make
@@ -80,6 +82,10 @@ const EDGES = [
   ['docker', 'linux'],
   ['linux', 'kubernetes'],
   ['swiftui', 'vapor'],
+  ['norviq', 'hermes'],
+  ['luminavault', 'hermes'],
+  ['hermes', 'kubernetes'],
+  ['norviq', 'go'],
 ];
 
 // A subset of the edges carry a travelling packet. Short list on purpose.
@@ -96,13 +102,16 @@ const PACKET_EDGES = [
   ['html', 'css'],
   ['csharp', 'mongodb'],
   ['go', 'postgres'],
+  ['norviq', 'hermes'],
+  ['hermes', 'kubernetes'],
 ];
 
 const TIER = {
-  hub: { nodeR: 0.22, sat: 2, labelH: 0.4, opacity: 0.92, edgeOpacity: 0.4 },
-  primary: { nodeR: 0.16, sat: 2, labelH: 0.34, opacity: 0.8, edgeOpacity: 0.32 },
-  secondary: { nodeR: 0.12, sat: 1, labelH: 0.28, opacity: 0.58, edgeOpacity: 0.28 },
-  satellite: { nodeR: 0.04, sat: 0, labelH: 0, opacity: 0.2, edgeOpacity: 0 },
+  hub: { nodeR: 0.22, sat: 2, labelH: 0.4, opacity: 0.92, edgeOpacity: 0.4, role: 'go' },
+  primary: { nodeR: 0.16, sat: 2, labelH: 0.34, opacity: 0.8, edgeOpacity: 0.32, role: 'fg' },
+  product: { nodeR: 0.18, sat: 3, labelH: 0.36, opacity: 0.84, edgeOpacity: 0.34, role: 'trail' },
+  secondary: { nodeR: 0.12, sat: 1, labelH: 0.28, opacity: 0.58, edgeOpacity: 0.28, role: 'fg' },
+  satellite: { nodeR: 0.04, sat: 0, labelH: 0, opacity: 0.2, edgeOpacity: 0, role: 'fg' },
 };
 
 function hash01(n) {
@@ -111,13 +120,20 @@ function hash01(n) {
 }
 
 function placedAt(node) {
-  const r = Math.hypot(node.x, node.z);
+  // x is the gutter. yOff is height. Old z (depth toward the previous camera)
+  // becomes a small offset along the path so a station is a volume, not a card.
+  const x = node.x;
+  const y = node.yOff * 1.8;
+  const z = STATIONS[node.station].z + node.z * 0.45;
+  const r = Math.hypot(x, y);
   const scale = r < CLEAR_R ? (CLEAR_R + 0.4) / Math.max(r, 0.001) : 1;
-  return {
-    x: node.x * scale,
-    y: STATION_Y[node.station] + node.yOff,
-    z: node.z * scale,
-  };
+  return { x: x * scale, y: y * scale, z };
+}
+
+function stationNear(station, progress) {
+  const t = STATIONS[station]?.t ?? 0;
+  const d = Math.abs((progress ?? 0) - t);
+  return Math.max(0, 1 - d / 0.22);
 }
 
 function cssOf(color) {
@@ -150,10 +166,16 @@ function drawLabel(canvas, text, fill, weight) {
   return { w, h };
 }
 
+function labelColor(node, palette) {
+  if (node.tier === 'hub') return palette.go;
+  if (node.tier === 'product') return palette.trail;
+  return palette.fg;
+}
+
 function makeLabel(THREE, node, palette) {
   const canvas = document.createElement('canvas');
-  const color = node.tier === 'hub' ? palette.go : palette.fg;
-  const weight = node.tier === 'hub' ? 560 : 450;
+  const color = labelColor(node, palette);
+  const weight = node.tier === 'hub' || node.tier === 'product' ? 560 : 450;
   const { w, h } = drawLabel(canvas, node.label, cssOf(color), weight);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -191,7 +213,7 @@ function placeInstance(dummy, mesh, i, x, y, z, scale, rot = null) {
 function restPose(seed, tier) {
   const hx = hash01(seed * 5);
   const hz = hash01(seed * 7);
-  if (tier === 'primary' || tier === 'secondary') {
+  if (tier === 'primary' || tier === 'secondary' || tier === 'product') {
     return { x: 0.42 + hx * 0.28, z: hz * 0.5 - 0.25 };
   }
   return { x: hx * 0.35 - 0.17, z: hz * 0.35 - 0.17 };
@@ -206,32 +228,32 @@ function spinRates(seed) {
 }
 
 function tierGeometry(THREE, tier) {
-  if (tier === 'hub') return new THREE.OctahedronGeometry(1, 0);
-  if (tier === 'primary') return new THREE.CylinderGeometry(1, 1, 0.45, 6);
-  if (tier === 'secondary') return new THREE.CylinderGeometry(1, 1, 0.18, 6);
+  if (tier === 'hub' || tier === 'product') return new THREE.OctahedronGeometry(1, 0);
+  if (tier === 'primary') return new THREE.OctahedronGeometry(1, 0);
+  if (tier === 'secondary') return new THREE.OctahedronGeometry(1, 0);
   return new THREE.TetrahedronGeometry(1, 0);
 }
 
 function makePhongMaterial(THREE, palette, tier) {
   const spec = TIER[tier];
-  const role = tier === 'hub' ? 'go' : 'fg';
+  const role = spec.role;
   const mat = new THREE.MeshPhongMaterial({
     color: palette[role],
     transparent: true,
     opacity: spec.opacity,
     shininess: 28,
   });
-  if (tier === 'hub') {
-    mat.emissive.copy(palette.go);
+  if (tier === 'hub' || tier === 'product') {
+    mat.emissive.copy(palette[role]);
     mat.emissiveIntensity = 0.18;
-    mat.userData.emissiveRole = 'go';
+    mat.userData.emissiveRole = role;
   }
   return tag(mat, role);
 }
 
 function makeEdgeMaterial(THREE, palette, tier) {
   const spec = TIER[tier];
-  const role = tier === 'hub' ? 'go' : 'fg';
+  const role = spec.role;
   return tag(
     new THREE.LineBasicMaterial({
       color: palette[role],
@@ -256,11 +278,12 @@ function createLabeledNode(THREE, node, palette) {
 
   const pivot = new THREE.Group();
   pivot.rotation.set(rest.x, 0, rest.z);
-  pivot.add(new THREE.Mesh(geo, makePhongMaterial(THREE, palette, node.tier)));
+  const fill = new THREE.Mesh(geo, makePhongMaterial(THREE, palette, node.tier));
+  pivot.add(fill);
   pivot.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 15), makeEdgeMaterial(THREE, palette, node.tier)));
   nodeGroup.add(pivot);
 
-  return { group: nodeGroup, pivot, spin, phase, rest };
+  return { group: nodeGroup, pivot, fill, node, spin, phase, rest };
 }
 
 /**
@@ -296,20 +319,21 @@ export function buildGraph(THREE, palette) {
     }
   });
 
-  // A thin dust ring at the horizon so that station does not fall off a cliff
-  // once the floor grid is gone. Unlabeled, attached to the nearest ops node.
+  // A thin dust ring at the horizon so that station does not fall off a cliff.
+  // Unlabeled, attached to the nearest ops/product node. In XY: a halo the
+  // camera flies toward, not a floor ring it looks down on.
   const horizonAnchors = placed.filter((n) => n.station === 'horizon');
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 10; i++) {
     const h = hash01(90 + i);
-    const a = (i / 8) * Math.PI * 2 + 0.35;
+    const a = (i / 10) * Math.PI * 2 + 0.35;
     const r = 8.2 + h * 2.4;
     const x = Math.cos(a) * r;
-    const z = Math.sin(a) * r;
-    const y = STATION_Y.horizon + (hash01(40 + i) - 0.5) * 2.4;
+    const y = Math.sin(a) * r * 0.55;
+    const z = STATIONS.horizon.z + (hash01(40 + i) - 0.5) * 3.2;
     let parent = horizonAnchors[0];
     let best = Infinity;
     for (const n of horizonAnchors) {
-      const d = (n.x - x) ** 2 + (n.z - z) ** 2;
+      const d = (n.x - x) ** 2 + (n.y - y) ** 2;
       if (d < best) {
         best = d;
         parent = n;
@@ -322,7 +346,7 @@ export function buildGraph(THREE, palette) {
   const satGeo = tierGeometry(THREE, 'satellite');
 
   const labeledNodes = placed
-    .filter((n) => n.tier === 'hub' || n.tier === 'primary' || n.tier === 'secondary')
+    .filter((n) => n.tier === 'hub' || n.tier === 'primary' || n.tier === 'secondary' || n.tier === 'product')
     .map((node) => {
       const hw = createLabeledNode(THREE, node, palette);
       group.add(hw.group);
@@ -410,14 +434,18 @@ export function buildGraph(THREE, palette) {
   const ndc = new THREE.Vector3();
   const world = new THREE.Vector3();
 
-  group.userData.tick = (t, camera) => {
+  group.userData.tick = (t, camera, progress) => {
     packetMat.opacity = 0.7 + Math.sin(t * 1.8) * 0.12;
-    signalLines.material.opacity = 0.2 + Math.sin(t * 1.4) * 0.07;
+    signalLines.material.opacity = 0.18 + Math.sin(t * 1.4) * 0.07;
 
-    labeledNodes.forEach(({ pivot, spin, phase, rest }) => {
+    labeledNodes.forEach(({ pivot, fill, node, spin, phase, rest }) => {
       pivot.rotation.x = rest.x + Math.sin(t * spin.x + phase) * 0.06;
       pivot.rotation.y = t * spin.y + phase;
       pivot.rotation.z = rest.z + Math.cos(t * spin.z + phase) * 0.05;
+      if (fill?.material?.emissive) {
+        const near = stationNear(node.station, progress);
+        fill.material.emissiveIntensity = 0.08 + near * 0.32;
+      }
     });
 
     satellites.forEach((sat, i) => {
@@ -453,17 +481,18 @@ export function buildGraph(THREE, palette) {
       const onCopy = Math.abs(ndc.x) < 0.36 && ndc.y > -0.22 && ndc.y < 0.52;
       const mid = onCopy ? 0.08 : offCenter < 0.18 ? 0.55 : 1;
       const near = THREE.MathUtils.smoothstep(dist, 2.4, 5.5);
-      const far = 1 - THREE.MathUtils.smoothstep(dist, 16, 26);
+      const far = 1 - THREE.MathUtils.smoothstep(dist, 22, 40);
+      const along = 0.45 + stationNear(node.station, progress) * 0.55;
       const behind = ndc.z > 1 ? 0 : 1;
-      sprite.material.opacity = sprite.userData.label.baseOpacity * mid * near * far * behind;
+      sprite.material.opacity = sprite.userData.label.baseOpacity * mid * near * far * along * behind;
       sprite.visible = sprite.material.opacity > 0.03;
     });
   };
 
   group.userData.repaint = (next) => {
-    labels.forEach(({ sprite }) => {
+    labels.forEach(({ sprite, node }) => {
       const meta = sprite.userData.label;
-      const color = meta.tier === 'hub' ? next.go : next.fg;
+      const color = labelColor(node, next);
       drawLabel(meta.canvas, meta.text, cssOf(color), meta.weight);
       sprite.material.map.needsUpdate = true;
     });

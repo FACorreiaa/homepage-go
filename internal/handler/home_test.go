@@ -142,7 +142,7 @@ func TestHomeWorldScaffold(t *testing.T) {
 	assert.Contains(t, body, `<div class="world-stage" data-world aria-hidden="true"></div>`)
 	assert.Contains(t, body, "world-shell")
 
-	// Four stations, in the order the camera descends them.
+	// Four stations, in the order the camera flies through them.
 	for _, station := range []string{"device", "server", "cluster", "horizon"} {
 		assert.Contains(t, body, `data-world-station="`+station+`"`)
 	}
