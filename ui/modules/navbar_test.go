@@ -78,3 +78,12 @@ func TestNavbarDrawerIncludesGitHub(t *testing.T) {
 	assert.GreaterOrEqual(t, strings.Count(body, `href="https://github.com/FACorreiaa"`), 2,
 		"GitHub should appear in the desktop bar and the mobile drawer")
 }
+
+func TestNavbarCarriesFC2SBrandMark(t *testing.T) {
+	body := renderNavbar(t, "home")
+	assert.Contains(t, body, "brand-mark")
+	assert.Contains(t, body, "brand-mark--sm")
+	assert.Contains(t, body, `aria-label="FC2S home, Fernando Correia Software Studio"`)
+	assert.GreaterOrEqual(t, strings.Count(body, ">F</span>"), 2)
+	assert.GreaterOrEqual(t, strings.Count(body, ">2</span>"), 2)
+}

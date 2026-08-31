@@ -3,8 +3,8 @@ package modules
 templ Navbar(activePage string) {
 	<nav class="sticky top-0 z-50 px-3 py-3">
 		<div class="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-border/70 bg-background/85 px-4 py-2 shadow-[0_18px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl">
-			<a href="/" class="flex items-center gap-3 font-semibold tracking-tight">
-				<span class="grid h-9 w-9 place-items-center rounded-full bg-foreground text-sm text-background">FC</span>
+			<a href="/" class="flex items-center gap-3 font-semibold tracking-tight" aria-label="FC2S home, Fernando Correia Software Studio">
+				@BrandMark(false, "")
 				<span class="hidden text-sm text-muted-foreground sm:inline">Software Studio</span>
 			</a>
 			<div class="hidden items-center gap-1 min-[900px]:flex">
@@ -91,9 +91,9 @@ templ Navbar(activePage string) {
 							class="absolute inset-y-0 right-0 flex h-[100dvh] w-full flex-col overflow-y-auto bg-background px-6 pb-8 pt-[max(1.5rem,env(safe-area-inset-top))] shadow-xl min-[640px]:max-w-sm"
 						>
 							<div class="mb-6 flex items-center justify-between">
-								<a href="/" class="flex items-center gap-2 font-semibold" @click="open=false">
-									<span class="grid h-8 w-8 place-items-center rounded-full bg-foreground text-xs text-background">FC</span>
-									<span>Studio</span>
+								<a href="/" class="flex items-center gap-2 font-semibold" @click="open=false" aria-label="FC2S home, Fernando Correia Software Studio">
+									@BrandMark(false, "sm")
+									<span>FC2S</span>
 								</a>
 								<button @click="open=false" aria-label="Close menu" class="rounded-full p-2 hover:bg-accent">
 									@UIIcon("close", "h-5 w-5")

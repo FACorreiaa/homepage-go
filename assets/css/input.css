@@ -543,20 +543,46 @@
     }
   }
 
-  /* Brand mark for footer — open gold ring (artist-style reference), no mega-watermark. */
-  .footer-mark {
-    display: inline-block;
-    height: 1.75rem;
-    width: 1.75rem;
+  /* FC2S stamp. Square, not pill: the chrome is rounded-full, the mark is a
+     studio plate. Cells are 2x2 so four letters stay legible at 36px. */
+  .brand-mark {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
     flex-shrink: 0;
-    border-radius: 9999px;
-    background: conic-gradient(
-      from 200deg,
-      oklch(0.8 0.12 78) 0deg 250deg,
-      transparent 250deg 360deg
-    );
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+    border-radius: 0.5rem;
+    background: var(--foreground);
+    color: var(--background);
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 0.625rem;
+    font-weight: 650;
+    letter-spacing: -0.06em;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .brand-mark--sm {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.5625rem;
+    border-radius: 0.45rem;
+  }
+
+  .brand-mark--lg {
+    width: 4rem;
+    height: 4rem;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    border-radius: 1rem;
+    letter-spacing: -0.04em;
+  }
+
+  .brand-mark--invert {
+    background: var(--background);
+    color: var(--foreground);
   }
 
   .status-dot {

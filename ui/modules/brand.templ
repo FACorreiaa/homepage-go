@@ -1,0 +1,20 @@
+package modules
+
+// BrandMark is the FC2S stamp: a 2x2 letter grid.
+// invert is for surfaces already painted in --foreground (the footer).
+templ BrandMark(invert bool, size string) {
+	<span
+		class={
+			"brand-mark",
+			templ.KV("brand-mark--invert", invert),
+			templ.KV("brand-mark--sm", size == "sm"),
+			templ.KV("brand-mark--lg", size == "lg"),
+		}
+		aria-hidden="true"
+	>
+		<span>F</span>
+		<span>C</span>
+		<span>2</span>
+		<span>S</span>
+	</span>
+}

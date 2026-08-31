@@ -31,14 +31,14 @@ func (p LayoutProps) htmlClass() string {
 
 func (p LayoutProps) title() string {
 	if p.Title == "" {
-		return "FC Software Studio"
+		return "FC2S"
 	}
 	return p.Title
 }
 
 func (p LayoutProps) description() string {
 	if p.Description == "" {
-		return "FC Software Studio - Fernando Correia. Go backends, SwiftUI iOS apps, and Kubernetes production systems for product teams."
+		return "FC2S is Fernando Correia Software Studio. Go backends, SwiftUI iOS apps, and Kubernetes production systems for product teams."
 	}
 	return p.Description
 }
@@ -69,7 +69,7 @@ templ BaseLayout(props LayoutProps) {
 			<meta name="robots" content="index,follow,max-image-preview:large"/>
 			<meta name="googlebot" content="index,follow"/>
 			<link rel="canonical" href={ canonicalURL(ctx) }/>
-			<meta property="og:site_name" content="FC Software Studio"/>
+			<meta property="og:site_name" content="FC2S"/>
 			<meta property="og:locale" content="en_US"/>
 			<meta property="og:url" content={ canonicalURL(ctx) }/>
 			<meta property="og:title" content={ props.title() }/>
@@ -83,7 +83,7 @@ templ BaseLayout(props LayoutProps) {
 			<meta name="twitter:image" content={ props.ogImage() }/>
 			<meta name="theme-color" content="#0f172a"/>
 			// Person + WebSite JSON-LD for brand/person entity.
-			@templ.Raw(`<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://facorreia.com/#website","url":"https://facorreia.com/","name":"FC Software Studio","description":"Portugal-based product engineering studio. Go backends, SwiftUI iOS apps, Kubernetes production systems.","inLanguage":"en","publisher":{"@id":"https://facorreia.com/#person"}},{"@type":"Person","@id":"https://facorreia.com/#person","name":"Fernando Correia","url":"https://facorreia.com/","jobTitle":"Software Engineer","address":{"@type":"PostalAddress","addressLocality":"Porto","addressCountry":"PT"},"sameAs":["https://github.com/FACorreiaa"],"knowsAbout":["Go","Swift","SwiftUI","Kubernetes","product engineering","backend systems"]},{"@type":"ProfessionalService","@id":"https://facorreia.com/#studio","name":"FC Software Studio","url":"https://facorreia.com/","image":"https://facorreia.com/assets/static/icon-512.png","areaServed":"Worldwide","availableLanguage":["en","pt"],"founder":{"@id":"https://facorreia.com/#person"}}]}</script>`)
+			@templ.Raw(`<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://facorreia.com/#website","url":"https://facorreia.com/","name":"Fernando Correia Software Studio","alternateName":["FC2S","FC Software Studio"],"description":"Portugal-based product engineering studio. Go backends, SwiftUI iOS apps, Kubernetes production systems.","inLanguage":"en","publisher":{"@id":"https://facorreia.com/#person"}},{"@type":"Person","@id":"https://facorreia.com/#person","name":"Fernando Correia","url":"https://facorreia.com/","jobTitle":"Software Engineer","address":{"@type":"PostalAddress","addressLocality":"Porto","addressCountry":"PT"},"sameAs":["https://github.com/FACorreiaa"],"knowsAbout":["Go","Swift","SwiftUI","Kubernetes","product engineering","backend systems"]},{"@type":"ProfessionalService","@id":"https://facorreia.com/#studio","name":"Fernando Correia Software Studio","alternateName":["FC2S","FC Software Studio"],"url":"https://facorreia.com/","image":"https://facorreia.com/assets/static/icon-512.png","areaServed":"Worldwide","availableLanguage":["en","pt"],"founder":{"@id":"https://facorreia.com/#person"}}]}</script>`)
 			if props.ExtraJSONLD != "" {
 				@templ.Raw(props.ExtraJSONLD)
 			}
