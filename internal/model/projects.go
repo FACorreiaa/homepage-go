@@ -20,6 +20,15 @@ type ProjectItem struct {
 	LogoAsset string
 	Status    string
 
+	// Tagline is the one-line pitch under the title on a featured card
+	// ("Private financial command center, web + iPhone"). Keep it under
+	// ~60 characters; the long form lives in ProjectDetailData.Tagline.
+	Tagline string
+	// Highlights are the three short bullets a featured card shows under the
+	// description. One line each, no trailing period; the card renders at
+	// most three and omits the block entirely when the slice is empty.
+	Highlights []string
+
 	// Proof slots: templates render these only when populated.
 	Metrics         []ProjectMetric
 	Testimonial     Testimonial

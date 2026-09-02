@@ -191,12 +191,12 @@
     letter-spacing: 0;
   }
 
-  /* The wordmark is the whole first screen, so it is allowed to run past
-     .hero-title's ceiling. "Fernando Correia" is 16 characters: at 11vw it
-     fills a desktop line almost exactly, which is the effect, but it means the
-     upper clamp is doing real work on wide monitors. */
+  /* The wordmark opens the first screen, so it may run a little past
+     .hero-title's ceiling, but not fill the line: at 7.5vw "Fernando" takes
+     roughly half a desktop width and the two words read as a name, not a
+     poster. The upper clamp still does real work on wide monitors. */
   .wordmark {
-    font-size: clamp(2.75rem, 11vw, 12rem);
+    font-size: clamp(2.5rem, 7.5vw, 8rem);
     line-height: 0.86;
     letter-spacing: -0.035em;
     font-weight: 600;
@@ -279,15 +279,27 @@
 
   .project-showcase-card,
   .project-feature-card {
-    box-shadow: 0 18px 70px color-mix(in oklab, var(--foreground) 6%, transparent);
+    box-shadow: 0 12px 40px color-mix(in oklab, var(--foreground) 5%, transparent);
   }
 
+  /* Compact card: the only trace of the per-project tone is a hairline on the
+     left edge, the way a prompt marks a line. */
   .project-feature-card {
+    position: relative;
     transition:
       border-color 200ms cubic-bezier(0.23, 1, 0.32, 1),
       background-color 200ms cubic-bezier(0.23, 1, 0.32, 1),
       box-shadow 200ms cubic-bezier(0.23, 1, 0.32, 1),
       transform 250ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .project-feature-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--project-tone-b);
+    pointer-events: none;
   }
 
   .section-pill {
@@ -338,7 +350,6 @@
     line-height: 1;
   }
 
-  .project-art-stage,
   .project-art-shell {
     position: relative;
     display: grid;
@@ -349,79 +360,6 @@
     background:
       radial-gradient(circle at 24% 22%, color-mix(in oklab, white 38%, transparent), transparent 18rem),
       linear-gradient(135deg, var(--project-tone-a), var(--project-tone-b));
-  }
-
-  .project-art-stage {
-    aspect-ratio: 16 / 10;
-    min-height: 14rem;
-  }
-
-  .project-art-stage--flagship {
-    aspect-ratio: 16 / 10;
-    min-height: 16rem;
-  }
-
-  .project-feature-split {
-    display: flex;
-    flex-direction: column;
-  }
-
-  @media (min-width: 768px) {
-    .project-feature-card--flagship .project-feature-split {
-      display: grid;
-      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-      align-items: stretch;
-      min-height: 22rem;
-    }
-
-    .project-feature-card--flagship .project-art-stage--flagship {
-      aspect-ratio: auto;
-      min-height: 22rem;
-      height: 100%;
-    }
-  }
-
-  .project-art-frame {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    height: 100%;
-    padding: 1.1rem 1.1rem 0;
-  }
-
-  @media (min-width: 768px) {
-    .project-art-frame {
-      padding: 1.5rem 1.5rem 0;
-    }
-
-    .project-feature-card--flagship .project-art-frame {
-      padding: 1.75rem 1.75rem 0;
-    }
-  }
-
-  .project-art-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    border-radius: 0.75rem 0.75rem 0 0;
-    border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
-    border-bottom: 0;
-    object-fit: cover;
-    object-position: top center;
-    box-shadow:
-      0 24px 60px color-mix(in oklab, var(--foreground) 16%, transparent),
-      inset 0 1px 0 color-mix(in oklab, white 35%, transparent);
-    background: color-mix(in oklab, var(--background) 70%, transparent);
-  }
-
-  .project-art-fallback {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 2rem;
   }
 
   .project-art-grid {
@@ -448,11 +386,31 @@
       color-mix(in oklab, var(--background) 72%, transparent);
     box-shadow:
       inset 0 1px 0 color-mix(in oklab, white 62%, transparent),
-      0 22px 70px color-mix(in oklab, var(--foreground) 18%, transparent);
+      0 8px 24px color-mix(in oklab, var(--foreground) 12%, transparent);
   }
 
   .project-app-mark {
-    border-radius: 1.35rem;
+    border-radius: 1.1rem;
+  }
+
+  .project-status {
+    font-weight: 600;
+    color: var(--signal);
+  }
+
+  .project-highlights li {
+    position: relative;
+    padding-left: 1.1rem;
+    color: color-mix(in oklab, var(--foreground) 82%, transparent);
+  }
+
+  .project-highlights li::before {
+    content: "\25B8";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
   }
 
   .project-mini-mark {
@@ -515,15 +473,7 @@
     .project-showcase-card:hover {
       transform: translateY(-3px);
       border-color: color-mix(in oklab, var(--foreground) 18%, var(--border));
-      box-shadow: 0 26px 80px color-mix(in oklab, var(--foreground) 10%, transparent);
-    }
-
-    .project-feature-card:hover .project-art-image {
-      transform: scale(1.02);
-    }
-
-    .project-art-image {
-      transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1);
+      box-shadow: 0 18px 60px color-mix(in oklab, var(--foreground) 9%, transparent);
     }
 
     .project-app-mark {
@@ -531,15 +481,11 @@
     }
 
     .project-feature-card:hover .project-app-mark {
-      transform: translateY(-5px) scale(1.03);
+      transform: translateY(-2px);
     }
 
     .project-art-grid {
       transition: opacity 250ms cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    .project-feature-card:hover .project-art-grid {
-      opacity: 0.26;
     }
   }
 

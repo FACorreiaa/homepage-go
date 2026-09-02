@@ -107,8 +107,8 @@ func TestHomeFeaturedWork(t *testing.T) {
 	assert.Equal(t, 3, cards, "landing page shows exactly three featured projects")
 	assert.Equal(t, 3, strings.Count(body, "project-showcase-card"))
 
-	// Flagship + 2-col grid: first card is full-bleed.
-	assert.Contains(t, body, "project-feature-card--flagship")
+	// Uniform 2-col grid: the flagship hero is gone, so no card can outgrow its row.
+	assert.NotContains(t, body, "project-feature-card--flagship")
 	assert.Contains(t, body, "Featured projects")
 
 	// Every card must link to its case study. Deep links are the whole point of
