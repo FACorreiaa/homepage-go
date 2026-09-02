@@ -75,6 +75,11 @@ func main() {
 	mux.HandleFunc("GET /{$}", home.Show)
 	mux.HandleFunc("GET /projects", handler.ProjectsList)
 	mux.HandleFunc("GET /projects/{slug}", handler.ProjectDetail)
+	// Per-product legal pages. App Store Connect and Play Console link to
+	// these directly, so the paths are part of the public contract.
+	mux.HandleFunc("GET /terms/{app}", handler.LegalTerms)
+	mux.HandleFunc("GET /privacy/{app}", handler.LegalPrivacy)
+	mux.HandleFunc("GET /support/{app}", handler.LegalSupport)
 	mux.HandleFunc("GET /about", handler.About)
 	mux.HandleFunc("GET /curriculum", handler.Curriculum)
 	mux.HandleFunc("GET /stack", handler.Stack)

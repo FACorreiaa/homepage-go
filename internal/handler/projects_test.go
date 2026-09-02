@@ -62,3 +62,19 @@ func TestProjectDetail(t *testing.T) {
 		})
 	}
 }
+
+func TestNorviqProductPage(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /projects/{slug}", handler.ProjectDetail)
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/projects/norviq", nil))
+	assert.Equal(t, http.StatusOK, w.Code)
+	body := w.Body.String()
+	assert.Contains(t, body, "Nothing slips past.")
+	assert.Contains(t, body, `id="screenshots"`)
+	assert.Contains(t, body, "/assets/static/projects/norviq/home.webp")
+	assert.Contains(t, body, `href="/privacy/norviq"`)
+	assert.Contains(t, body, `href="/terms/norviq"`)
+	assert.Contains(t, body, `href="/support/norviq"`)
+	assert.Contains(t, body, `href="`+norviqAppStoreURL+`"`)
+}

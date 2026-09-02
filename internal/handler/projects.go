@@ -46,6 +46,16 @@ var allProjects = []model.ProjectItem{
 			"Thesis, risks, and base/bear/bull target scenarios",
 			"Passkeys, MFA, Face ID; export and in-app deletion",
 		},
+		GalleryLabel:   "iPhone screenshots",
+		GalleryCaption: "The daily read: what moved, why, and what to do about it — next to the spending that funds it.",
+		Gallery: []model.GalleryShot{
+			{Src: "/assets/static/projects/norviq/home.webp", Alt: "Norviq home: today's portfolio move with the reasons behind it"},
+			{Src: "/assets/static/projects/norviq/portfolio.webp", Alt: "Portfolio holdings with live prices and day change"},
+			{Src: "/assets/static/projects/norviq/bear_bull.webp", Alt: "Base, bear, and bull target scenarios for a position"},
+			{Src: "/assets/static/projects/norviq/technical_analysis.webp", Alt: "Technical analysis and fundamentals for a single stock"},
+			{Src: "/assets/static/projects/norviq/expenses.webp", Alt: "Expenses and budget pillars for the month"},
+			{Src: "/assets/static/projects/norviq/reports.webp", Alt: "Monthly report comparing spending, saving, and investing"},
+		},
 	},
 	{Slug: "luminavault", Title: "LuminaVault", RoleTag: "Independent", Description: "A private second brain for people who want to own their memory: organized Spaces plus Hermes, an AI agent that reasons only over what you've saved.", Outcome: "Live on TestFlight — capture becomes structured, searchable memory, and every AI answer is grounded in your own vault, self-hostable end to end.", Tags: []string{"SwiftUI", "Hermes Agent", "Spaces", "AI Memory", "TestFlight"}, Category: "iOS App / AI Memory", DisplayGroup: "iOS products", GithubLink: "Private", HasLiveLink: false, Featured: true, Icon: "LV", LogoAsset: "/assets/static/projects/luminavault-icon.webp", Status: "TestFlight", Tagline: "Self-hosted second brain with an AI agent over your notes", Highlights: []string{"Screenshots, photos, Maps, HealthKit saved as Markdown", "kb-compile builds a pgvector-searchable knowledge base", "Docker self-host, per-tenant vault, BYO LLM key"}},
 	{Slug: "hermesvault-backend", Title: "HermesVault Backend", RoleTag: "Independent", Description: "The self-hosted engine behind HermesVault: a Swift 6 / Hummingbird 2 API whose kb-compile pipeline turns raw Markdown into a queryable knowledge base with pgvector semantic search.", Outcome: "Runs in production as private infrastructure — per-tenant vaults, JWT auth, Docker deploys on a bare VPS.", Tags: []string{"Swift 6", "Hummingbird 2", "Postgres", "pgvector", "Docker"}, Category: "Backend API", DisplayGroup: "Backend systems", GithubLink: "Private", HasLiveLink: false, Featured: true, Icon: "HB", LogoAsset: "/assets/static/projects/hermesvault-icon.webp", Status: "Self-hosted", Tagline: "Swift 6 / Hummingbird API behind HermesVault", Highlights: []string{"kb-compile pipeline: Markdown → queryable knowledge base", "pgvector semantic search, per-tenant vaults, JWT auth", "Docker deploys on a bare VPS"}},
@@ -148,6 +158,12 @@ func ProjectDetail(w http.ResponseWriter, r *http.Request) {
 	p, ok := projectBySlug(slug)
 	if !ok {
 		http.NotFound(w, r)
+		return
+	}
+	if p.Slug == "norviq" {
+		if err := pages.ProjectNorviq(p).Render(r.Context(), w); err != nil {
+			http.Error(w, "Failed to render page", http.StatusInternalServerError)
+		}
 		return
 	}
 	if p.Slug == "luminavault" {

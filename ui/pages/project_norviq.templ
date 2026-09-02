@@ -1,0 +1,166 @@
+package pages
+
+import (
+	"myapp/internal/model"
+	"myapp/ui/layouts"
+	"myapp/ui/modules"
+)
+
+// ProjectNorviq is the product page for Norviq: a store-style landing rather
+// than a case study. Order follows what a stranger arriving from the App Store
+// or a search wants: what it is, see it (#screenshots), what it does, how it
+// works, what it costs, questions, then the links every listing must carry.
+templ ProjectNorviq(p model.ProjectItem) {
+	@layouts.BaseLayout(layouts.LayoutProps{
+		Title:       "Norviq — Why your money moved | FC Software Studio",
+		ActivePage:  "projects",
+		Description: "Norviq keeps the vigil: wealth, spending, and the signals between. Track stocks, ETFs, and crypto next to real spending, and see why your holdings moved. iPhone and web.",
+		OGImage:     "/assets/static/projects/norviq/home.webp",
+		ExtraJSONLD: layouts.ProjectJSONLD(p.Slug, p.Title, p.Description, p.LogoAsset),
+	}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-7xl px-4 py-20 md:py-28">
+				<a href="/projects" class="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+					@modules.UIIcon("arrow-left", "h-4 w-4")
+					All projects
+				</a>
+				<div class="grid gap-12 lg:grid-cols-[0.62fr_0.38fr] lg:items-center">
+					<div>
+						<div class="mb-6 flex items-center gap-4">
+							<img src={ p.LogoAsset } alt="" width="56" height="56" class="h-14 w-14 rounded-xl border border-border"/>
+							<div>
+								<p class="text-lg font-semibold">Norviq</p>
+								<p class="text-sm text-muted-foreground">Wealth · Spending · Intelligence</p>
+							</div>
+						</div>
+						<h1 class="hero-title max-w-4xl font-semibold">Nothing slips past.</h1>
+						<p class="mt-8 max-w-2xl text-xl leading-9 text-muted-foreground">Norviq explains why your money moved, not just that it moved. Stocks, ETFs, and crypto next to your real spending, with today's contributors, market context, and retail sentiment in one sentence you can act on.</p>
+						<div class="mt-10 flex flex-wrap items-center gap-3">
+							<a href={ templ.SafeURL(p.AppStoreLink) } target="_blank" rel="noopener noreferrer" class="rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background">Download on the App Store</a>
+							<a href="https://norviq.org/signup" class="rounded-full border border-border bg-background/70 px-7 py-3 text-sm font-semibold backdrop-blur transition-colors hover:bg-accent">Use it on the web</a>
+							<a href="#screenshots" class="px-2 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground">See it in action ↓</a>
+						</div>
+						<ul class="mt-10 flex flex-wrap gap-2 text-xs">
+							for _, chip := range []string{"Free to start", "Finance", "iPhone + Web", "EU-hosted", "Read-only broker sync"} {
+								<li class="rounded-full border border-border px-3 py-1 text-muted-foreground">{ chip }</li>
+							}
+						</ul>
+					</div>
+					<div class="public-image-wrap aspect-[4/5] lg:aspect-[3/4]" data-motion="image-scale">
+						<img src="/assets/static/projects/norviq/home.webp" alt="Norviq home screen showing today's portfolio move and the reasons behind it" width="1290" height="2619" class="h-full w-full object-cover object-top transition-transform duration-700 ease-out hover:scale-105"/>
+					</div>
+				</div>
+			</section>
+			<div id="screenshots" class="scroll-mt-20">
+				@modules.ProjectGallery(p)
+			</div>
+			<section id="features" class="mx-auto max-w-7xl px-4 py-24 md:py-32">
+				<h2 class="section-title font-semibold">What Norviq does</h2>
+				<div class="mt-12 grid grid-flow-dense gap-px overflow-hidden rounded-lg bg-border md:grid-cols-12">
+					for i, f := range []model.DetailFeature{
+						{"Why it moved", "Today's contributors with price action, market context, and X-informed sentiment on the names you actually hold."},
+						{"Wealth", "Stocks, ETFs, crypto, watchlists, and net worth in one workspace. Allocation, chart builder, DCF, financials, earnings, and research."},
+						{"Spending", "Expenses, budgets, receipt scanning, and read-only bank sync. Leftover cash shown as units of your DCA ticker."},
+						{"Targets and scenarios", "Write the thesis, set base, bear, and bull targets, plan rebalancing, and project ten years out."},
+						{"Tax surfaces", "How EU retail investors actually file: harvestable positions, dividend withholding, personal inflation versus CPI."},
+						{"Q and MCP", "An in-app assistant over your real holdings, and a remote MCP server so Claude, Codex, or Hermes can read your portfolio with a scoped token."},
+					} {
+						<div class={ norviqFeatureClass(i) }>
+							<h3 class="text-2xl font-semibold">{ f.Title }</h3>
+							<p class="mt-3 text-sm leading-6 text-muted-foreground">{ f.Body }</p>
+						</div>
+					}
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 py-24 md:py-32" data-motion="pinned-split">
+				<div class="grid gap-12 lg:grid-cols-[0.36fr_0.64fr]">
+					<div data-motion-pin>
+						<h2 class="section-title font-semibold">How Norviq works</h2>
+						<p class="mt-6 text-lg leading-8 text-muted-foreground">Import once, then let the vigil run.</p>
+					</div>
+					<div class="space-y-5" data-motion-track>
+						for _, step := range []model.LuminaStep{{"01", "Bring your holdings", "Connect Interactive Brokers read-only, import a CSV or spreadsheet, or add positions by hand."}, {"02", "Log what you spend", "Scan a receipt, sync a bank read-only, or type it in. Budgets sort it into pillars."}, {"03", "Read why it moved", "Every day Norviq joins price action, news, and sentiment into one line per position, and tells you what is worth your attention."}} {
+							<div class="public-card rounded-lg p-7 md:p-9">
+								<p class="font-mono text-xs tracking-[0.16em] text-muted-foreground">{ step.Num }</p>
+								<h3 class="mt-3 text-3xl font-semibold">{ step.Title }</h3>
+								<p class="mt-3 text-base leading-7 text-muted-foreground">{ step.Body }</p>
+							</div>
+						}
+					</div>
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 py-24 md:py-32">
+				<h2 class="section-title font-semibold">About Norviq</h2>
+				<div class="mt-12 grid gap-10 md:grid-cols-2">
+					<div>
+						<h3 class="font-mono text-xs tracking-[0.16em] text-muted-foreground">FREE TO START</h3>
+						<p class="mt-3 text-base leading-7 text-foreground/85">Portfolio, watchlists, expenses, budgets, and the daily read of why things moved are free. No card to sign up.</p>
+					</div>
+					<div>
+						<h3 class="font-mono text-xs tracking-[0.16em] text-muted-foreground">NORVIQ PRO</h3>
+						<p class="mt-3 text-base leading-7 text-foreground/85">Pro unlocks broker and bank sync, AI insights, scenarios, tax surfaces, and MCP access. Subscription sold through the App Store or web billing; current prices are shown in the app.</p>
+					</div>
+					<div>
+						<h3 class="font-mono text-xs tracking-[0.16em] text-muted-foreground">WHO IT'S FOR</h3>
+						<p class="mt-3 text-base leading-7 text-foreground/85">EU retail investors holding stocks and ETFs at Interactive Brokers or a local broker, who also want their spending and their portfolio in one place.</p>
+					</div>
+					<div>
+						<h3 class="font-mono text-xs tracking-[0.16em] text-muted-foreground">HONEST PROMISE</h3>
+						<p class="mt-3 text-base leading-7 text-foreground/85">Read-only everywhere. Norviq never trades, moves money, or sells your data. It is information, not investment advice. Hosted in the EU by one person who uses it daily.</p>
+					</div>
+				</div>
+			</section>
+			<section id="faq" class="mx-auto max-w-3xl px-4 py-24 md:py-32">
+				<h2 class="section-title font-semibold">Frequently asked questions</h2>
+				<div class="mt-10 divide-y divide-border border-y border-border">
+					for _, q := range []model.DetailFeature{
+						{"Is Norviq free?", "Yes. The free tier is a complete tracker, not a trial. Pro adds sync, AI, scenarios, tax, and MCP."},
+						{"Can Norviq trade or move my money?", "No. Broker and bank connections are read-only by design, and there is no order or transfer feature anywhere in the app."},
+						{"Where is my data stored?", "On servers in the European Union. Bank tokens are encrypted at rest. You can export or delete everything from Settings."},
+						{"What is MCP access?", "A remote Model Context Protocol server. You create a scoped personal access token and your own LLM client (Claude, Codex, Cursor) can read your portfolio and spending through it. You choose and pay the model."},
+						{"Which brokers and banks work?", "Interactive Brokers through its reporting feed, plus CSV and spreadsheet import for any broker. Banks through Plaid (US) and GoCardless (EU)."},
+						{"Does it work on Android?", "The web app works in any browser, including on Android. The native app is iPhone only."},
+					} {
+						<details class="group py-5">
+							<summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold">
+								{ q.Title }
+								<span class="text-muted-foreground transition-transform group-open:rotate-45">+</span>
+							</summary>
+							<p class="mt-3 text-base leading-7 text-muted-foreground">{ q.Body }</p>
+						</details>
+					}
+				</div>
+			</section>
+			<section class="mx-auto max-w-7xl px-4 pb-32 md:pb-48">
+				<div class="public-card rounded-lg p-10 text-center md:p-16">
+					<h2 class="section-title font-semibold">Begin the vigil.</h2>
+					<p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">Free unlimited tracking. Pro is a subscription with a free trial; terms are shown before you buy.</p>
+					<div class="mt-10 flex flex-wrap justify-center gap-3">
+						<a href={ templ.SafeURL(p.AppStoreLink) } target="_blank" rel="noopener noreferrer" class="rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background">Download on the App Store</a>
+						<a href="https://norviq.org/signup" class="rounded-full border border-border px-7 py-3 text-sm font-semibold transition-colors hover:bg-accent">Create free account</a>
+					</div>
+					<p class="mt-10 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+						<a href={ templ.SafeURL(p.AppStoreLink) } target="_blank" rel="noopener noreferrer" class="hover:text-foreground">App Store ↗</a>
+						<a href="/support/norviq" class="hover:text-foreground">Support</a>
+						<a href="/privacy/norviq" class="hover:text-foreground">Privacy Policy</a>
+						<a href="/terms/norviq" class="hover:text-foreground">Terms of Use</a>
+						<a href="https://norviq.org" class="hover:text-foreground">norviq.org ↗</a>
+					</p>
+					<p class="mt-4 text-xs text-muted-foreground">Requires iOS 18 or later · by Fernando Correia, FC Software Studio</p>
+				</div>
+			</section>
+		</div>
+	}
+}
+
+func norviqFeatureClass(i int) string {
+	base := "bg-card p-7 md:p-9 "
+	switch i {
+	case 0:
+		return base + "md:col-span-7"
+	case 1:
+		return base + "md:col-span-5"
+	default:
+		return base + "md:col-span-4"
+	}
+}

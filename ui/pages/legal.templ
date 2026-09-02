@@ -1,0 +1,120 @@
+package pages
+
+import (
+	"myapp/internal/model"
+	"myapp/ui/layouts"
+	"myapp/ui/modules"
+)
+
+// LegalPage renders one product legal document (privacy policy or terms of
+// use). App Store Connect links straight here, so the page must read well
+// with no app context: product name in the title, operator in the intro,
+// dated, and every section addressable by anchor.
+templ LegalPage(app model.LegalApp, doc model.LegalDocument) {
+	@layouts.BaseLayout(layouts.LayoutProps{
+		Title:       doc.Title + " | FC Software Studio",
+		ActivePage:  "projects",
+		Description: doc.Intro,
+	}) {
+		<div class="public-shell min-h-screen">
+			<article class="mx-auto max-w-3xl px-4 py-20 md:py-28">
+				<a href={ templ.SafeURL("/projects/" + app.Slug) } class="mb-10 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+					@modules.UIIcon("arrow-left", "h-4 w-4")
+					{ app.Name }
+				</a>
+				<p class="font-mono text-xs tracking-[0.16em] text-muted-foreground">{ legalKicker(doc) }</p>
+				<h1 class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">{ doc.Title }</h1>
+				<p class="mt-3 text-sm text-muted-foreground">Last updated: { doc.LastUpdated }</p>
+				<p class="mt-8 text-lg leading-8 text-foreground/85">{ doc.Intro }</p>
+				<nav aria-label="Sections" class="mt-10 flex flex-wrap gap-x-4 gap-y-2 border-y border-border py-4 text-sm">
+					for i, s := range doc.Sections {
+						<a href={ templ.SafeURL("#" + legalAnchor(i, s.Heading)) } class="text-muted-foreground hover:text-foreground">{ s.Heading }</a>
+					}
+				</nav>
+				for i, s := range doc.Sections {
+					<section id={ legalAnchor(i, s.Heading) } class="mt-12 scroll-mt-24">
+						<h2 class="text-2xl font-semibold">{ s.Heading }</h2>
+						for _, p := range s.Body {
+							<p class="mt-4 text-base leading-7 text-foreground/85">{ p }</p>
+						}
+					</section>
+				}
+				<footer class="mt-16 border-t border-border pt-8 text-sm text-muted-foreground">
+					<p>{ app.Name } is operated by { app.Operator }.</p>
+					<p class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+						<a href={ templ.SafeURL("/support/" + app.Slug) } class="hover:text-foreground">Support</a>
+						<a href={ templ.SafeURL("/privacy/" + app.Slug) } class="hover:text-foreground">Privacy Policy</a>
+						<a href={ templ.SafeURL("/terms/" + app.Slug) } class="hover:text-foreground">Terms of Use</a>
+						<a href={ templ.SafeURL(app.WebsiteURL) } class="hover:text-foreground">{ app.WebsiteURL }</a>
+					</p>
+				</footer>
+			</article>
+		</div>
+	}
+}
+
+// LegalSupport is the App Store "Support URL" target: how to reach us, plus
+// the two documents Apple and Google ask every listing to link.
+templ LegalSupport(app model.LegalApp) {
+	@layouts.BaseLayout(layouts.LayoutProps{
+		Title:       app.Name + " Support | FC Software Studio",
+		ActivePage:  "projects",
+		Description: "Support, privacy policy, and terms of use for " + app.Name + ".",
+	}) {
+		<div class="public-shell min-h-screen">
+			<article class="mx-auto max-w-3xl px-4 py-20 md:py-28">
+				<a href={ templ.SafeURL("/projects/" + app.Slug) } class="mb-10 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+					@modules.UIIcon("arrow-left", "h-4 w-4")
+					{ app.Name }
+				</a>
+				<p class="font-mono text-xs tracking-[0.16em] text-muted-foreground">SUPPORT</p>
+				<h1 class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">{ app.Name } support</h1>
+				<p class="mt-8 text-lg leading-8 text-foreground/85">Email is the fastest route. Include the email address on your account and, for billing questions, the platform you subscribed on (App Store or web).</p>
+				<div class="mt-10 grid gap-4 sm:grid-cols-2">
+					<a href={ templ.SafeURL("mailto:" + app.SupportEmail) } class="public-card rounded-lg p-6">
+						<p class="text-sm text-muted-foreground">Support</p>
+						<p class="mt-1 text-lg font-semibold">{ app.SupportEmail }</p>
+					</a>
+					<a href={ templ.SafeURL("mailto:" + app.PrivacyEmail) } class="public-card rounded-lg p-6">
+						<p class="text-sm text-muted-foreground">Privacy, export, deletion</p>
+						<p class="mt-1 text-lg font-semibold">{ app.PrivacyEmail }</p>
+					</a>
+				</div>
+				<h2 class="mt-14 text-2xl font-semibold">Documents</h2>
+				<ul class="mt-4 space-y-2 text-base">
+					<li><a href={ templ.SafeURL("/privacy/" + app.Slug) } class="underline underline-offset-4 hover:text-foreground">Privacy Policy</a></li>
+					<li><a href={ templ.SafeURL("/terms/" + app.Slug) } class="underline underline-offset-4 hover:text-foreground">Terms of Use (EULA)</a></li>
+				</ul>
+				<h2 class="mt-14 text-2xl font-semibold">Delete your account</h2>
+				<p class="mt-4 text-base leading-7 text-foreground/85">Open Settings in the app or at norviq.org, choose Account, then Delete account. Connected brokerage and bank links are revoked and your data is removed; backups clear within 30 days. You can also email the privacy address above.</p>
+				<footer class="mt-16 border-t border-border pt-8 text-sm text-muted-foreground">
+					<p>{ app.Name } is operated by { app.Operator }.</p>
+				</footer>
+			</article>
+		</div>
+	}
+}
+
+func legalKicker(doc model.LegalDocument) string {
+	if doc.Kind == "privacy" {
+		return "PRIVACY POLICY · " + doc.AppName
+	}
+	return "TERMS OF USE (EULA) · " + doc.AppName
+}
+
+func legalAnchor(i int, heading string) string {
+	slug := make([]rune, 0, len(heading))
+	for _, r := range heading {
+		switch {
+		case r >= 'a' && r <= 'z', r >= '0' && r <= '9':
+			slug = append(slug, r)
+		case r >= 'A' && r <= 'Z':
+			slug = append(slug, r+('a'-'A'))
+		case r == ' ' || r == '-':
+			if n := len(slug); n > 0 && slug[n-1] != '-' {
+				slug = append(slug, '-')
+			}
+		}
+	}
+	return "s" + string(rune('0'+i%10)) + "-" + string(slug)
+}

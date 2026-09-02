@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"myapp/internal/model"
+
 	"myapp/internal/db"
 	"myapp/internal/service"
 	"myapp/ui/layouts"
@@ -74,6 +76,13 @@ func (h *SitemapHandler) Serve(w http.ResponseWriter, r *http.Request) {
 		set.URLs = append(set.URLs, sitemapURL{
 			Loc: siteBase + "/projects/" + p.Slug, LastMod: today, ChangeFreq: "monthly", Priority: 0.7,
 		})
+	}
+	for _, a := range model.LegalApps() {
+		for _, path := range []string{"/support/", "/privacy/", "/terms/"} {
+			set.URLs = append(set.URLs, sitemapURL{
+				Loc: siteBase + path + a.Slug, LastMod: today, ChangeFreq: "yearly", Priority: 0.3,
+			})
+		}
 	}
 	if h.Q != nil {
 		ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
