@@ -27,9 +27,13 @@ func TestProjectsList(t *testing.T) {
 	assert.Contains(t, body, "norviq.org")
 	assert.Contains(t, body, "Featured projects")
 	assert.Contains(t, body, "Hosted products and systems I shipped and still stand behind.")
-	assert.Contains(t, body, "project-feature-card--flagship")
+	// Uniform grid: no flagship hero, every featured card has the same anatomy.
+	assert.NotContains(t, body, "project-feature-card--flagship")
 	assert.Equal(t, 4, strings.Count(body, `class="project-feature-card project-showcase-card`),
 		"hosted featured list stays Norviq, LuminaVault, HermesVault, Fandemic")
+	assert.Contains(t, body, "Highlights")
+	assert.Contains(t, body, "Holdings, watchlists, allocation with live pricing")
+	assert.Contains(t, body, "Private financial command center, web + iPhone")
 	assert.Contains(t, body, `href="/projects/luminavault"`)
 	assert.Contains(t, body, `href="/projects/fandemic"`)
 }

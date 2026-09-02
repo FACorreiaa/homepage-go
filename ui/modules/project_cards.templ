@@ -7,166 +7,112 @@ import (
 	"myapp/internal/model"
 )
 
-// FeaturedProjectsSection is the visual-first gallery used on home and /projects.
-// One hosted product is a split flagship; two sit equal; three or more keep a
-// flagship plus a two-column grid.
+// FeaturedProjectsSection is the hosted-work gallery used on home and /projects.
+// Every card has the same anatomy and sits in a uniform two-column grid: no
+// flagship hero, so no project can outgrow its row and no logo can outgrow the
+// text beside it. One project is capped so it does not stretch to full width.
 templ FeaturedProjectsSection(projects []model.ProjectItem, title, subtitle string, showAllWorkCTA bool) {
-	{{ flagship, grid, equalPair := splitFeatured(projects) }}
 	<div class="mx-auto max-w-6xl">
-		<div class="max-w-3xl">
-			if title != "" {
-				<h2 class="section-title font-semibold tracking-tight text-balance">{ title }</h2>
-			}
-			if subtitle != "" {
-				<p class="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">{ subtitle }</p>
+		<div class="flex flex-wrap items-end justify-between gap-6">
+			<div class="max-w-3xl">
+				if title != "" {
+					<h2 class="section-title font-semibold tracking-tight text-balance">{ title }</h2>
+				}
+				if subtitle != "" {
+					<p class="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">{ subtitle }</p>
+				}
+			</div>
+			if showAllWorkCTA {
+				@allProjectsLink("hidden md:inline-flex")
 			}
 		</div>
-
-		<div class="mt-12 space-y-6 md:space-y-8">
-			if equalPair {
-				<div class="grid gap-6 md:grid-cols-2 md:gap-8">
-					for i, p := range grid {
-						@ProjectFeatureCard(p, i, false)
-					}
-				</div>
-			} else {
-				if flagship.Slug != "" {
-					@ProjectFeatureCard(flagship, 0, true)
-				}
-				if len(grid) > 0 {
-					<div class="grid gap-6 md:grid-cols-2 md:gap-8">
-						for i, p := range grid {
-							@ProjectFeatureCard(p, i+1, false)
-						}
-					</div>
-				}
+		<div
+			class={
+				"mt-10 grid gap-6 md:gap-7",
+				templ.KV("md:grid-cols-2", len(projects) > 1),
+				templ.KV("max-w-3xl", len(projects) == 1),
+			}
+		>
+			for i, p := range projects {
+				@ProjectFeatureCard(p, i)
 			}
 		</div>
-
 		if showAllWorkCTA {
-			<div class="mt-12 flex justify-center">
-				<a href="/projects" class="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-accent active:scale-[0.97]">
-					See all work
-					@UIIcon("arrow-right", "h-4 w-4")
-				</a>
+			<div class="mt-8 flex md:hidden">
+				@allProjectsLink("inline-flex")
 			</div>
 		}
 	</div>
 }
 
-// ProjectFeatureCard — primary case-study link; external actions are siblings (no nested anchors).
-templ ProjectFeatureCard(p model.ProjectItem, i int, flagship bool) {
+templ allProjectsLink(class string) {
+	<a href="/projects" class={ class + " min-h-11 items-center gap-2 font-mono text-xs tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground" }>
+		All projects
+		@UIIcon("arrow-right", "h-3.5 w-3.5")
+	</a>
+}
+
+// ProjectFeatureCard is one compact, information-first card: a small app mark
+// inline with the title, tagline, and meta line; the description; up to three
+// highlights; then a footer of stack chips and links. The mark, title, and CTA
+// are three plain links to the case study and the external links are siblings,
+// so nothing nests an anchor inside an anchor.
+templ ProjectFeatureCard(p model.ProjectItem, i int) {
 	{{ host := liveHost(p) }}
+	{{ caseStudy := templ.SafeURL("/projects/" + p.Slug) }}
 	<article
-		class={
-			"project-feature-card project-showcase-card group overflow-hidden rounded-2xl border border-border bg-card",
-			templ.KV("project-feature-card--flagship", flagship),
-		}
+		class={ "project-feature-card project-showcase-card group flex flex-col overflow-hidden rounded-2xl border border-border bg-card " + projectToneClass(i) }
 		data-reveal
 	>
-		<a
-			href={ templ.SafeURL("/projects/" + p.Slug) }
-			class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
-			aria-label={ "View " + p.Title + " case study" }
-		>
-			<div class={
-				templ.KV("project-feature-split", flagship),
-			}>
-				<div class={
-					"project-art-stage",
-					projectToneClass(i),
-					templ.KV("project-art-stage--flagship", flagship),
-				}>
-					<div class="project-art-grid" aria-hidden="true"></div>
-					if p.ScreenshotAsset != "" {
-						<div class="project-art-frame">
-							<img
-								src={ p.ScreenshotAsset }
-								alt={ screenshotAlt(p) }
-								loading={ lazyAfter(i) }
-								fetchpriority={ priorityFor(i) }
-								class="project-art-image"
-							/>
-						</div>
+		<div class="flex-1 p-6 md:p-7">
+			<header class="flex items-start gap-5">
+				<a
+					href={ caseStudy }
+					class="project-app-mark h-16 w-16 shrink-0 md:h-[4.5rem] md:w-[4.5rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					aria-label={ "View " + p.Title + " case study" }
+					tabindex="-1"
+				>
+					if p.LogoAsset != "" {
+						<img src={ p.LogoAsset } alt="" width="72" height="72" loading={ lazyAfter(i) } fetchpriority={ priorityFor(i) } class="h-full w-full object-cover"/>
 					} else {
-						<div class={
-							"project-art-fallback",
-							templ.KV("project-art-fallback--flagship", flagship),
-						}>
-							<div class={
-								"project-app-mark",
-								templ.KV("h-24 w-24 md:h-28 md:w-28", !flagship),
-								templ.KV("h-28 w-28 md:h-36 md:w-36", flagship),
-							}>
-								if p.LogoAsset != "" {
-									<img src={ p.LogoAsset } alt="" width="160" height="160" loading={ lazyAfter(i) } fetchpriority={ priorityFor(i) } class="h-full w-full object-cover"/>
-								} else {
-									<span class="font-mono text-3xl font-semibold">{ p.Icon }</span>
-								}
-							</div>
-							<p class="mt-4 max-w-[16rem] text-sm font-medium text-foreground/75">{ displayGroup(p) }</p>
-						</div>
+						<span class="font-mono text-lg font-semibold">{ p.Icon }</span>
 					}
-				</div>
-
-				<div class={
-					"flex flex-col p-5 md:p-7",
-					templ.KV("md:justify-center md:p-8 lg:p-10", flagship),
-				}>
-					<div class="flex flex-wrap items-center gap-2">
-						<span class="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{ displayGroup(p) }</span>
+				</a>
+				<div class="min-w-0 flex-1">
+					<h3 class="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+						<a href={ caseStudy } class="focus-visible:outline-none focus-visible:underline focus-visible:underline-offset-4">{ p.Title }</a>
+					</h3>
+					if p.Tagline != "" {
+						<p class="mt-1 text-sm leading-6 text-muted-foreground md:text-base">{ p.Tagline }</p>
+					}
+					<p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] tracking-[0.08em]">
+						<span class="text-muted-foreground">{ "[" + displayGroup(p) + "]" }</span>
 						if p.Status != "" {
-							<span class="project-tag-pill project-tag-pill--emphasis">{ p.Status }</span>
+							<span class="project-status">{ p.Status }</span>
 						}
-					</div>
-
-					<h3 class={
-						"mt-3 font-semibold tracking-tight text-foreground",
-						templ.KV("text-2xl md:text-3xl lg:text-4xl", flagship),
-						templ.KV("text-xl md:text-2xl", !flagship),
-					}>{ p.Title }</h3>
-
-					<p class={
-						"mt-3 text-sm leading-6 text-muted-foreground md:text-[0.95rem] md:leading-7",
-						templ.KV("line-clamp-3 max-w-3xl", flagship),
-						templ.KV("line-clamp-2", !flagship),
-					}>{ p.Description }</p>
-
-					if flagship && p.Outcome != "" {
-						<p class="mt-4 max-w-3xl border-l border-border pl-4 text-sm leading-6 text-foreground/80">{ p.Outcome }</p>
-					}
-
-					if len(p.Metrics) > 0 {
-						<div class={
-							"mt-5 grid gap-4 border-t border-border pt-4",
-							templ.KV("grid-cols-2 sm:grid-cols-3", true),
-							templ.KV("max-w-xl", !flagship),
-						}>
-							for _, m := range topMetrics(p.Metrics, 3) {
-								<div>
-									<p class="font-mono text-lg font-semibold tabular-nums md:text-xl">{ m.Value }</p>
-									<p class="mt-0.5 text-[11px] leading-4 text-muted-foreground">{ m.Label }</p>
-								</div>
-							}
-						</div>
-					}
-
-					<div class="mt-5 flex flex-wrap gap-2">
-						for _, tag := range topTags(p.Tags, 2) {
-							<span class="project-tag-pill">{ tag }</span>
+						if p.RoleTag != "" {
+							<span class="text-muted-foreground">{ p.RoleTag }</span>
 						}
-					</div>
-
-					<div class="mt-6 flex min-h-11 items-center gap-2 text-sm font-semibold text-foreground">
-						<span>View case study</span>
-						@UIIcon("arrow-right", "h-4 w-4 motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover:translate-x-1")
-					</div>
+					</p>
 				</div>
+			</header>
+			<p class="mt-5 line-clamp-3 text-sm leading-6 text-muted-foreground md:text-[0.95rem] md:leading-7">{ p.Description }</p>
+			if len(p.Highlights) > 0 {
+				<p class="mt-5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Highlights</p>
+				<ul class="project-highlights mt-2 space-y-1.5 text-sm leading-6">
+					for _, h := range topHighlights(p.Highlights, 3) {
+						<li>{ h }</li>
+					}
+				</ul>
+			}
+		</div>
+		<footer class="flex flex-wrap items-center justify-between gap-3 border-t border-border px-6 py-4 md:px-7">
+			<div class="flex flex-wrap gap-2">
+				for _, tag := range topTags(p.Tags, 3) {
+					<span class="project-meta-chip">{ tag }</span>
+				}
 			</div>
-		</a>
-
-		if p.HasLiveLink || p.AppStoreLink != "" {
-			<div class="flex flex-wrap items-center gap-2 border-t border-border px-5 py-4 md:px-7 md:py-5">
+			<div class="flex flex-wrap items-center gap-2">
 				if p.HasLiveLink {
 					<a href={ templ.SafeURL(p.LiveLink) } target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-semibold transition hover:bg-accent">
 						Website
@@ -182,8 +128,12 @@ templ ProjectFeatureCard(p model.ProjectItem, i int, flagship bool) {
 						@UIIcon("external", "h-3.5 w-3.5")
 					</a>
 				}
+				<a href={ caseStudy } class="inline-flex min-h-11 items-center gap-2 rounded-full bg-foreground px-4 py-1.5 text-xs font-semibold text-background transition hover:opacity-90 active:scale-[0.97]">
+					View case study
+					@UIIcon("arrow-right", "h-3.5 w-3.5 motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover:translate-x-0.5")
+				</a>
 			</div>
-		}
+		</footer>
 	</article>
 }
 
@@ -282,19 +232,6 @@ func RestOf(projects []model.ProjectItem) []model.ProjectItem {
 	return out
 }
 
-func splitFeatured(projects []model.ProjectItem) (flagship model.ProjectItem, grid []model.ProjectItem, equalPair bool) {
-	switch len(projects) {
-	case 0:
-		return model.ProjectItem{}, nil, false
-	case 1:
-		return projects[0], nil, false
-	case 2:
-		return model.ProjectItem{}, projects, true
-	default:
-		return projects[0], projects[1:], false
-	}
-}
-
 func liveHost(p model.ProjectItem) string {
 	if !p.HasLiveLink || p.LiveLink == "" {
 		return ""
@@ -313,11 +250,11 @@ func topTags(tags []string, limit int) []string {
 	return tags[:limit]
 }
 
-func topMetrics(metrics []model.ProjectMetric, limit int) []model.ProjectMetric {
-	if len(metrics) <= limit {
-		return metrics
+func topHighlights(items []string, limit int) []string {
+	if len(items) <= limit {
+		return items
 	}
-	return metrics[:limit]
+	return items[:limit]
 }
 
 func displayGroup(p model.ProjectItem) string {
