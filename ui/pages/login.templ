@@ -3,7 +3,7 @@ package pages
 import "myapp/ui/layouts"
 
 templ Login(errMsg string) {
-	@layouts.BaseLayout(layouts.LayoutProps{Title: "Admin Login | FC Software Studio", ActivePage: "admin"}) {
+	@layouts.BaseLayout(layouts.LayoutProps{Title: "Admin Login | FC Software Studio", ActivePage: "admin", NoIndex: true}) {
 		<div class="flex items-center justify-center min-h-[60vh] px-4">
 			<div class="w-full max-w-sm">
 				<h1 class="text-2xl font-bold text-center mb-8">Admin Login</h1>

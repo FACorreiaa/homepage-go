@@ -25,7 +25,25 @@ func RobotsTxt(w http.ResponseWriter, r *http.Request) {
 			"Disallow: /api/\n" +
 			"Disallow: /book-call\n" +
 			"\n" +
-			"Sitemap: " + siteBase + "/sitemap.xml\n",
+			"Sitemap: " + siteBase + "/sitemap.xml\n" +
+			"# Studio summary for AI crawlers: " + siteBase + "/llms.txt\n",
+	))
+}
+
+func LLMsTxt(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	_, _ = w.Write([]byte(
+		"# Fernando Correia Software Studio (FC2S)\n\n" +
+			"Portugal-based solo engineer. Design, build, ship, and operate product systems: SwiftUI on iOS, Go on the server, Kubernetes in production.\n\n" +
+			"- Website: https://facorreia.com/\n" +
+			"- Projects: https://facorreia.com/projects\n" +
+			"- Curriculum: https://facorreia.com/curriculum\n" +
+			"- Blog: https://facorreia.com/blog\n" +
+			"- Proposal: https://facorreia.com/proposal\n" +
+			"- GitHub: https://github.com/FACorreiaa\n" +
+			"- LinkedIn: https://www.linkedin.com/in/fernando-correia-ab018079/\n\n" +
+			"Live products: Norviq (https://norviq.org, https://facorreia.com/projects/norviq), LuminaVault, and client delivery listed on /projects.\n",
 	))
 }
 

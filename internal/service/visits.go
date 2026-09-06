@@ -181,7 +181,7 @@ func ShouldTrack(r *http.Request) bool {
 		}
 	}
 	switch path {
-	case "/healthz", "/robots.txt", "/sitemap.xml", "/favicon.ico":
+	case "/healthz", "/robots.txt", "/sitemap.xml", "/llms.txt", "/favicon.ico":
 		return false
 	}
 	return true

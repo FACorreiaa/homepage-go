@@ -11,6 +11,7 @@ type LayoutProps struct {
 	OGImage     string
 	OGType      string
 	ActivePage  string
+	NoIndex     bool
 
 	// ExtraJSONLD is one or more full <script type="application/ld+json">…</script>
 	// blocks (page-specific BlogPosting, BreadcrumbList, etc.). Safe to leave empty.
@@ -44,10 +45,14 @@ func (p LayoutProps) description() string {
 }
 
 func (p LayoutProps) ogImage() string {
-	if p.OGImage == "" {
-		return "https://facorreia.com/assets/static/icon-512.png"
+	return absoluteAssetURL(p.OGImage)
+}
+
+func (p LayoutProps) robots() string {
+	if p.NoIndex {
+		return "noindex,nofollow"
 	}
-	return p.OGImage
+	return "index,follow,max-image-preview:large"
 }
 
 func (p LayoutProps) ogType() string {
@@ -66,8 +71,8 @@ templ BaseLayout(props LayoutProps) {
 			<title>{ props.title() }</title>
 			<meta name="description" content={ props.description() }/>
 			<meta name="author" content="Fernando Correia"/>
-			<meta name="robots" content="index,follow,max-image-preview:large"/>
-			<meta name="googlebot" content="index,follow"/>
+			<meta name="robots" content={ props.robots() }/>
+			<meta name="googlebot" content={ props.robots() }/>
 			<link rel="canonical" href={ canonicalURL(ctx) }/>
 			<meta property="og:site_name" content="FC2S"/>
 			<meta property="og:locale" content="en_US"/>
@@ -77,13 +82,18 @@ templ BaseLayout(props LayoutProps) {
 			<meta property="og:type" content={ props.ogType() }/>
 			<meta property="og:image" content={ props.ogImage() }/>
 			<meta property="og:image:alt" content={ props.title() }/>
+			if props.OGImage == "" {
+				<meta property="og:image:type" content="image/png"/>
+				<meta property="og:image:width" content="1200"/>
+				<meta property="og:image:height" content="630"/>
+			}
 			<meta name="twitter:card" content="summary_large_image"/>
 			<meta name="twitter:title" content={ props.title() }/>
 			<meta name="twitter:description" content={ props.description() }/>
 			<meta name="twitter:image" content={ props.ogImage() }/>
+			<meta name="twitter:image:alt" content={ props.title() }/>
 			<meta name="theme-color" content="#0f172a"/>
-			// Person + WebSite JSON-LD for brand/person entity.
-			@templ.Raw(`<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://facorreia.com/#website","url":"https://facorreia.com/","name":"Fernando Correia Software Studio","alternateName":["FC2S","FC Software Studio"],"description":"Portugal-based product engineering studio. Go backends, SwiftUI iOS apps, Kubernetes production systems.","inLanguage":"en","publisher":{"@id":"https://facorreia.com/#person"}},{"@type":"Person","@id":"https://facorreia.com/#person","name":"Fernando Correia","url":"https://facorreia.com/","jobTitle":"Software Engineer","address":{"@type":"PostalAddress","addressLocality":"Porto","addressCountry":"PT"},"sameAs":["https://github.com/FACorreiaa"],"knowsAbout":["Go","Swift","SwiftUI","Kubernetes","product engineering","backend systems"]},{"@type":"ProfessionalService","@id":"https://facorreia.com/#studio","name":"Fernando Correia Software Studio","alternateName":["FC2S","FC Software Studio"],"url":"https://facorreia.com/","image":"https://facorreia.com/assets/static/icon-512.png","areaServed":"Worldwide","availableLanguage":["en","pt"],"founder":{"@id":"https://facorreia.com/#person"}}]}</script>`)
+			@templ.Raw(SiteGraphJSONLD())
 			if props.ExtraJSONLD != "" {
 				@templ.Raw(props.ExtraJSONLD)
 			}

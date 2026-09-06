@@ -42,6 +42,7 @@ func TestShouldTrack(t *testing.T) {
 		{"health check", htmlRequest("GET", "/healthz", browserUA), false},
 		{"robots", htmlRequest("GET", "/robots.txt", browserUA), false},
 		{"sitemap", htmlRequest("GET", "/sitemap.xml", browserUA), false},
+		{"llms", htmlRequest("GET", "/llms.txt", browserUA), false},
 		{"crawler", htmlRequest("GET", "/", "Googlebot/2.1"), false},
 		{"empty user agent", htmlRequest("GET", "/", ""), false},
 	}

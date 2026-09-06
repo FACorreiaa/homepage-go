@@ -16,7 +16,7 @@ templ ProjectNorviq(p model.ProjectItem) {
 		ActivePage:  "projects",
 		Description: "Norviq keeps the vigil: wealth, spending, and the signals between. Track stocks, ETFs, and crypto next to real spending, and see why your holdings moved. iPhone and web.",
 		OGImage:     "/assets/static/projects/norviq/home.webp",
-		ExtraJSONLD: layouts.ProjectJSONLD(p.Slug, p.Title, p.Description, p.LogoAsset),
+		ExtraJSONLD: norviqExtraJSONLD(p),
 	}) {
 		<div class="public-shell min-h-screen">
 			<section class="mx-auto max-w-7xl px-4 py-20 md:py-28">
@@ -113,14 +113,7 @@ templ ProjectNorviq(p model.ProjectItem) {
 			<section id="faq" class="mx-auto max-w-3xl px-4 py-24 md:py-32">
 				<h2 class="section-title font-semibold">Frequently asked questions</h2>
 				<div class="mt-10 divide-y divide-border border-y border-border">
-					for _, q := range []model.DetailFeature{
-						{"Is Norviq free?", "Yes. The free tier is a complete tracker, not a trial. Pro adds sync, AI, scenarios, tax, and MCP."},
-						{"Can Norviq trade or move my money?", "No. Broker and bank connections are read-only by design, and there is no order or transfer feature anywhere in the app."},
-						{"Where is my data stored?", "On servers in the European Union. Bank tokens are encrypted at rest. You can export or delete everything from Settings."},
-						{"What is MCP access?", "A remote Model Context Protocol server. You create a scoped personal access token and your own LLM client (Claude, Codex, Cursor) can read your portfolio and spending through it. You choose and pay the model."},
-						{"Which brokers and banks work?", "Interactive Brokers through its reporting feed, plus CSV and spreadsheet import for any broker. Banks through Plaid (US) and GoCardless (EU)."},
-						{"Does it work on Android?", "The web app works in any browser, including on Android. The native app is iPhone only."},
-					} {
+					for _, q := range norviqFAQs() {
 						<details class="group py-5">
 							<summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold">
 								{ q.Title }

@@ -22,7 +22,7 @@ func BlogPostJSONLD(slug, title, summary, category, date, updatedAt, imageURL st
 		published = modified
 	}
 	if imageURL == "" {
-		imageURL = siteBaseURL + "/assets/static/icon-512.png"
+		imageURL = absoluteAssetURL("")
 	}
 
 	graph := []map[string]any{
@@ -67,11 +67,7 @@ func BlogPostJSONLD(slug, title, summary, category, date, updatedAt, imageURL st
 // CreativeWork avoids SoftwareApplication's required Offer shape for portfolio pieces.
 func ProjectJSONLD(slug, title, description, imageURL string) string {
 	pageURL := siteBaseURL + "/projects/" + slug
-	if imageURL == "" {
-		imageURL = siteBaseURL + "/assets/static/icon-512.png"
-	} else if strings.HasPrefix(imageURL, "/") {
-		imageURL = siteBaseURL + imageURL
-	}
+	imageURL = absoluteAssetURL(imageURL)
 
 	graph := []map[string]any{
 		{
@@ -108,6 +104,81 @@ func ProjectJSONLD(slug, title, description, imageURL string) string {
 type breadcrumbItem struct {
 	Name string
 	URL  string
+}
+
+// FAQItem is one question already shown on a page. JSON-LD must not invent Q&A.
+type FAQItem struct {
+	Question string
+	Answer   string
+}
+
+// FAQPageJSONLD emits a FAQPage block for a public path (e.g. "/projects/norviq").
+func FAQPageJSONLD(path string, items []FAQItem) string {
+	if len(items) == 0 {
+		return ""
+	}
+	pageURL := siteBaseURL + path
+	entities := make([]map[string]any, 0, len(items))
+	for _, it := range items {
+		entities = append(entities, map[string]any{
+			"@type": "Question",
+			"name":  it.Question,
+			"acceptedAnswer": map[string]any{
+				"@type": "Answer",
+				"text":  it.Answer,
+			},
+		})
+	}
+	return scriptTag(map[string]any{
+		"@context":   "https://schema.org",
+		"@type":      "FAQPage",
+		"@id":        pageURL + "#faq",
+		"url":        pageURL,
+		"mainEntity": entities,
+	})
+}
+
+// SiteGraphJSONLD is the site-wide Person / WebSite / ProfessionalService graph.
+func SiteGraphJSONLD() string {
+	og := absoluteAssetURL("")
+	return scriptTag(map[string]any{
+		"@context": "https://schema.org",
+		"@graph": []any{
+			map[string]any{
+				"@type":         "WebSite",
+				"@id":           siteBaseURL + "/#website",
+				"url":           siteBaseURL + "/",
+				"name":          "Fernando Correia Software Studio",
+				"alternateName": []string{"FC2S", "FC Software Studio"},
+				"description":   "Portugal-based product engineering studio. Go backends, SwiftUI iOS apps, Kubernetes production systems.",
+				"inLanguage":    "en",
+				"publisher":     map[string]any{"@id": personID},
+				"image":         og,
+			},
+			map[string]any{
+				"@type":      "Person",
+				"@id":        personID,
+				"name":       "Fernando Correia",
+				"url":        siteBaseURL + "/",
+				"jobTitle":   "Software Engineer",
+				"image":      og,
+				"address":    map[string]any{"@type": "PostalAddress", "addressLocality": "Porto", "addressCountry": "PT"},
+				"sameAs":     []string{"https://github.com/FACorreiaa", "https://www.linkedin.com/in/fernando-correia-ab018079/"},
+				"knowsAbout": []string{"Go", "Swift", "SwiftUI", "Kubernetes", "product engineering", "backend systems"},
+			},
+			map[string]any{
+				"@type":             "ProfessionalService",
+				"@id":               siteBaseURL + "/#studio",
+				"name":              "Fernando Correia Software Studio",
+				"alternateName":     []string{"FC2S", "FC Software Studio"},
+				"url":               siteBaseURL + "/",
+				"image":             og,
+				"areaServed":        "Worldwide",
+				"availableLanguage": []string{"en", "pt"},
+				"founder":           map[string]any{"@id": personID},
+			},
+		},
+	})
 }
 
 func breadcrumbList(items []breadcrumbItem) map[string]any {

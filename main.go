@@ -112,6 +112,7 @@ func main() {
 	sm := &handler.SitemapHandler{Q: q, Store: bookmarkStore}
 	mux.HandleFunc("GET /robots.txt", handler.RobotsTxt)
 	mux.HandleFunc("GET /sitemap.xml", sm.Serve)
+	mux.HandleFunc("GET /llms.txt", handler.LLMsTxt)
 
 	// Admin
 	admin := &handler.AdminHandler{Q: q}
