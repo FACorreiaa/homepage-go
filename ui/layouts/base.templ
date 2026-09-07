@@ -68,6 +68,7 @@ templ BaseLayout(props LayoutProps) {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta name="htmx-config" content='{"noSwap": [204, 304, "4xx", "5xx"]}'/>
 			<title>{ props.title() }</title>
 			<meta name="description" content={ props.description() }/>
 			<meta name="author" content="Fernando Correia"/>
@@ -164,6 +165,9 @@ templ BaseLayout(props LayoutProps) {
 			</script>
 			<script defer src="/assets/static/vendor/alpine/alpine.min.js"></script>
 			<script defer src="/assets/static/vendor/htmx/htmx.min.js"></script>
+			// htmx 4 morph swaps discard Alpine component state without this; it is a
+			// permanent part of the stack, not a migration bridge.
+			<script defer src="/assets/static/vendor/htmx/hx-alpine-compat.min.js"></script>
 		</body>
 	</html>
 }
