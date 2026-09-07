@@ -29,7 +29,14 @@ func TestLLMsTxt(t *testing.T) {
 		t.Fatalf("content type %q", ct)
 	}
 	body := rec.Body.String()
-	for _, want := range []string{"# Fernando Correia Software Studio", "https://facorreia.com/", "linkedin.com/in/fernando-correia", "norviq.org"} {
+	for _, want := range []string{
+		"# Fernando Correia Software Studio",
+		"https://facorreia.com/",
+		"linkedin.com/in/fernando-correia",
+		"norviq.org",
+		"kheprios.com",
+		"lociai.fyi",
+	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("llms.txt missing %q:\n%s", want, body)
 		}

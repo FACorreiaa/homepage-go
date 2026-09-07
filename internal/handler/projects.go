@@ -21,7 +21,7 @@ var trustItems = []model.TrustItem{
 //	Metrics: []model.ProjectMetric{{Value: "38ms", Label: "p95 API latency"}},
 //
 // Featured is the hosted-work gallery. Flip Featured to true when a product
-// should sit in that first section (Norviq, LuminaVault, and later North / Loci).
+// should sit in that first section (live public products first).
 var allProjects = []model.ProjectItem{
 	{
 		Slug:         "norviq",
@@ -55,6 +55,68 @@ var allProjects = []model.ProjectItem{
 			{Src: "/assets/static/projects/norviq/technical_analysis.webp", Alt: "Technical analysis and fundamentals for a single stock"},
 			{Src: "/assets/static/projects/norviq/expenses.webp", Alt: "Expenses and budget pillars for the month"},
 			{Src: "/assets/static/projects/norviq/reports.webp", Alt: "Monthly report comparing spending, saving, and investing"},
+		},
+	},
+	{
+		Slug:         "khepri",
+		Title:        "Khepri",
+		RoleTag:      "Independent",
+		Description:  "One coach with one memory: goals, training, meals, sleep, and check-ins, available on the web, in Telegram, and inside any tool that speaks MCP.",
+		Outcome:      "Live at kheprios.com. Advice is fitted to the life it has been logging, not to the last ten messages.",
+		Tags:         []string{"Go", "templ", "PostgreSQL", "MCP", "Telegram"},
+		Category:     "Full Stack / AI Coach",
+		DisplayGroup: "Web products",
+		GithubLink:   "Private",
+		LiveLink:     "https://kheprios.com",
+		HasLiveLink:  true,
+		Featured:     true,
+		Icon:         "KP",
+		LogoAsset:    "/assets/static/projects/khepri-icon.webp",
+		Status:       "Live",
+		Tagline:      "AI operating system for personal growth",
+		Highlights: []string{
+			"Persistent memory across goals, training, meals, and sleep",
+			"Same coach on web, Telegram, and MCP",
+			"BYOK for OpenAI, Anthropic, Gemini, and xAI",
+		},
+		GalleryLabel:   "Product screens",
+		GalleryCaption: "One memory across coaching, training, and goals.",
+		Gallery: []model.GalleryShot{
+			{Src: "/assets/static/projects/khepri/landing.webp", Alt: "Khepri landing: one coach with one memory across web, Telegram, and MCP"},
+			{Src: "/assets/static/projects/khepri/training.webp", Alt: "Khepri training demo: a plan read as anatomy, not a list of names"},
+			{Src: "/assets/static/projects/khepri/features.webp", Alt: "Khepri features: persistent memory, context-aware coaching, and tools"},
+			{Src: "/assets/static/projects/khepri/everywhere.webp", Alt: "Khepri across surfaces: web, Telegram, and MCP sharing one thread"},
+		},
+	},
+	{
+		Slug:         "loci",
+		Title:        "Loci",
+		RoleTag:      "Independent",
+		Description:  "Describe a city and a mood. Loci streams back an itinerary of real places you can edit, save, compare, and open again when you are standing there.",
+		Outcome:      "Live at lociai.fyi. The plan persists outside the chat, with weather, hours, and a two-city compare for weekend decisions.",
+		Tags:         []string{"Go", "Connect RPC", "SolidStart", "PostgreSQL", "PostGIS"},
+		Category:     "Full Stack / Travel",
+		DisplayGroup: "Web products",
+		GithubLink:   "Private",
+		LiveLink:     "https://lociai.fyi",
+		HasLiveLink:  true,
+		Featured:     true,
+		Icon:         "LC",
+		LogoAsset:    "/assets/static/projects/loci-icon.webp",
+		Status:       "Live",
+		Tagline:      "A travel planner that produces a trip you can keep",
+		Highlights: []string{
+			"Streamed itineraries of real places, mapped and editable",
+			"Two-city compare with weather, logistics, and feasibility",
+			"Remote MCP so Claude can build trips you actually keep",
+		},
+		GalleryLabel:   "Product screens",
+		GalleryCaption: "A vibe in, a route of real places out.",
+		Gallery: []model.GalleryShot{
+			{Src: "/assets/static/projects/loci/landing.webp", Alt: "Loci landing: turn a vibe into a route of real places"},
+			{Src: "/assets/static/projects/loci/compare.webp", Alt: "Loci compare: two candidate cities side by side"},
+			{Src: "/assets/static/projects/loci/features.webp", Alt: "Loci features: itineraries, maps, and trip kit export"},
+			{Src: "/assets/static/projects/loci/mcp.webp", Alt: "Loci MCP: a travel planner your AI assistant can actually use"},
 		},
 	},
 	{Slug: "luminavault", Title: "LuminaVault", RoleTag: "Independent", Description: "A private second brain for people who want to own their memory: organized Spaces plus Hermes, an AI agent that reasons only over what you've saved.", Outcome: "Live on TestFlight — capture becomes structured, searchable memory, and every AI answer is grounded in your own vault, self-hostable end to end.", Tags: []string{"SwiftUI", "Hermes Agent", "Spaces", "AI Memory", "TestFlight"}, Category: "iOS App / AI Memory", DisplayGroup: "iOS products", GithubLink: "Private", HasLiveLink: false, Featured: true, Icon: "LV", LogoAsset: "/assets/static/projects/luminavault-icon.webp", Status: "TestFlight", Tagline: "Self-hosted second brain with an AI agent over your notes", Highlights: []string{"Screenshots, photos, Maps, HealthKit saved as Markdown", "kb-compile builds a pgvector-searchable knowledge base", "Docker self-host, per-tenant vault, BYO LLM key"}},
@@ -100,6 +162,40 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 				{Label: "Discord", URL: "https://discord.gg/3QVkas3rH"},
 			},
 			BackendNote: "Powered by api.norviqa.io",
+		}
+	case "khepri":
+		return model.ProjectDetailData{
+			Project: p,
+			Tagline: "An AI operating system for personal growth: one coach, one memory, still useful in month eight.",
+			LongDesc: []string{
+				"Most assistants reset every session. Khepri keeps a long-running picture of your goals, training, meals, sleep, documents, and check-ins, then coaches from that record instead of the last ten messages.",
+				"The same memory is on the web, in Telegram, and inside any client that speaks MCP. Bring your own OpenAI, Anthropic, Gemini, or xAI key, or let the app fall back to a working floor.",
+			},
+			Features: []model.DetailFeature{
+				{Title: "Persistent memory", Body: "Goals, sessions, check-ins, and offhand remarks stay. An injury mentioned in March still shapes the plan in September."},
+				{Title: "Context-aware coaching", Body: "Before it answers, Khepri assembles active goals, this week's training, documents, calendar, and how you have been sleeping."},
+				{Title: "Everywhere you already are", Body: "Web and Telegram share one thread. Through MCP, Khepri can file a check-in or pull a summary from the agent you already use."},
+			},
+			TechStack:   []string{"Go", "templ", "HTMX", "Alpine", "PostgreSQL", "MCP", "Telegram", "Docker"},
+			BackendNote: "Live at kheprios.com.",
+			BannerAsset: "/assets/static/projects/khepri/banner.webp",
+		}
+	case "loci":
+		return model.ProjectDetailData{
+			Project: p,
+			Tagline: "A travel planner that produces a trip you can keep, not a chat log you lose.",
+			LongDesc: []string{
+				"Tell Loci a city and a mood. It streams back an itinerary of real places with weather, opening context, and a confidence signal on each stop. You edit it, save it, export it, and open it again when you are standing there.",
+				"The two-city compare is for weekend decisions. The remote MCP server is for the assistant you already run: Claude can search, save, and build trips against the same product, not a throwaway prompt.",
+			},
+			Features: []model.DetailFeature{
+				{Title: "Itineraries that persist", Body: "A real timeline you reorder and annotate, not a wall of text that dies with the conversation."},
+				{Title: "Two-city compare", Body: "Origin, two or three candidates, and a time window. Side-by-side places, weather, logistics, and whether doing both is feasible."},
+				{Title: "MCP from day one", Body: "A hosted, authenticated remote MCP server so your existing AI client can build and save real itineraries."},
+			},
+			TechStack:   []string{"Go", "Connect RPC", "SolidStart", "PostgreSQL", "PostGIS", "pgvector", "Mapbox", "Stripe"},
+			BackendNote: "Live at lociai.fyi. API on api.lociai.fyi.",
+			BannerAsset: "/assets/static/projects/loci/banner.webp",
 		}
 	case "luminavault":
 		return model.ProjectDetailData{

@@ -119,6 +119,9 @@ func TestHomeFeaturedWork(t *testing.T) {
 		seen[m[1]] = true
 	}
 	assert.GreaterOrEqual(t, len(seen), 3, "three distinct case-study links, got %v", seen)
+	assert.True(t, seen["norviq"], "home featured includes Norviq, got %v", seen)
+	assert.True(t, seen["khepri"], "home featured includes Khepri, got %v", seen)
+	assert.True(t, seen["loci"], "home featured includes Loci, got %v", seen)
 }
 
 func TestHomeOpsStrip(t *testing.T) {
