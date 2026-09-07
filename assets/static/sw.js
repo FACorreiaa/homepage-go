@@ -1,10 +1,11 @@
 // Service Worker for FC Software Studio
-const CACHE_NAME = 'fc-studio-v5';
+const CACHE_NAME = 'fc-studio-v6';
 const PRECACHE = [
   '/',
   '/assets/css/output.css',
   '/assets/static/vendor/alpine/alpine.min.js',
   '/assets/static/vendor/htmx/htmx.min.js',
+  '/assets/static/vendor/htmx/hx-alpine-compat.min.js',
   '/assets/static/manifest.json',
 ];
 
