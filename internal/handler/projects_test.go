@@ -12,10 +12,12 @@ import (
 )
 
 const (
-	norviqWebsiteURL  = "https://norviq.org"
-	norviqAppStoreURL = "https://apps.apple.com/pt/app/norviq/id6765849578?l=en-GB"
-	khepriWebsiteURL  = "https://kheprios.com"
-	lociWebsiteURL    = "https://lociai.fyi"
+	norviqWebsiteURL    = "https://norviq.org"
+	norviqAppStoreURL   = "https://apps.apple.com/pt/app/norviq/id6765849578?l=en-GB"
+	khepriWebsiteURL    = "https://kheprios.com"
+	lociWebsiteURL      = "https://lociai.fyi"
+	luminaWebsiteURL    = "https://app.luminavault.fyi"
+	luminaTestFlightURL = "https://testflight.apple.com/join/s1qKaww4"
 )
 
 func TestProjectsList(t *testing.T) {
@@ -44,6 +46,10 @@ func TestProjectsList(t *testing.T) {
 	assert.Contains(t, body, `href="`+lociWebsiteURL+`"`)
 	assert.Contains(t, body, "kheprios.com")
 	assert.Contains(t, body, "lociai.fyi")
+	assert.Contains(t, body, `href="`+luminaWebsiteURL+`"`)
+	assert.Contains(t, body, `href="`+luminaTestFlightURL+`"`)
+	assert.Contains(t, body, "app.luminavault.fyi")
+	assert.Contains(t, body, "Live · TestFlight")
 }
 
 func TestProjectDetail(t *testing.T) {
@@ -80,6 +86,15 @@ func TestProjectDetail(t *testing.T) {
 				assert.Contains(t, body, `href="`+lociWebsiteURL+`"`)
 				assert.Contains(t, body, "/assets/static/projects/loci/landing.webp")
 				assert.Contains(t, body, "trip you can keep")
+			}
+			if tt.slug == "luminavault" {
+				body := w.Body.String()
+				assert.Contains(t, body, `href="`+luminaWebsiteURL+`"`)
+				assert.Contains(t, body, `href="`+luminaTestFlightURL+`"`)
+				assert.Contains(t, body, "Open the web app")
+				assert.Contains(t, body, "Join on TestFlight")
+				assert.NotContains(t, body, "TestFlight Waitlist")
+				assert.NotContains(t, body, "No web app")
 			}
 		})
 	}

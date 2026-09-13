@@ -124,7 +124,7 @@ templ ProjectFeatureCard(p model.ProjectItem, i int) {
 				}
 				if p.AppStoreLink != "" {
 					<a href={ templ.SafeURL(p.AppStoreLink) } target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-semibold transition hover:bg-accent">
-						App Store
+						{ p.IOSLinkLabel() }
 						@UIIcon("external", "h-3.5 w-3.5")
 					</a>
 				}

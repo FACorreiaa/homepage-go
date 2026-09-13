@@ -70,7 +70,7 @@ templ ProjectDetail(d model.ProjectDetailData) {
 							}
 							if d.Project.AppStoreLink != "" {
 								<a href={ templ.SafeURL(d.Project.AppStoreLink) } target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold">
-									App Store
+									{ d.Project.IOSLinkLabel() }
 									@modules.UIIcon("external", "h-4 w-4")
 								</a>
 							}

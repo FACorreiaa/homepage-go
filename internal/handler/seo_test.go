@@ -36,6 +36,7 @@ func TestLLMsTxt(t *testing.T) {
 		"norviq.org",
 		"kheprios.com",
 		"lociai.fyi",
+		"app.luminavault.fyi",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("llms.txt missing %q:\n%s", want, body)

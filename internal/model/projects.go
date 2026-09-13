@@ -1,5 +1,7 @@
 package model
 
+import "strings"
+
 type ProjectItem struct {
 	Slug         string
 	Title        string
@@ -11,6 +13,7 @@ type ProjectItem struct {
 	DisplayGroup string
 	GithubLink   string
 	LiveLink     string
+	// AppStoreLink is the iOS distribution URL: App Store or a public TestFlight join.
 	AppStoreLink string
 	HasLiveLink  bool
 	// Featured puts a project in the first gallery on /projects and home.
@@ -91,4 +94,15 @@ type LuminaStep struct {
 	Num   string
 	Title string
 	Body  string
+}
+
+// IOSLinkLabel is the public name for AppStoreLink.
+func (p ProjectItem) IOSLinkLabel() string {
+	if p.AppStoreLink == "" {
+		return ""
+	}
+	if strings.Contains(p.AppStoreLink, "testflight.apple.com") {
+		return "TestFlight"
+	}
+	return "App Store"
 }

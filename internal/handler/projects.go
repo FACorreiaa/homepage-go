@@ -119,7 +119,30 @@ var allProjects = []model.ProjectItem{
 			{Src: "/assets/static/projects/loci/mcp.webp", Alt: "Loci MCP: a travel planner your AI assistant can actually use"},
 		},
 	},
-	{Slug: "luminavault", Title: "LuminaVault", RoleTag: "Independent", Description: "A private second brain for people who want to own their memory: organized Spaces plus Hermes, an AI agent that reasons only over what you've saved.", Outcome: "Live on TestFlight — capture becomes structured, searchable memory, and every AI answer is grounded in your own vault, self-hostable end to end.", Tags: []string{"SwiftUI", "Hermes Agent", "Spaces", "AI Memory", "TestFlight"}, Category: "iOS App / AI Memory", DisplayGroup: "iOS products", GithubLink: "Private", HasLiveLink: false, Featured: true, Icon: "LV", LogoAsset: "/assets/static/projects/luminavault-icon.webp", Status: "TestFlight", Tagline: "Self-hosted second brain with an AI agent over your notes", Highlights: []string{"Screenshots, photos, Maps, HealthKit saved as Markdown", "kb-compile builds a pgvector-searchable knowledge base", "Docker self-host, per-tenant vault, BYO LLM key"}},
+	{
+		Slug:         "luminavault",
+		Title:        "LuminaVault",
+		RoleTag:      "Independent",
+		Description:  "A private second brain on the web and iPhone for people who want to own their memory: organized Spaces plus Hermes, an AI agent that reasons only over what you've saved.",
+		Outcome:      "Live at app.luminavault.fyi and on TestFlight — capture becomes structured, searchable memory, and every AI answer is grounded in your own vault, self-hostable end to end.",
+		Tags:         []string{"SwiftUI", "Web", "Hermes Agent", "Spaces", "AI Memory"},
+		Category:     "Web & iOS / AI Memory",
+		DisplayGroup: "Web & iOS products",
+		GithubLink:   "Private",
+		LiveLink:     "https://app.luminavault.fyi",
+		AppStoreLink: "https://testflight.apple.com/join/s1qKaww4",
+		HasLiveLink:  true,
+		Featured:     true,
+		Icon:         "LV",
+		LogoAsset:    "/assets/static/projects/luminavault-icon.webp",
+		Status:       "Live · TestFlight",
+		Tagline:      "Self-hosted second brain, web + iPhone",
+		Highlights: []string{
+			"Screenshots, photos, Maps, HealthKit saved as Markdown",
+			"kb-compile builds a pgvector-searchable knowledge base",
+			"Docker self-host, per-tenant vault, BYO LLM key",
+		},
+	},
 	{Slug: "hermesvault-backend", Title: "HermesVault Backend", RoleTag: "Independent", Description: "The self-hosted engine behind HermesVault: a Swift 6 / Hummingbird 2 API whose kb-compile pipeline turns raw Markdown into a queryable knowledge base with pgvector semantic search.", Outcome: "Runs in production as private infrastructure — per-tenant vaults, JWT auth, Docker deploys on a bare VPS.", Tags: []string{"Swift 6", "Hummingbird 2", "Postgres", "pgvector", "Docker"}, Category: "Backend API", DisplayGroup: "Backend systems", GithubLink: "Private", HasLiveLink: false, Featured: true, Icon: "HB", LogoAsset: "/assets/static/projects/hermesvault-icon.webp", Status: "Self-hosted", Tagline: "Swift 6 / Hummingbird API behind HermesVault", Highlights: []string{"kb-compile pipeline: Markdown → queryable knowledge base", "pgvector semantic search, per-tenant vaults, JWT auth", "Docker deploys on a bare VPS"}},
 	{Slug: "hermes", Title: "Hermes", RoleTag: "Independent", Description: "A private gateway and automation hub hosted on a VPS, acting as a central coordinator for AI models, webhooks, and personal services.", Outcome: "Personal infra gateway for model routing, webhooks, and small automations.", Tags: []string{"Docker", "VPS", "Gateway", "Swift", "API"}, Category: "Backend API", DisplayGroup: "Private infrastructure", GithubLink: "Private", HasLiveLink: false, Icon: "HM", Status: "Private infra"},
 	{Slug: "hermesvault-client", Title: "HermesVault Client", RoleTag: "Independent", Description: "Native iOS app with Vision-based OCR, native capture of photos, notes, and HealthKit data.", Outcome: "Capture client for photos, notes, OCR, and personal data ingestion.", Tags: []string{"SwiftUI", "SwiftData", "Vision OCR", "AVFoundation"}, Category: "iOS App", DisplayGroup: "iOS products", GithubLink: "Private", HasLiveLink: false, Icon: "HC", Status: "In development"},
@@ -199,16 +222,19 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 		}
 	case "luminavault":
 		return model.ProjectDetailData{
-			Project:  p,
-			Tagline:  "Your second brain, self-hosted. Private, AI-powered memory layer you actually own.",
-			LongDesc: []string{"LuminaVault is a self-improving memory layer for researchers and analysts who want a living second brain they truly own.", "One tap with kb-compile turns raw inputs into a smart, searchable wiki."},
+			Project: p,
+			Tagline: "Your second brain, self-hosted. Private, AI-powered memory layer you actually own.",
+			LongDesc: []string{
+				"LuminaVault is a self-improving memory layer for researchers and analysts who want a living second brain they truly own — on the web and on iPhone.",
+				"One tap with kb-compile turns raw inputs into a smart, searchable wiki.",
+			},
 			Features: []model.DetailFeature{
 				{Title: "Effortless capture", Body: "Screenshots, photos, Apple Maps, and HealthKit saved as clean Markdown."},
 				{Title: "kb-compile engine", Body: "Turns raw notes into a queryable knowledge base with pgvector semantic search."},
 				{Title: "100% yours", Body: "Self-hosted via Docker. Per-tenant vault, JWT auth, BYO LLM key."},
 			},
 			TechStack:   []string{"SwiftUI", "SwiftData", "Vision OCR", "Swift 6", "Hummingbird 2", "PostgreSQL", "pgvector", "Docker"},
-			BackendNote: "Self-hosted on your own VPS.",
+			BackendNote: "Live at app.luminavault.fyi. iOS on TestFlight.",
 			BannerAsset: "/assets/static/projects/luminavault-banner.webp",
 		}
 	case "fandemic":

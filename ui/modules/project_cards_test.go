@@ -79,3 +79,22 @@ func TestFeaturedSectionHasNoFlagship(t *testing.T) {
 	assert.NotContains(t, body, "flagship")
 	assert.Equal(t, 3, strings.Count(body, `class="project-feature-card project-showcase-card`))
 }
+
+func TestFeatureCardLabelsTestFlightLink(t *testing.T) {
+	body := renderCard(t, model.ProjectItem{
+		Slug: "x", Title: "X", Description: "d",
+		AppStoreLink: "https://testflight.apple.com/join/s1qKaww4",
+	})
+	assert.Contains(t, body, `href="https://testflight.apple.com/join/s1qKaww4"`)
+	assert.Contains(t, body, "TestFlight")
+	assert.NotContains(t, body, "App Store")
+}
+
+func TestFeatureCardLabelsAppStoreLink(t *testing.T) {
+	body := renderCard(t, model.ProjectItem{
+		Slug: "x", Title: "X", Description: "d",
+		AppStoreLink: "https://apps.apple.com/pt/app/norviq/id6765849578?l=en-GB",
+	})
+	assert.Contains(t, body, "App Store")
+	assert.NotContains(t, body, "TestFlight")
+}
