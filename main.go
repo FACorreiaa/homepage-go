@@ -108,6 +108,10 @@ func main() {
 	mux.HandleFunc("GET /api/stats", stats.JSON)
 	mux.HandleFunc("GET /api/stats/stream", stats.Stream)
 
+	// Apps: user counts pulled from each product's /internal/metrics.
+	appsBoard := &handler.AppsHandler{Metrics: service.NewAppMetricsService()}
+	mux.HandleFunc("GET /apps", appsBoard.Page)
+
 	// SEO
 	sm := &handler.SitemapHandler{Q: q, Store: bookmarkStore}
 	mux.HandleFunc("GET /robots.txt", handler.RobotsTxt)

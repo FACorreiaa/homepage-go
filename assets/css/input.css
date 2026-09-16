@@ -766,6 +766,73 @@
     color: var(--muted-foreground);
   }
 
+  /* App cards — the portfolio board on /apps. Same chrome as .stat-panel;
+     the figure is the hero, the copy is caption. An app that did not answer
+     gets a muted dash rather than a fake zero. */
+  .app-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    background: color-mix(in oklab, var(--card) 72%, transparent);
+    transition: border-color 250ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .app-card:hover {
+    border-color: color-mix(in oklab, var(--foreground) 28%, var(--border));
+  }
+
+  .app-card > .app-card-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    color: var(--muted-foreground);
+  }
+
+  .app-card > .app-card-value {
+    margin-top: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .app-card > .app-card-value[data-live="true"] {
+    color: var(--signal);
+  }
+
+  .app-card > .app-card-value-empty {
+    color: var(--muted-foreground);
+  }
+
+  .app-card > .app-card-name {
+    margin-top: 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .app-card > .app-card-description {
+    margin-top: 0.375rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--muted-foreground);
+  }
+
+  .app-card > .app-card-status {
+    margin-top: auto;
+    padding-top: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    color: var(--muted-foreground);
+  }
+
+  .app-card[data-state="unavailable"] > .app-card-status {
+    color: var(--destructive, var(--muted-foreground));
+  }
+
   .stat-list {
     margin-top: 1.25rem;
     display: flex;

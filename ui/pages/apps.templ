@@ -1,0 +1,143 @@
+package pages
+
+import (
+	"fmt"
+	"strconv"
+
+	"myapp/internal/service"
+	"myapp/ui/layouts"
+)
+
+// Apps is the portfolio board: every product with the number of accounts it
+// has, read live from each backend's /internal/metrics endpoint.
+templ Apps(results []service.AppMetricsResult) {
+	@layouts.BaseLayout(layouts.LayoutProps{
+		Title:       "Apps in production | FC Software Studio",
+		ActivePage:  "apps",
+		Description: "Every product this studio runs, with the number of people using each one.",
+		NoIndex:     true,
+	}) {
+		<div class="public-shell min-h-screen">
+			<section class="mx-auto max-w-6xl px-4 pt-24 md:pt-32">
+				<p class="font-mono text-xs tracking-[0.18em] text-muted-foreground">PORTFOLIO / USERS</p>
+				<h1 class="hero-title mt-6 max-w-4xl font-semibold">Who's using what.</h1>
+				<p class="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
+					Every product this studio runs, and how many people have an account on it.
+					Each figure is read straight from that app's own database, so this is the
+					real number, not a launch-day estimate.
+				</p>
+			</section>
+			@appsOpsStrip(results)
+			<section class="mx-auto max-w-6xl px-4 pt-16 pb-24 md:pb-32">
+				if len(results) == 0 {
+					<p class="stat-panel-empty">No apps registered.</p>
+				} else {
+					<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+						for _, r := range results {
+							@appCard(r)
+						}
+					</div>
+				}
+				<p class="mt-14 max-w-2xl text-sm leading-6 text-muted-foreground">
+					How this works: each backend exposes a single number behind a shared secret,
+					this server asks all of them at once and keeps the answer for a minute. An app
+					that does not answer shows a dash rather than a guess.
+				</p>
+			</section>
+		</div>
+	}
+}
+
+// appsOpsStrip mirrors the stats page strip: hairline rules, mono figures.
+templ appsOpsStrip(results []service.AppMetricsResult) {
+	<section class="ops-strip mt-14" aria-label="Portfolio totals" data-reveal>
+		<div class="mx-auto grid max-w-6xl grid-cols-2 gap-x-8 px-4 md:grid-cols-4">
+			<div class="ops-metric">
+				<span class="ops-metric-label">APPS</span>
+				<span class="ops-metric-value" data-metric="apps">{ strconv.Itoa(len(results)) }</span>
+			</div>
+			<div class="ops-metric">
+				<span class="ops-metric-label">REPORTING</span>
+				<span class="ops-metric-value" data-metric="reporting">{ strconv.Itoa(service.ReportingCount(results)) }</span>
+			</div>
+			<div class="ops-metric">
+				<span class="ops-metric-label">USERS TOTAL</span>
+				<span class="ops-metric-value" data-live="true" data-metric="usersTotal">{ formatCount(service.TotalUsers(results)) }</span>
+			</div>
+			<div class="ops-metric">
+				<span class="ops-metric-label">REFRESH</span>
+				<span class="ops-metric-value">60s</span>
+			</div>
+		</div>
+	</section>
+}
+
+// appCard is one product. The count is the hero; everything else is caption.
+templ appCard(r service.AppMetricsResult) {
+	<article
+		class="app-card"
+		data-reveal
+		data-app={ r.App.Slug }
+		data-state={ appState(r) }
+	>
+		<p class="app-card-eyebrow">{ fmt.Sprintf("%s / USERS", upper(r.App.Slug)) }</p>
+		if r.Users != nil {
+			<p class="app-card-value" data-live="true">{ formatCount(*r.Users) }</p>
+		} else {
+			<p class="app-card-value app-card-value-empty" aria-label="unavailable">&mdash;</p>
+		}
+		<h2 class="app-card-name">{ r.App.Name }</h2>
+		<p class="app-card-description">{ r.App.Description }</p>
+		<p class="app-card-status">
+			if r.Users != nil {
+				live from the app's database
+			} else if r.Err == service.ErrNotConfigured {
+				not connected yet
+			} else {
+				unavailable right now
+			}
+		</p>
+	</article>
+}
+
+func appState(r service.AppMetricsResult) string {
+	if r.Users != nil {
+		return "ok"
+	}
+	if r.Err == service.ErrNotConfigured {
+		return "unconfigured"
+	}
+	return "unavailable"
+}
+
+// formatCount groups thousands with a thin space so 12345 reads as 12 345,
+// which sits better in a mono figure than a comma does.
+func formatCount(n int64) string {
+	s := strconv.FormatInt(n, 10)
+	neg := false
+	if s[0] == '-' {
+		neg = true
+		s = s[1:]
+	}
+	var out []byte
+	for i, c := range []byte(s) {
+		if i > 0 && (len(s)-i)%3 == 0 {
+			out = append(out, ' ')
+		}
+		out = append(out, c)
+	}
+	if neg {
+		return "-" + string(out)
+	}
+	return string(out)
+}
+
+func upper(s string) string {
+	b := []byte(s)
+	for i, c := range b {
+		if c >= 'a' && c <= 'z' {
+			b[i] = c - 32
+		}
+	}
+	return string(b)
+}
