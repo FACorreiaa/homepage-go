@@ -9,9 +9,10 @@ import (
 )
 
 // homeFeaturedCount is how many case studies the landing page carries before
-// handing off to /projects. Three is enough to establish range without
-// turning the front door into the index.
-const homeFeaturedCount = 3
+// handing off to /projects. Four: the section is a two-column grid, so four
+// fills it without an orphan row, and it is exactly the set of products that
+// are live today (Norviq, Khepri, Loci, LuminaVault).
+const homeFeaturedCount = 4
 
 type HomeHandler struct {
 	Tracker *service.VisitTracker

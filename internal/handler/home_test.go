@@ -104,8 +104,8 @@ func TestHomeFeaturedWork(t *testing.T) {
 
 	// Count card roots, not the --flagship modifier which also contains the class name.
 	cards := strings.Count(body, `class="project-feature-card project-showcase-card`)
-	assert.Equal(t, 3, cards, "landing page shows exactly three featured projects")
-	assert.Equal(t, 3, strings.Count(body, "project-showcase-card"))
+	assert.Equal(t, 4, cards, "landing page shows exactly four featured projects")
+	assert.Equal(t, 4, strings.Count(body, "project-showcase-card"))
 
 	// Uniform 2-col grid: the flagship hero is gone, so no card can outgrow its row.
 	assert.NotContains(t, body, "project-feature-card--flagship")
@@ -118,10 +118,13 @@ func TestHomeFeaturedWork(t *testing.T) {
 	for _, m := range slugs {
 		seen[m[1]] = true
 	}
-	assert.GreaterOrEqual(t, len(seen), 3, "three distinct case-study links, got %v", seen)
+	assert.GreaterOrEqual(t, len(seen), 4, "four distinct case-study links, got %v", seen)
 	assert.True(t, seen["norviq"], "home featured includes Norviq, got %v", seen)
 	assert.True(t, seen["khepri"], "home featured includes Khepri, got %v", seen)
 	assert.True(t, seen["loci"], "home featured includes Loci, got %v", seen)
+	assert.True(t, seen["luminavault"], "home featured includes LuminaVault, got %v", seen)
+	// The live product link rides on the card, not only on the detail page.
+	assert.Contains(t, body, `href="https://app.luminavault.fyi"`)
 }
 
 func TestHomeOpsStrip(t *testing.T) {
