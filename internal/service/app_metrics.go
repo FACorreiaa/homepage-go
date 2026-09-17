@@ -90,13 +90,25 @@ func NewAppMetricsService() *AppMetricsService {
 			URL:         os.Getenv("SKYVISOR_METRICS_URL"),
 		},
 		{
-			Name:        "North",
-			Slug:        "north",
-			Description: "AI health coach for training, nutrition, and recovery.",
-			URL:         os.Getenv("NORTH_METRICS_URL"),
+			// Public brand is Khepri (kheprios.com); the repo and the env var
+			// keep the working name North. Either variable configures it.
+			Name:        "Khepri",
+			Slug:        "khepri",
+			Description: "AI operating system for personal growth: memory, goals, coaching.",
+			URL:         firstEnv("KHEPRI_METRICS_URL", "NORTH_METRICS_URL"),
 		},
 	}
 	return NewAppMetricsServiceWith(apps, os.Getenv("METRICS_SECRET"), nil)
+}
+
+// firstEnv returns the first of the named variables that is set.
+func firstEnv(names ...string) string {
+	for _, n := range names {
+		if v := os.Getenv(n); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // NewAppMetricsServiceWith is the constructor tests use: an explicit registry,

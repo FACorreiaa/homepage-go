@@ -58,7 +58,7 @@ func TestAppsPagePopulated(t *testing.T) {
 	results := []service.AppMetricsResult{
 		{App: service.AppEntry{Name: "Norviq", Slug: "norviq", Description: "Stock plans."}, Users: &n},
 		{App: service.AppEntry{Name: "Loci", Slug: "loci", Description: "Travel."}, Users: &zero},
-		{App: service.AppEntry{Name: "North", Slug: "north", Description: "Health."}, Err: errors.New("status 502")},
+		{App: service.AppEntry{Name: "Khepri", Slug: "khepri", Description: "Growth."}, Err: errors.New("status 502")},
 		{App: service.AppEntry{Name: "Seshat", Slug: "seshat", Description: "Lessons."}, Err: service.ErrNotConfigured},
 	}
 
@@ -71,7 +71,7 @@ func TestAppsPagePopulated(t *testing.T) {
 	assert.Contains(t, body, `data-app="loci" data-state="ok"`)
 	assert.Contains(t, body, `data-live="true">0<`)
 	// A failed fetch and an unconfigured app are told apart on the card.
-	assert.Contains(t, body, `data-app="north" data-state="unavailable"`)
+	assert.Contains(t, body, `data-app="khepri" data-state="unavailable"`)
 	assert.Contains(t, body, "unavailable right now")
 	assert.Contains(t, body, `data-app="seshat" data-state="unconfigured"`)
 	assert.Contains(t, body, "not connected yet")
