@@ -66,6 +66,12 @@ type AppMetricsService struct {
 func NewAppMetricsService() *AppMetricsService {
 	apps := []AppEntry{
 		{
+			Name:        "LuminaVault",
+			Slug:        "luminavault",
+			Description: "Personal knowledge vault with an AI agent that remembers, captures and acts.",
+			URL:         os.Getenv("LUMINAVAULT_METRICS_URL"),
+		},
+		{
 			Name:        "Norviq",
 			Slug:        "norviq",
 			Description: "Stock plan and portfolio intelligence for equity-compensated employees.",
