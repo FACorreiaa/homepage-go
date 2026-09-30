@@ -1,0 +1,4 @@
+# Masters are ~10 MB each and rebuildable from reel.html; the web encodes in
+# assets/static/promo are what gets committed.
+out/
+node_modules/

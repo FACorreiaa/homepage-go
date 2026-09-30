@@ -1,0 +1,8 @@
+{
+  "name": "facorreia-reel",
+  "private": true,
+  "type": "module",
+  "description": "Renders reel.html to the home-page showreel videos. See README.md.",
+  "scripts": { "render": "node render.mjs" },
+  "dependencies": { "playwright-core": "^1.55.0" }
+}

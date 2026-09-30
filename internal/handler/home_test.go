@@ -208,3 +208,31 @@ func TestGopherAssetsAreNotPinned(t *testing.T) {
 	// The loader is version-pinned in its path, so it may be cached forever.
 	assert.True(t, assets.IsImmutable("/assets/static/vendor/three/addons/loaders/GLTFLoader.js"))
 }
+
+// The reel plays for everyone, so it must cost nothing until it is near the
+// viewport: no autoplay attribute, no preload, and a cut per device class so a
+// phone never downloads the 16:9 file.
+func TestHomeShowreelIsLazyAndPerDevice(t *testing.T) {
+	body := renderHome(t)
+
+	assert.Contains(t, body, `data-showreel`)
+	assert.Contains(t, body, `preload="none"`)
+	assert.Contains(t, body, ` muted `)
+	assert.Contains(t, body, `playsinline`)
+	assert.NotRegexp(t, regexp.MustCompile(`<video[^>]*\sautoplay`), body)
+
+	assert.Contains(t, body, `/assets/static/promo/reel-mobile.webm?v=`)
+	assert.Contains(t, body, `/assets/static/promo/reel-desktop.mp4?v=`)
+	assert.Contains(t, body, `media="(max-width: 767px)"`)
+
+	// Every file the markup names must actually be embedded.
+	for _, name := range []string{
+		"static/promo/reel-desktop.webm", "static/promo/reel-desktop.mp4",
+		"static/promo/reel-mobile.webm", "static/promo/reel-mobile.mp4",
+		"static/promo/poster-desktop.webp", "static/promo/poster-mobile.webp",
+		"static/showreel.js",
+	} {
+		_, err := assets.Assets.ReadFile(name)
+		assert.NoError(t, err, name)
+	}
+}

@@ -878,6 +878,91 @@
     font-variant-numeric: tabular-nums;
     color: var(--muted-foreground);
   }
+
+  /* The reel is dark in both themes: it is footage, not page chrome. The box
+     is sized by the cut the visitor gets, so nothing shifts when it loads. */
+  .showreel {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    background: #0a0a0a;
+    box-shadow: 0 0 0 1px var(--border);
+  }
+
+  /* The phone cut is 1170×2532. At full width that is one screen tall, so it
+     is capped short of the viewport and letterboxed into the same black. */
+  @media (max-width: 767px) {
+    .showreel {
+      aspect-ratio: 1170 / 2532;
+      max-height: 88svh;
+      margin-inline: auto;
+    }
+  }
+
+  .showreel-poster img,
+  .showreel-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* Hidden until it has a frame to show, so a slow start reads as the poster
+     rather than as a black box. */
+  .showreel-video {
+    opacity: 0;
+    transition: opacity 400ms ease-out;
+  }
+
+  .showreel.is-playing .showreel-video {
+    opacity: 1;
+  }
+
+  .showreel-toggle {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    color: #f4f4f3;
+    background: rgb(10 10 10 / 0.55);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.18);
+    backdrop-filter: blur(8px);
+    opacity: 0.7;
+    transition:
+      opacity 200ms ease-out,
+      transform 160ms ease-out;
+  }
+
+  .showreel-toggle:hover,
+  .showreel-toggle:focus-visible,
+  .showreel.is-paused .showreel-toggle {
+    opacity: 1;
+  }
+
+  .showreel-toggle:active {
+    transform: scale(0.94);
+  }
+
+  .showreel-toggle svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .showreel-icon-play,
+  .showreel.is-paused .showreel-icon-pause {
+    display: none;
+  }
+
+  .showreel.is-paused .showreel-icon-play {
+    display: block;
+  }
 }
 
 /* -50% is the whole trick: the track carries the item list twice, so half a

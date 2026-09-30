@@ -32,6 +32,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+  // Media is fetched in byte ranges. A 206 cannot be cached and Safari will not
+  // play a whole 200 handed back for a range, so video goes straight to the
+  // network and its own HTTP caching.
+  if (req.destination === 'video' || req.headers.has('range')) return;
   if (new URL(req.url).origin !== self.location.origin) return;
 
   const path = new URL(req.url).pathname;

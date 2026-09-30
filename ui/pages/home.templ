@@ -40,6 +40,12 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 					the server, Kubernetes underneath. This site included. The numbers below are its own.
 				</p>
 			</section>
+			// The reel sits between the claim and the numbers that back it: it shows
+			// what "the whole stack, in production" has produced. It carries no
+			// station, so the camera passes over it on the way to the telemetry.
+			<section class="mx-auto max-w-6xl px-4 pt-14 md:pt-20" aria-label="Showreel">
+				@modules.Showreel()
+			</section>
 			@opsStrip(stats)
 			<section class="mx-auto max-w-6xl px-4 pt-20 md:pt-28" data-world-station="server">
 				<div class="grid gap-5 md:grid-cols-2">
@@ -107,6 +113,7 @@ templ Home(stats service.StatsSnapshot, featured []model.ProjectItem) {
 		<script defer src="/assets/static/vendor/lenis/lenis.min.js"></script>
 		@templ.Raw(`<script type="importmap">{"imports":{"three":"/assets/static/vendor/three/three.module.min.js","three/webgpu":"/assets/static/vendor/three/webgpu-stub.js","three/examples/jsm/":"/assets/static/vendor/three/addons/"}}</script>`)
 		<script type="module" src={ assets.URL("static/home-world.js") }></script>
+		<script type="module" src={ assets.URL("static/showreel.js") }></script>
 	}
 }
 

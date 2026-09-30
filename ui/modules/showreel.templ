@@ -1,0 +1,42 @@
+package modules
+
+import "myapp/assets"
+
+// showreelPhone is where the reel swaps to its portrait cut. It is written into
+// both the <source media> and the <picture> so the poster and the video can
+// never disagree about which one a visitor gets.
+const showreelPhone = "(max-width: 767px)"
+
+// Showreel is the 15-second product reel: a 16:9 cut for desktop and a tall
+// iPhone cut for phones, silent and looping. Source and renderer live in
+// promo/; the files here are its web encodes.
+//
+// Nothing about it costs the first paint. The video ships with preload="none"
+// and no autoplay attribute, so not a byte of it moves until showreel.js sees
+// it near the viewport; until then the visitor sees a poster from the same
+// cut. AV1 comes first and H.264 after it, for Safari on hardware without an
+// AV1 decoder.
+templ Showreel() {
+	<figure class="showreel" data-showreel>
+		<picture class="showreel-poster">
+			<source media={ showreelPhone } srcset={ assets.URL("static/promo/poster-mobile.webp") } type="image/webp"/>
+			<img src={ assets.URL("static/promo/poster-desktop.webp") } alt="" width="1920" height="1080" loading="lazy" decoding="async"/>
+		</picture>
+		<video class="showreel-video" muted playsinline loop preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1">
+			<source media={ showreelPhone } src={ assets.URL("static/promo/reel-mobile.webm") } type={ `video/webm; codecs="av01.0.08M.08"` }/>
+			<source media={ showreelPhone } src={ assets.URL("static/promo/reel-mobile.mp4") } type="video/mp4"/>
+			<source src={ assets.URL("static/promo/reel-desktop.webm") } type={ `video/webm; codecs="av01.0.08M.08"` }/>
+			<source src={ assets.URL("static/promo/reel-desktop.mp4") } type="video/mp4"/>
+		</video>
+		<figcaption class="sr-only">
+			Fifteen-second showreel: Norviq, Khepri, Loci and LuminaVault, four products designed, built and run in production by Fernando Correia.
+		</figcaption>
+		// Moving content that runs past five seconds needs a way to stop it
+		// (WCAG 2.2.2). The same button starts the reel for anyone it did not
+		// autoplay for: reduced motion, or Save-Data.
+		<button type="button" class="showreel-toggle" data-showreel-toggle aria-label="Play showreel" hidden>
+			<svg class="showreel-icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"></path></svg>
+			<svg class="showreel-icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path></svg>
+		</button>
+	</figure>
+}
