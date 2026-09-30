@@ -17,9 +17,14 @@ var Assets embed.FS
 // serves — its own CSS and JS — is rebuilt on every deploy at a fixed path, and
 // pinning those is how a returning visitor ends up running new HTML against a
 // year-old stylesheet.
+//
+// The showreel is pinned for a different reason: it is megabytes, every link to
+// it goes through URL's content hash, and the embedded files carry no modtime
+// or ETag, so "revalidate" would mean downloading it again on every visit.
 var immutablePrefixes = []string{
 	"/assets/static/vendor/",
 	"/assets/fonts/",
+	"/assets/static/promo/",
 }
 
 // IsImmutable reports whether a request path may be cached indefinitely.
