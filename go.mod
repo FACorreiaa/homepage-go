@@ -13,7 +13,6 @@ require (
 	github.com/a-h/templ v0.3.1020
 	github.com/adrg/frontmatter v0.2.0
 	github.com/angelofallars/htmx-go v0.5.0
-	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.12.1
@@ -42,6 +41,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/google/cel-go v0.28.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/govalues/decimal v0.1.36 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

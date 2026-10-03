@@ -6,9 +6,9 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"uuid"
 
 	htmx "github.com/angelofallars/htmx-go"
-	"github.com/google/uuid"
 	"myapp/internal/db"
 	"myapp/internal/service"
 	"myapp/ui/pages"
@@ -71,7 +71,7 @@ func (h *ProposalHandler) Submit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lead := db.CreateProposalLeadParams{
-		ID:          uuid.NewString(),
+		ID:          uuid.New().String(),
 		Name:        name,
 		Email:       email,
 		Company:     sql.NullString{String: r.FormValue("company"), Valid: r.FormValue("company") != ""},

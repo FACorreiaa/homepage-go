@@ -3,8 +3,8 @@ package db
 import (
 	"context"
 	"os"
+	"uuid"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,7 +17,7 @@ func SeedAdminUser(ctx context.Context, q *Queries) error {
 		return err
 	}
 	return q.CreateUser(ctx, CreateUserParams{
-		ID:            uuid.NewString(),
+		ID:            uuid.New().String(),
 		Name:          "Fernando Correia",
 		Email:         email,
 		PasswordHash:  string(hash),
