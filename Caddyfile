@@ -13,7 +13,7 @@
 # Caddy 2.11 serves HTTP/1.1 + HTTP/2 + HTTP/3 by default and auto-manages
 # Let's Encrypt certificates (no certbot needed).
 {
-	email fernandocorreia316@gmail.com
+	email fernando@facorreia.com
 	servers {
 		protocols h1 h2 h3
 	}

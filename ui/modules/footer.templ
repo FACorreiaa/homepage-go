@@ -22,7 +22,7 @@ templ Footer() {
 						<a href="https://www.linkedin.com/in/fernando-correia-ab018079/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="text-background/70 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">
 							@UIIcon("linkedin", "h-5 w-5")
 						</a>
-						<a href="mailto:fernandocorreia316@gmail.com" aria-label="Email Fernando" class="text-background/70 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">
+						<a href="mailto:fernando@facorreia.com" aria-label="Email Fernando" class="text-background/70 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">
 							@UIIcon("mail", "h-5 w-5")
 						</a>
 					</div>
@@ -49,7 +49,7 @@ templ Footer() {
 				<div>
 					<p class="mb-5 text-sm font-semibold text-background">Company</p>
 					<nav class="space-y-3" aria-label="Company">
-						for _, l := range [][]string{{"Request proposal", "/proposal"}, {"Curriculum", "/curriculum"}, {"Contact", "mailto:fernandocorreia316@gmail.com"}, {"Live traffic", "/stats"}} {
+						for _, l := range [][]string{{"Request proposal", "/proposal"}, {"Curriculum", "/curriculum"}, {"Contact", "mailto:fernando@facorreia.com"}, {"Live traffic", "/stats"}} {
 							<a href={ templ.SafeURL(l[1]) } class="block text-sm text-background/60 transition-colors duration-200 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background/40">{ l[0] }</a>
 						}
 					</nav>

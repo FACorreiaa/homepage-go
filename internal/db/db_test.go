@@ -39,7 +39,7 @@ func TestSeedAdminUser(t *testing.T) {
 	require.NoError(t, db.SeedAdminUser(ctx, q))
 	require.NoError(t, db.SeedAdminUser(ctx, q)) // idempotent
 
-	user, err := q.GetUserByEmail(ctx, "fernandocorreia316@gmail.com")
+	user, err := q.GetUserByEmail(ctx, "fernando@facorreia.com")
 	require.NoError(t, err)
 	require.Equal(t, "Fernando Correia", user.Name)
 }

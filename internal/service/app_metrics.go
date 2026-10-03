@@ -9,6 +9,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/FACorreiaa/go-utils/pkg/util"
 )
 
 // AppEntry is one product on the /apps board. The registry is static: the
@@ -186,7 +188,7 @@ func (s *AppMetricsService) FetchAll(ctx context.Context) []AppMetricsResult {
 				results[i].Err = err
 				return
 			}
-			results[i].Users = &count
+			results[i].Users = util.Ptr(count)
 		}(i, app.URL)
 	}
 	wg.Wait()

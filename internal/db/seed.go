@@ -9,7 +9,7 @@ import (
 )
 
 func SeedAdminUser(ctx context.Context, q *Queries) error {
-	email := getEnvOrDefault("ADMIN_EMAIL", "fernandocorreia316@gmail.com")
+	email := getEnvOrDefault("ADMIN_EMAIL", "fernando@facorreia.com")
 	password := getEnvOrDefault("ADMIN_PASSWORD", "StudioAdmin123!")
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

@@ -53,6 +53,6 @@ jobs:
           cd infra
           sed -i "s|^  tag: .*|  tag: ${GITHUB_SHA} # CI overwrites with the git SHA on each main push|" apps/isis/values.yaml
           git config user.name "facorreia-ci"
-          git config user.email "fernandocorreia316@gmail.com"
+          git config user.email "fernando@facorreia.com"
           git commit -am "isis → ${GITHUB_SHA:0:12} (homepage-go@${GITHUB_SHA})"
           git push

@@ -4,7 +4,7 @@ x-shared_environment: &shared_environment
   BLOG_STATS_PATH: /var/lib/facorreia-site/blog_stats.json
   VAULT_PATH: /app/vault
   SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production-32-chars!!}
-  ADMIN_EMAIL: ${ADMIN_EMAIL:-fernandocorreia316@gmail.com}
+  ADMIN_EMAIL: ${ADMIN_EMAIL:-fernando@facorreia.com}
   ADMIN_PASSWORD: ${ADMIN_PASSWORD:-StudioAdmin123!}
   DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
   CALENDLY_URL: ${CALENDLY_URL:-https://calendly.com/fernandocorreia316}
