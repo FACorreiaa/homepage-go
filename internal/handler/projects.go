@@ -89,6 +89,33 @@ var allProjects = []model.ProjectItem{
 		},
 	},
 	{
+		Slug:         "scanitnow",
+		Title:        "ScanItNow",
+		RoleTag:      "Independent",
+		Description:  "Scan each product as you shop and watch a running total against the limit you set for the trip. Prices are remembered per store, and everything works offline in the aisle.",
+		Outcome:      "Built local-first in SwiftUI and SwiftData: no account, no tracking, and a total that never waits for signal.",
+		Tags:         []string{"SwiftUI", "SwiftData", "VisionKit", "Swift Charts", "StoreKit 2"},
+		Category:     "iOS App",
+		DisplayGroup: "iOS products",
+		GithubLink:   "Private",
+		HasLiveLink:  false,
+		Icon:         "SN",
+		LogoAsset:    "/assets/static/projects/scanitnow-icon.png",
+		Status:       "Coming to the App Store",
+		Tagline:      "Know your shopping total before the till",
+		Highlights: []string{
+			"Barcode scanning with a live total and limit bar",
+			"Remembers each product's price per store",
+			"Works fully offline, no account needed",
+		},
+		GalleryLabel:   "iPhone app",
+		GalleryCaption: "A live total while you shop, and where the money went afterwards.",
+		Gallery: []model.GalleryShot{
+			{Src: "/assets/static/projects/scanitnow/trip.jpg", Alt: "A ScanItNow trip: three items, a total of €5,48 and a red bar showing €0,48 over the €5,00 limit"},
+			{Src: "/assets/static/projects/scanitnow/insights.jpg", Alt: "ScanItNow insights: spend this month, average trip, trips under the limit, spend by store and category"},
+		},
+	},
+	{
 		Slug:         "loci",
 		Title:        "Loci",
 		RoleTag:      "Independent",
@@ -185,6 +212,22 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 				{Label: "Discord", URL: "https://discord.gg/3QVkas3rH"},
 			},
 			BackendNote: "Powered by api.norviqa.io",
+		}
+	case "scanitnow":
+		return model.ProjectDetailData{
+			Project: p,
+			Tagline: "A shopping companion for iPhone: scan as you go and know your total before the till.",
+			LongDesc: []string{
+				"ScanItNow turns every product you scan into a running total, measured against a limit you set for the trip. The bar turns amber as you get close and red when you go over, so the surprise happens in the aisle, not at the checkout.",
+				"It is built local-first: trips, prices and stores live only on the phone, it works with no signal, and it needs no account. Product names and photos come from Open Food Facts, and a price you confirmed once fills itself in the next time you shop there.",
+			},
+			Features: []model.DetailFeature{
+				{Title: "Live total and limit", Body: "Every scan updates the total and the limit bar, with a haptic as you cross 80% and 100%."},
+				{Title: "Prices that remember", Body: "A product bought at this store before is two taps: scan, add. Price history shows what got dearer."},
+				{Title: "Spending insights", Body: "Spend by store and category, prices that went up, and where the things you buy often cost less."},
+			},
+			TechStack:   []string{"SwiftUI", "SwiftData", "VisionKit", "Swift Charts", "StoreKit 2", "Open Food Facts", "fastlane", "GitHub Actions"},
+			BannerAsset: "/assets/static/projects/scanitnow/banner.avif",
 		}
 	case "khepri":
 		return model.ProjectDetailData{

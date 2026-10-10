@@ -28,13 +28,17 @@ type LegalApp struct {
 	PrivacyEmail string
 	WebsiteURL   string
 	AppStoreURL  string
-	Privacy      LegalDocument
-	Terms        LegalDocument
+	// Support page copy, per app (the page used to hardcode Norviq's account wording).
+	SupportIntro  string
+	DeleteHeading string
+	DeleteBody    string
+	Privacy       LegalDocument
+	Terms         LegalDocument
 }
 
 // LegalApps is the registry the legal routes consult. Order does not matter.
 func LegalApps() []LegalApp {
-	return []LegalApp{norviqLegal()}
+	return []LegalApp{norviqLegal(), scanitnowLegal()}
 }
 
 func norviqLegal() LegalApp {
@@ -44,13 +48,16 @@ func norviqLegal() LegalApp {
 		privacy  = "privacy@norviq.com"
 	)
 	app := LegalApp{
-		Slug:         "norviq",
-		Name:         "Norviq",
-		Operator:     operator,
-		SupportEmail: support,
-		PrivacyEmail: privacy,
-		WebsiteURL:   "https://norviq.org",
-		AppStoreURL:  "https://apps.apple.com/app/money-manager-norviq/id6765849578",
+		Slug:          "norviq",
+		Name:          "Norviq",
+		Operator:      operator,
+		SupportEmail:  support,
+		PrivacyEmail:  privacy,
+		WebsiteURL:    "https://norviq.org",
+		AppStoreURL:   "https://apps.apple.com/app/money-manager-norviq/id6765849578",
+		SupportIntro:  "Email is the fastest route. Include the email address on your account and, for billing questions, the platform you subscribed on (App Store or web).",
+		DeleteHeading: "Delete your account",
+		DeleteBody:    "Open Settings in the app or at norviq.org, choose Account, then Delete account. Connected brokerage and bank links are revoked and your data is removed; backups clear within 30 days. You can also email the privacy address above.",
 	}
 	app.Terms = LegalDocument{
 		App: "norviq", AppName: "Norviq", Kind: "terms",
