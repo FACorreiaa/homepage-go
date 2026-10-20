@@ -1,6 +1,6 @@
 module myapp
 
-go 1.27.0
+go 1.27.3
 
 tool (
 	github.com/a-h/templ/cmd/templ
