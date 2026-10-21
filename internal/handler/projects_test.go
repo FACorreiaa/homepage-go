@@ -37,6 +37,7 @@ func TestProjectsList(t *testing.T) {
 		"hosted featured list is Norviq, Khepri, Loci, LuminaVault, Aaru, HermesVault, Fandemic")
 	assert.Contains(t, body, "Highlights")
 	assert.Contains(t, body, "One private shelf for everything you watch and read")
+	assert.Contains(t, body, `href="https://aaruapp.com"`)
 	assert.Contains(t, body, "Holdings, watchlists, allocation with live pricing")
 	assert.Contains(t, body, "Private financial command center, web + iPhone")
 	assert.Contains(t, body, `href="/projects/luminavault"`)
