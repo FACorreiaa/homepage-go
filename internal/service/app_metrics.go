@@ -46,7 +46,7 @@ const (
 	appMetricsTimeout = 5 * time.Second
 	// appMetricsTTL is how long a fetched board is served before the
 	// backends are asked again. /apps is public, so without this every
-	// visitor would fan out five requests into the cluster.
+	// visitor would fan out one request per app into the cluster.
 	appMetricsTTL = 60 * time.Second
 )
 
@@ -104,6 +104,12 @@ func NewAppMetricsService() *AppMetricsService {
 			Slug:        "khepri",
 			Description: "AI operating system for personal growth: memory, goals, coaching.",
 			URL:         firstEnv("KHEPRI_METRICS_URL", "NORTH_METRICS_URL"),
+		},
+		{
+			Name:        "Aaru Media Manager",
+			Slug:        "aaru",
+			Description: "Private-first library for movies, shows, anime and books.",
+			URL:         os.Getenv("AARU_METRICS_URL"),
 		},
 	}
 	return NewAppMetricsServiceWith(apps, os.Getenv("METRICS_SECRET"), nil)
