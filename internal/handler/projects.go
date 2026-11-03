@@ -38,7 +38,7 @@ var allProjects = []model.ProjectItem{
 		HasLiveLink:  true,
 		Featured:     true,
 		Icon:         "NV",
-		LogoAsset:    "/assets/static/projects/norviq-icon.webp",
+		LogoAsset:    "/assets/static/projects/norviq-icon-v2.webp",
 		Status:       "Live · App Store",
 		Tagline:      "Private financial command center, web + iPhone",
 		Highlights: []string{
@@ -71,7 +71,7 @@ var allProjects = []model.ProjectItem{
 		HasLiveLink:  true,
 		Featured:     true,
 		Icon:         "KP",
-		LogoAsset:    "/assets/static/projects/khepri-icon.webp",
+		LogoAsset:    "/assets/static/projects/khepri-icon-v2.webp",
 		Status:       "Live",
 		Tagline:      "AI operating system for personal growth",
 		Highlights: []string{
@@ -129,7 +129,7 @@ var allProjects = []model.ProjectItem{
 		HasLiveLink:  true,
 		Featured:     true,
 		Icon:         "LC",
-		LogoAsset:    "/assets/static/projects/loci-icon.webp",
+		LogoAsset:    "/assets/static/projects/loci-icon-v2.webp",
 		Status:       "Live",
 		Tagline:      "A travel planner that produces a trip you can keep",
 		Highlights: []string{
@@ -161,7 +161,7 @@ var allProjects = []model.ProjectItem{
 		HasLiveLink:  true,
 		Featured:     true,
 		Icon:         "LV",
-		LogoAsset:    "/assets/static/projects/luminavault-icon.webp",
+		LogoAsset:    "/assets/static/projects/luminavault-icon-v2.webp",
 		Status:       "Live · TestFlight",
 		Tagline:      "Self-hosted second brain, web + iPhone",
 		Highlights: []string{
@@ -184,7 +184,7 @@ var allProjects = []model.ProjectItem{
 		HasLiveLink:  true,
 		Featured:     true,
 		Icon:         "AA",
-		LogoAsset:    "/assets/static/projects/aaru-icon.webp",
+		LogoAsset:    "/assets/static/projects/aaru-icon-v2.webp",
 		Status:       "Live · App Store soon",
 		Tagline:      "One private shelf for everything you watch and read",
 		Highlights: []string{
