@@ -28,8 +28,8 @@ var allProjects = []model.ProjectItem{
 		Title:        "Norviq",
 		RoleTag:      "Independent",
 		Description:  "A private financial command center for holdings, research, targets, and spending — available on the web and as a native iPhone app.",
-		Outcome:      "I own and maintain the full stack in production: SwiftUI, Vapor, PostgreSQL, and Redis on Hetzner, secured with MFA, passkeys, and Face ID.",
-		Tags:         []string{"Vapor (Swift)", "SwiftUI", "Web", "PostgreSQL", "Redis", "Hetzner VPS"},
+		Outcome:      "I own and maintain the full stack in production: SwiftUI, Go, PostgreSQL, and Redis on Hetzner, secured with MFA, passkeys, and Face ID.",
+		Tags:         []string{"Go", "SwiftUI", "Web", "PostgreSQL", "Redis", "Hetzner VPS"},
 		Category:     "Full Stack / Web & iOS",
 		DisplayGroup: "Web & iOS products",
 		GithubLink:   "Private",
@@ -228,13 +228,13 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 				{Title: "Research and targets", Body: "Capture thesis, risks, and catalysts, then model base, bear, and bull scenarios."},
 				{Title: "Private by design", Body: "Passkeys, MFA, Face ID, private notes, data export, and in-app account deletion."},
 			},
-			TechStack: []string{"SwiftUI", "Swift Charts", "Vapor", "PostgreSQL", "Redis", "Docker", "RevenueCat"},
+			TechStack: []string{"SwiftUI", "Swift Charts", "Go", "PostgreSQL", "Redis", "Docker", "RevenueCat"},
 			SocialLinks: []model.DetailLink{
 				{Label: "Instagram", URL: "https://instagram.com/norviqplan"},
 				{Label: "X (Twitter)", URL: "https://x.com/NorviqPlanner"},
 				{Label: "Discord", URL: "https://discord.gg/3QVkas3rH"},
 			},
-			BackendNote: "Powered by api.norviqa.io",
+			BackendNote: "Powered by api.norviq.org",
 		}
 	case "scanitnow":
 		return model.ProjectDetailData{
