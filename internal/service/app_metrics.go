@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"sync"
@@ -198,6 +199,14 @@ func (s *AppMetricsService) FetchAll(ctx context.Context) []AppMetricsResult {
 		}(i, app.URL)
 	}
 	wg.Wait()
+
+	// The page shows only "unavailable right now", so this is the one place the
+	// reason survives. The cache keeps it to one line per app per TTL.
+	for _, r := range results {
+		if r.Err != nil && !errors.Is(r.Err, ErrNotConfigured) {
+			slog.Warn("apps board: metrics fetch failed", "app", r.App.Slug, "err", r.Err)
+		}
+	}
 
 	s.mu.Lock()
 	s.cached = results

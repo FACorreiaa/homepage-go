@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
@@ -149,4 +151,44 @@ func TestAppsReturnsRegistryUnknown(t *testing.T) {
 		assert.Nil(t, r.Users)
 		assert.ErrorIs(t, r.Err, ErrNotConfigured)
 	}
+}
+
+// captureLogs points the default slog logger at a buffer for one test.
+func captureLogs(t *testing.T) *bytes.Buffer {
+	t.Helper()
+	var buf bytes.Buffer
+	previous := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&buf, nil)))
+	t.Cleanup(func() { slog.SetDefault(previous) })
+	return &buf
+}
+
+func TestFetchAllLogsFailedFetchWithoutSecret(t *testing.T) {
+	logs := captureLogs(t)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "boom", http.StatusBadGateway)
+	}))
+	t.Cleanup(srv.Close)
+
+	svc := NewAppMetricsServiceWith([]AppEntry{{Slug: "norviq", URL: srv.URL}}, "s3cret", nil)
+	results := svc.FetchAll(context.Background())
+
+	require.Error(t, results[0].Err)
+	assert.Contains(t, logs.String(), "level=WARN")
+	assert.Contains(t, logs.String(), "app=norviq")
+	assert.Contains(t, logs.String(), "status 502")
+	assert.NotContains(t, logs.String(), "s3cret")
+}
+
+func TestFetchAllDoesNotLogUnconfiguredOrHealthyApps(t *testing.T) {
+	logs := captureLogs(t)
+	healthy := metricsServer(t, "s", 7, nil)
+
+	svc := NewAppMetricsServiceWith([]AppEntry{
+		{Slug: "skyvisor"},
+		{Slug: "loci", URL: healthy.URL},
+	}, "s", nil)
+	svc.FetchAll(context.Background())
+
+	assert.Empty(t, logs.String())
 }
