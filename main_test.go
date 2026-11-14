@@ -33,18 +33,17 @@ func TestAssetCacheControl(t *testing.T) {
 		{"/assets/static/sw.js", revalidate},
 		{"/assets/static/manifest.json", revalidate},
 		{"/assets/static/globe.js", revalidate},
-		{"/assets/static/home-world.js", revalidate},
 		{"/assets/static/three-utils.js", revalidate},
 		// Version-pinned in the path, or content-stable.
 		{"/assets/fonts/geist/geist-variable.woff2", immutable},
 		{"/assets/static/vendor/three/three.module.min.js", immutable},
-		{"/assets/static/vendor/gsap/gsap.min.js", immutable},
+		{"/assets/static/vendor/three/addons/controls/OrbitControls.js", immutable},
 		// Megabytes, only ever linked through assets.URL's content hash, and
 		// served from embed with no validator to revalidate against.
 		{"/assets/static/promo/reel-desktop.webm", immutable},
 		// The stripped path must never match an immutable prefix: matching after
 		// StripPrefix was the original bug.
-		{"static/vendor/gsap/gsap.min.js", revalidate},
+		{"static/vendor/three/three.module.min.js", revalidate},
 		{"css/output.css", revalidate},
 	}
 
