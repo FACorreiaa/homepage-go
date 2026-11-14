@@ -175,17 +175,18 @@ var allProjects = []model.ProjectItem{
 		Title:        "Aaru Media Manager",
 		RoleTag:      "Independent",
 		Description:  "A private-first library for the movies, shows, anime and books you care about. Track what you want, what you are in the middle of and what you have finished, and bring the history you already keep on Trakt, IMDb, Letterboxd or Goodreads.",
-		Outcome:      "Live at aaruapp.com, with native iPhone and Mac apps on the way. All three share one Go API; the library is private by default, and imports keep working when an upstream catalog goes down.",
+		Outcome:      "Live at aaruapp.com and on the App Store. Web and Apple apps share one Go API; the library is private by default, and imports keep working when an upstream catalog goes down.",
 		Tags:         []string{"SwiftUI", "Go", "PostgreSQL", "TanStack Start", "Cloudflare Workers"},
 		Category:     "Web & iOS / Media Library",
 		DisplayGroup: "Web & iOS products",
 		GithubLink:   "Private",
 		LiveLink:     "https://aaruapp.com",
+		AppStoreLink: "https://apps.apple.com/pt/app/aaru-media-manager/id6821299076?l=en-GB",
 		HasLiveLink:  true,
 		Featured:     true,
 		Icon:         "AA",
 		LogoAsset:    "/assets/static/projects/aaru-icon-v2.webp",
-		Status:       "Live · App Store soon",
+		Status:       "Live · App Store",
 		Tagline:      "One private shelf for everything you watch and read",
 		Highlights: []string{
 			"Films, shows, anime and books with episode-level progress",
@@ -302,6 +303,22 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 			TechStack:   []string{"SwiftUI", "SwiftData", "Vision OCR", "Swift 6", "Hummingbird 2", "PostgreSQL", "pgvector", "Docker"},
 			BackendNote: "Live at app.luminavault.fyi. iOS on TestFlight.",
 			BannerAsset: "/assets/static/projects/luminavault-banner.webp",
+		}
+	case "aaru":
+		return model.ProjectDetailData{
+			Project: p,
+			Tagline: "One private shelf for the movies, shows, anime and books you care about, on the web and on iPhone.",
+			LongDesc: []string{
+				"Aaru keeps track of what you plan to watch or read, what you are in the middle of, and what you have finished, with episode-level progress for shows and anime and reading progress for books.",
+				"Bring the history you already keep: one-way imports from Trakt, IMDb, Letterboxd and Goodreads. The library is private by default: no feed, no followers, no public profile.",
+			},
+			Features: []model.DetailFeature{
+				{Title: "Everything in one library", Body: "Films, shows, anime, manga and books, each with the status and progress that fits it."},
+				{Title: "Imports that stay one-way", Body: "Trakt, IMDb, Letterboxd and Goodreads come in once; after that, Aaru is the source of truth."},
+				{Title: "Private by default", Body: "A new account has no visible surface. Anything social is opt-in and friends-only."},
+			},
+			TechStack:   []string{"SwiftUI", "Go", "PostgreSQL", "SolidJS", "TanStack Start", "Cloudflare Workers"},
+			BackendNote: "Live at aaruapp.com and on the App Store.",
 		}
 	case "fandemic":
 		return model.ProjectDetailData{
