@@ -43,7 +43,7 @@ func LLMsTxt(w http.ResponseWriter, r *http.Request) {
 			"- Proposal: https://facorreia.com/proposal\n" +
 			"- GitHub: https://github.com/FACorreiaa\n" +
 			"- LinkedIn: https://www.linkedin.com/in/fernando-correia-ab018079/\n\n" +
-			"Live products: Norviq (https://norviq.org, https://facorreia.com/projects/norviq), Khepri (https://kheprios.com, https://facorreia.com/projects/khepri), Loci (https://lociai.fyi, https://facorreia.com/projects/loci), LuminaVault (https://app.luminavault.fyi, https://facorreia.com/projects/luminavault), and client delivery listed on /projects.\n",
+			"Live products: Norviq (https://norviq.org, https://facorreia.com/projects/norviq), Khepri (https://kheprios.com, https://facorreia.com/projects/khepri), Loci (https://lociai.fyi, https://facorreia.com/projects/loci), LuminaVault (https://app.luminavault.fyi, https://facorreia.com/projects/luminavault), Aaru Media Manager (https://aaruapp.com, https://apps.apple.com/pt/app/aaru-media-manager/id6821299076?l=en-GB, https://facorreia.com/projects/aaru), and client delivery listed on /projects.\n",
 	))
 }
 
