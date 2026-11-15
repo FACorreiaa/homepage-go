@@ -15,7 +15,10 @@ type ProjectItem struct {
 	LiveLink     string
 	// AppStoreLink is the iOS distribution URL: App Store or a public TestFlight join.
 	AppStoreLink string
-	HasLiveLink  bool
+	// MacAppStoreLink is the Mac App Store URL. A universal purchase shares
+	// the iOS listing; add &platform=mac to open on the Mac screenshots.
+	MacAppStoreLink string
+	HasLiveLink     bool
 	// Featured puts a project in the first gallery on /projects and home.
 	// Use it for hosted work you have already shipped, not only public URLs.
 	Featured  bool

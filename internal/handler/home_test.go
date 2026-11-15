@@ -47,18 +47,16 @@ func TestHomeConversionPaths(t *testing.T) {
 func TestHomeWordmarkCover(t *testing.T) {
 	body := renderHome(t)
 
-	assert.Contains(t, body, `data-world-station="cover"`)
 	assert.Contains(t, body, `<h1 class="wordmark">`)
 
 	// The split is the whole idea: one name, two colours.
 	assert.Contains(t, body, `<span class="wordmark-accent">Correia</span>`)
 
-	// The cover must come before the station that used to be first, or the
-	// camera legs run backwards.
+	// The wordmark comes before the hero line it introduces.
 	assert.Less(t,
-		strings.Index(body, `data-world-station="cover"`),
-		strings.Index(body, `data-world-station="device"`),
-		"cover station must precede device station",
+		strings.Index(body, `<h1 class="wordmark">`),
+		strings.Index(body, `<h2 class="hero-title`),
+		"wordmark must precede the hero line",
 	)
 
 	// Demoted, not deleted: the old hero line is now the sub-head.
@@ -139,38 +137,21 @@ func TestHomeOpsStrip(t *testing.T) {
 	assert.Contains(t, body, `href="/stats"`)
 }
 
-func TestHomeWorldScaffold(t *testing.T) {
+// The home page used to fly a three.js camera through the sections, with Lenis
+// smooth scroll and GSAP ScrollTrigger driving it. It made the page feel slower
+// than /projects for no gain, so it was removed. Keep it out: native scrolling,
+// no WebGL, no scroll-hijacking libraries on the landing page.
+func TestHomeHasNoScrollScene(t *testing.T) {
 	body := renderHome(t)
 
-	// The canvas mounts into an empty, inert, aria-hidden container. If it is
-	// ever given content or taken out of the fixed layer it starts affecting
-	// the page, which is the one thing the scene must never do.
-	assert.Contains(t, body, `<div class="world-stage" data-world aria-hidden="true"></div>`)
-	assert.Contains(t, body, "world-shell")
-
-	// Four stations, in the order the camera flies through them.
-	for _, station := range []string{"device", "server", "cluster", "horizon"} {
-		assert.Contains(t, body, `data-world-station="`+station+`"`)
+	for _, gone := range []string{
+		"world-stage", "data-world", "home-world.js",
+		"vendor/gsap/", "vendor/lenis/", "window.__lenis",
+		`<script type="importmap">`,
+	} {
+		assert.NotContains(t, body, gone)
 	}
-
-	// gsap must load before ScrollTrigger, which registers itself against it.
-	gsap := strings.Index(body, "vendor/gsap/gsap.min.js")
-	scrollTrigger := strings.Index(body, "vendor/gsap/ScrollTrigger.min.js")
-	assert.Positive(t, gsap)
-	assert.Positive(t, scrollTrigger)
-	assert.Less(t, gsap, scrollTrigger, "gsap must be ordered before ScrollTrigger")
-
-	assert.Contains(t, body, "vendor/lenis/lenis.min.js")
-	// The gopher module pulls in the GLB and GLTFLoader at runtime, so the page
-	// only has to carry the module itself.
-
-	// Fingerprinted, so match the path and assert the cache buster separately.
-	assert.Regexp(t, `<script type="module" src="/assets/static/home-world\.js\?v=[0-9a-f]{10}">`, body)
-
-	// Lenis owns scrolling here, so the two native behaviours that fight it are
-	// stood down: scroll-smooth on <html>, and the scroll-top button.
-	assert.NotContains(t, body, `<html lang="en" class="scroll-smooth">`)
-	assert.Contains(t, body, "window.__lenis")
+	assert.Contains(t, body, `<html lang="en" class="scroll-smooth">`)
 }
 
 // The stylesheet URL must carry a content fingerprint. A browser that cached
@@ -187,26 +168,12 @@ func TestStylesheetIsFingerprinted(t *testing.T) {
 func TestHomeRendersWithoutScripts(t *testing.T) {
 	body := renderHome(t)
 
-	// The 3D scene is progressive enhancement. Strip every script tag and the
-	// page must still carry its content, exactly as it does for a crawler.
+	// Strip every script tag and the page must still carry its content,
+	// exactly as it does for a crawler.
 	withoutScripts := regexp.MustCompile(`(?s)<script.*?</script>`).ReplaceAllString(body, "")
 	assert.Contains(t, withoutScripts, "One engineer, the whole stack, in production.")
 	assert.Contains(t, withoutScripts, `href="/proposal"`)
 	assert.Contains(t, withoutScripts, "project-showcase-card")
-}
-
-// The gopher mesh and its loader are the largest things the landing page pulls
-// in, and they are exactly the kind of asset that gets pinned by accident. Only
-// vendored libraries and fonts may be immutable; the model is neither.
-func TestGopherAssetsAreNotPinned(t *testing.T) {
-	for _, path := range []string{
-		"/assets/static/models/gopher.glb",
-		"/assets/static/gopher.js",
-	} {
-		assert.False(t, assets.IsImmutable(path), "%s must revalidate", path)
-	}
-	// The loader is version-pinned in its path, so it may be cached forever.
-	assert.True(t, assets.IsImmutable("/assets/static/vendor/three/addons/loaders/GLTFLoader.js"))
 }
 
 // The reel plays for everyone, so it must cost nothing until it is near the

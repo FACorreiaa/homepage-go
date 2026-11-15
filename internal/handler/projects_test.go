@@ -14,6 +14,7 @@ import (
 const (
 	norviqWebsiteURL    = "https://norviq.org"
 	norviqAppStoreURL   = "https://apps.apple.com/pt/app/norviq/id6765849578?l=en-GB"
+	aaruAppStoreURL     = "https://apps.apple.com/pt/app/aaru-media-manager/id6821299076?l=en-GB"
 	khepriWebsiteURL    = "https://kheprios.com"
 	lociWebsiteURL      = "https://lociai.fyi"
 	luminaWebsiteURL    = "https://app.luminavault.fyi"
@@ -33,11 +34,15 @@ func TestProjectsList(t *testing.T) {
 	assert.Contains(t, body, "Hosted products and systems I shipped and still stand behind.")
 	// Uniform grid: no flagship hero, every featured card has the same anatomy.
 	assert.NotContains(t, body, "project-feature-card--flagship")
-	assert.Equal(t, 7, strings.Count(body, `class="project-feature-card project-showcase-card`),
-		"hosted featured list is Norviq, Khepri, Loci, LuminaVault, Aaru, HermesVault, Fandemic")
+	assert.Equal(t, 8, strings.Count(body, `class="project-feature-card project-showcase-card`),
+		"featured list is Norviq, Khepri, Loci, LuminaVault, Aaru, ScanItNow, HermesVault, Fandemic")
+	assert.Contains(t, body, "Know your shopping total before the till")
+	assert.Contains(t, body, `href="/projects/postitheka"`)
+	assert.Contains(t, body, "/assets/static/projects/postitheka-icon.webp")
 	assert.Contains(t, body, "Highlights")
 	assert.Contains(t, body, "One private shelf for everything you watch and read")
 	assert.Contains(t, body, `href="https://aaruapp.com"`)
+	assert.Contains(t, body, `href="`+aaruAppStoreURL+`"`)
 	assert.Contains(t, body, "Holdings, watchlists, allocation with live pricing")
 	assert.Contains(t, body, "Private financial command center, web + iPhone")
 	assert.Contains(t, body, `href="/projects/luminavault"`)
@@ -64,6 +69,9 @@ func TestProjectDetail(t *testing.T) {
 		{"luminavault branded", "luminavault", http.StatusOK},
 		{"khepri case study", "khepri", http.StatusOK},
 		{"loci case study", "loci", http.StatusOK},
+		{"aaru case study", "aaru", http.StatusOK},
+		{"scanitnow case study", "scanitnow", http.StatusOK},
+		{"postitheka case study", "postitheka", http.StatusOK},
 		{"unknown slug", "does-not-exist", http.StatusNotFound},
 	}
 	for _, tt := range tests {
@@ -88,6 +96,18 @@ func TestProjectDetail(t *testing.T) {
 				assert.Contains(t, body, `href="`+lociWebsiteURL+`"`)
 				assert.Contains(t, body, "/assets/static/projects/loci/landing.webp")
 				assert.Contains(t, body, "trip you can keep")
+			}
+			if tt.slug == "aaru" {
+				body := w.Body.String()
+				assert.Contains(t, body, `href="https://aaruapp.com"`)
+				assert.Contains(t, body, `href="`+aaruAppStoreURL+`"`)
+				assert.Contains(t, body, "One private shelf")
+			}
+			if tt.slug == "scanitnow" {
+				assert.Contains(t, w.Body.String(), "/assets/static/projects/scanitnow/store-01.webp")
+			}
+			if tt.slug == "postitheka" {
+				assert.Contains(t, w.Body.String(), "write once, choose the destinations")
 			}
 			if tt.slug == "luminavault" {
 				body := w.Body.String()

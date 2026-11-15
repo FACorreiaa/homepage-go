@@ -74,6 +74,12 @@ templ ProjectDetail(d model.ProjectDetailData) {
 									@modules.UIIcon("external", "h-4 w-4")
 								</a>
 							}
+							if d.Project.MacAppStoreLink != "" {
+								<a href={ templ.SafeURL(d.Project.MacAppStoreLink) } target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold">
+									Mac App Store
+									@modules.UIIcon("external", "h-4 w-4")
+								</a>
+							}
 							if d.Project.GithubLink != "" && d.Project.GithubLink != "Private" {
 								<a href={ templ.SafeURL(d.Project.GithubLink) } target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold">
 									GitHub
