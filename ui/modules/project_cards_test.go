@@ -98,3 +98,13 @@ func TestFeatureCardLabelsAppStoreLink(t *testing.T) {
 	assert.Contains(t, body, "App Store")
 	assert.NotContains(t, body, "TestFlight")
 }
+
+func TestFeatureCardLabelsMacAppStoreLink(t *testing.T) {
+	body := renderCard(t, model.ProjectItem{
+		Slug: "x", Title: "X", Description: "d",
+		AppStoreLink:    "https://apps.apple.com/pt/app/aaru-media-manager/id6821299076?l=en-GB",
+		MacAppStoreLink: "https://apps.apple.com/pt/app/aaru-media-manager/id6821299076?l=en-GB&platform=mac",
+	})
+	assert.Contains(t, body, "Mac App Store")
+	assert.Contains(t, body, "platform=mac")
+}
