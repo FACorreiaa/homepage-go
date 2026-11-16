@@ -46,6 +46,11 @@ var allProjects = []model.ProjectItem{
 			"Thesis, risks, and base/bear/bull target scenarios",
 			"Passkeys, MFA, Face ID; export and in-app deletion",
 		},
+		Demo: model.ProjectDemo{
+			Video:   "static/promo/norviq-demo.mp4",
+			Poster:  "static/promo/norviq-demo-poster.webp",
+			Caption: "Value a stock, catch its earnings, see winners against losers, and budget with a partner — on iPhone and the web.",
+		},
 		GalleryLabel:   "iPhone screenshots",
 		GalleryCaption: "The daily read: what moved, why, and what to do about it — next to the spending that funds it.",
 		Gallery: []model.GalleryShot{
@@ -79,6 +84,11 @@ var allProjects = []model.ProjectItem{
 			"Same coach on web, Telegram, and MCP",
 			"BYOK for OpenAI, Anthropic, Gemini, and xAI",
 		},
+		Demo: model.ProjectDemo{
+			Video:   "static/promo/khepri-demo.mp4",
+			Poster:  "static/promo/khepri-demo-poster.webp",
+			Caption: "Your whole day on one line, every set weighed, and a coach that notices the patterns you miss.",
+		},
 		GalleryLabel:   "Product screens",
 		GalleryCaption: "One memory across coaching, training, and goals.",
 		Gallery: []model.GalleryShot{
@@ -109,6 +119,11 @@ var allProjects = []model.ProjectItem{
 			"Streamed itineraries of real places, mapped and editable",
 			"Two-city compare with weather, logistics, and feasibility",
 			"Remote MCP so Claude can build trips you actually keep",
+		},
+		Demo: model.ProjectDemo{
+			Video:   "static/promo/loci-demo.mp4",
+			Poster:  "static/promo/loci-demo-poster.webp",
+			Caption: "Real places day by day, planned with the people you are going with, then walked stop by stop.",
 		},
 		GalleryLabel:   "Product screens",
 		GalleryCaption: "A vibe in, a route of real places out.",
@@ -142,6 +157,11 @@ var allProjects = []model.ProjectItem{
 			"kb-compile builds a pgvector-searchable knowledge base",
 			"Docker self-host, per-tenant vault, BYO LLM key",
 		},
+		Demo: model.ProjectDemo{
+			Video:   "static/promo/luminavault-demo.mp4",
+			Poster:  "static/promo/luminavault-demo-poster.webp",
+			Caption: "Capture anything in one tap, ask across what you saved, and watch it link up into a map of how you think.",
+		},
 	},
 	{
 		Slug:            "aaru",
@@ -166,6 +186,11 @@ var allProjects = []model.ProjectItem{
 			"Films, shows, anime and books with episode-level progress",
 			"One-way imports from Trakt, IMDb, Letterboxd and Goodreads",
 			"Private by default: no feed, no followers, your library alone",
+		},
+		Demo: model.ProjectDemo{
+			Video:   "static/promo/aaru-demo.mp4",
+			Poster:  "static/promo/aaru-demo-poster.webp",
+			Caption: "Bring your history in, see what matched before anything is added, and undo the whole import if you change your mind.",
 		},
 	},
 	{

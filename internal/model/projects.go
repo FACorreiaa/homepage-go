@@ -48,6 +48,19 @@ type ProjectItem struct {
 	Gallery        []GalleryShot
 	GalleryLabel   string // right-aligned kicker, e.g. "App Store screenshots"
 	GalleryCaption string
+
+	// Demo is the product walkthrough video on the detail page. Like the
+	// gallery it renders only when set.
+	Demo ProjectDemo
+}
+
+// ProjectDemo is a 16:9 walkthrough video. Video and Poster are asset names
+// relative to /assets (e.g. "static/promo/norviq-demo.mp4") so templates can
+// pass them through assets.URL and get a content-hashed, immutable URL.
+type ProjectDemo struct {
+	Video   string
+	Poster  string
+	Caption string
 }
 
 type GalleryShot struct {

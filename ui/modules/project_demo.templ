@@ -1,0 +1,43 @@
+package modules
+
+import (
+	"myapp/assets"
+	"myapp/internal/model"
+)
+
+// ProjectDemo is the walkthrough video on a project's detail page: the cut
+// from the app's own marketing folder, re-encoded to 720p H.264 for the web.
+// It renders nothing when the project has no demo.
+//
+// Unlike the home showreel this one is a video someone chooses to watch, so it
+// has native controls and sound, never autoplays, and loads nothing but the
+// poster until the visitor presses play (preload="none").
+templ ProjectDemo(p model.ProjectItem) {
+	if p.Demo.Video != "" {
+		<section class="mx-auto max-w-7xl px-4 pb-24 md:pb-32" aria-label={ p.Title + " walkthrough" }>
+			<div class="flex flex-wrap items-baseline justify-between gap-4 border-b border-border pb-5">
+				<h2 class="text-2xl font-semibold md:text-3xl">See it work</h2>
+				<p class="font-mono text-xs tracking-[0.16em] text-muted-foreground">Product walkthrough</p>
+			</div>
+			<figure class="mt-10">
+				<video
+					class="aspect-video w-full rounded-lg border border-border bg-muted"
+					controls
+					playsinline
+					preload="none"
+					width="1280"
+					height="720"
+					if p.Demo.Poster != "" {
+						poster={ assets.URL(p.Demo.Poster) }
+					}
+				>
+					<source src={ assets.URL(p.Demo.Video) } type="video/mp4"/>
+					<a href={ templ.SafeURL(assets.URL(p.Demo.Video)) }>Download the { p.Title } walkthrough</a>
+				</video>
+				if p.Demo.Caption != "" {
+					<figcaption class="mt-8 max-w-xl text-base leading-7 text-muted-foreground">{ p.Demo.Caption }</figcaption>
+				}
+			</figure>
+		</section>
+	}
+}
