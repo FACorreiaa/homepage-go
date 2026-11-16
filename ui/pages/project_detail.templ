@@ -57,6 +57,7 @@ templ ProjectDetail(d model.ProjectDetailData) {
 					@modules.ProjectVisual(d.Project, 0, "mt-14 aspect-[16/7] rounded-lg")
 				}
 			</section>
+			@modules.ProjectDemo(d.Project)
 			<section class="mx-auto max-w-7xl px-4 py-24 md:py-36" data-motion="pinned-split">
 				<div class="grid gap-12 lg:grid-cols-[0.38fr_0.62fr]">
 					<div data-motion-pin>
