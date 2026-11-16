@@ -245,6 +245,27 @@ var allProjects = []model.ProjectItem{
 			"Official APIs only; never posts the same thing twice",
 		},
 	},
+	{
+		Slug:         "aegis-terra",
+		Title:        "Aegis Terra",
+		RoleTag:      "Independent",
+		Description:  "A live map of what is happening on Earth right now: earthquakes, wildfires, floods, storms, volcanoes and official weather warnings, gathered from GDACS, USGS, NASA EONET, NASA FIRMS and Meteoalarm into one view.",
+		Outcome:      "Early build: the Go backend's foundations are in place, with PostGIS, River jobs, migrations and every country's borders loaded. Ingestion from each source comes next, then the iPhone and Mac app.",
+		Tags:         []string{"Go", "Echo", "River", "PostGIS", "SwiftUI", "MapKit"},
+		Category:     "iOS & macOS / Hazard map",
+		DisplayGroup: "Web & iOS products",
+		GithubLink:   "Private",
+		HasLiveLink:  false,
+		Icon:         "AT",
+		LogoAsset:    "/assets/static/projects/aegis-terra-icon.webp",
+		Status:       "In development",
+		Tagline:      "What is happening on Earth right now, and where",
+		Highlights: []string{
+			"Five official sources normalized into one live map",
+			"Source severity shown next to the derived one",
+			"Every record says where it came from and how fresh it is",
+		},
+	},
 	{Slug: "hermesvault-backend", Title: "HermesVault Backend", RoleTag: "Independent", Description: "The self-hosted engine behind HermesVault: a Swift 6 / Hummingbird 2 API whose kb-compile pipeline turns raw Markdown into a queryable knowledge base with pgvector semantic search.", Outcome: "Runs in production as private infrastructure — per-tenant vaults, JWT auth, Docker deploys on a bare VPS.", Tags: []string{"Swift 6", "Hummingbird 2", "Postgres", "pgvector", "Docker"}, Category: "Backend API", DisplayGroup: "Backend systems", GithubLink: "Private", HasLiveLink: false, Featured: true, Icon: "HB", LogoAsset: "/assets/static/projects/hermesvault-icon.webp", Status: "Self-hosted", Tagline: "Swift 6 / Hummingbird API behind HermesVault", Highlights: []string{"kb-compile pipeline: Markdown → queryable knowledge base", "pgvector semantic search, per-tenant vaults, JWT auth", "Docker deploys on a bare VPS"}},
 	{Slug: "hermes", Title: "Hermes", RoleTag: "Independent", Description: "A private gateway and automation hub hosted on a VPS, acting as a central coordinator for AI models, webhooks, and personal services.", Outcome: "Personal infra gateway for model routing, webhooks, and small automations.", Tags: []string{"Docker", "VPS", "Gateway", "Swift", "API"}, Category: "Backend API", DisplayGroup: "Private infrastructure", GithubLink: "Private", HasLiveLink: false, Icon: "HM", Status: "Private infra"},
 	{Slug: "hermesvault-client", Title: "HermesVault Client", RoleTag: "Independent", Description: "Native iOS app with Vision-based OCR, native capture of photos, notes, and HealthKit data.", Outcome: "Capture client for photos, notes, OCR, and personal data ingestion.", Tags: []string{"SwiftUI", "SwiftData", "Vision OCR", "AVFoundation"}, Category: "iOS App", DisplayGroup: "iOS products", GithubLink: "Private", HasLiveLink: false, Icon: "HC", Status: "In development"},
@@ -386,6 +407,22 @@ func detailFor(p model.ProjectItem) model.ProjectDetailData {
 			},
 			TechStack:   []string{"Go", "River", "PostgreSQL", "sqlc", "React", "Vite", "SwiftUI", "Cloudflare R2"},
 			BackendNote: "In development; not deployed yet.",
+		}
+	case "aegis-terra":
+		return model.ProjectDetailData{
+			Project: p,
+			Tagline: "A global natural-hazard map: what is happening on Earth right now, how serious it is, and where.",
+			LongDesc: []string{
+				"Aegis Terra gathers earthquakes, wildfires, floods, storms, volcanoes and official weather warnings from GDACS, USGS, NASA EONET, NASA FIRMS and Meteoalarm, and puts them on one map that updates live.",
+				"Every record shows which source it came from, that source's own severity next to the one Aegis Terra derives, and how fresh it is. It is an information tool, and it does not replace national emergency services.",
+			},
+			Features: []model.DetailFeature{
+				{Title: "One map, five sources", Body: "Each feed is polled on its own schedule and normalized into one event model, with every event assigned to the countries it touches."},
+				{Title: "Severity you can check", Body: "The source's own rating is always shown beside the derived one, so nothing is hidden behind a single score."},
+				{Title: "Live, not refreshed", Body: "Changes reach the app over server-sent events, and every event says how long ago it was updated."},
+			},
+			TechStack:   []string{"Go", "Echo", "River", "PostgreSQL", "PostGIS", "sqlc", "OpenAPI", "SwiftUI", "MapKit"},
+			BackendNote: "In development; not deployed yet. iPhone and Mac come first, then the web.",
 		}
 	case "fandemic":
 		return model.ProjectDetailData{
