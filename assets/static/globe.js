@@ -48,8 +48,8 @@ function toVec3(lat, lon, radius) {
  * ephemeris for a decoration that only has to be honest, not precise.
  */
 function sunDirection(date) {
-  const start = Date.UTC(date.getUTCFullYear(), 0, 0);
-  const dayOfYear = (Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - start) / 86400000;
+  const yearStart = Date.UTC(date.getUTCFullYear(), 0, 0);
+  const dayOfYear = (Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - yearStart) / 86400000;
   const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60;
 
   const lat = 23.44 * Math.sin(((2 * Math.PI) / 365) * (dayOfYear - 81));
@@ -219,6 +219,13 @@ function makeMarkerMaterial(colors) {
       }
     `,
   });
+}
+
+function applyMetrics(payload) {
+  for (const [key, value] of Object.entries(payload)) {
+    const el = document.querySelector(`[data-metric="${key}"]`);
+    if (el && typeof value === 'number') el.textContent = String(value);
+  }
 }
 
 function start(landGeometry) {
@@ -425,13 +432,6 @@ function start(landGeometry) {
   loop();
 
   // ---- data ----------------------------------------------------------------
-
-  function applyMetrics(payload) {
-    for (const [key, value] of Object.entries(payload)) {
-      const el = document.querySelector(`[data-metric="${key}"]`);
-      if (el && typeof value === 'number') el.textContent = String(value);
-    }
-  }
 
   async function backfill() {
     try {

@@ -1,0 +1,35 @@
+{
+	// oxlint over the site's own JavaScript (assets/static/*.js). There is no
+	// package.json here on purpose: run it with `task lint:js`, which pins the
+	// version through npx. CI runs the same command (job lint-js).
+	//
+	// Profile: "bug-finding". Every rule in the correctness, suspicious and perf
+	// categories, plus a few pedantic rules that catch defects rather than style.
+	"plugins": ["unicorn", "oxc", "import"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error",
+		"perf": "error"
+	},
+	"env": { "browser": true, "es2022": true },
+	// vendor/ is third-party code, copied in as shipped. promo/ is a one-off
+	// Node render script with its own dependencies. tmp/ is air's scratch dir.
+	"ignorePatterns": ["assets/static/vendor/**", "promo/**", "tmp/**"],
+	"overrides": [
+		{ "files": ["assets/static/sw.js"], "env": { "browser": false, "serviceworker": true } }
+	],
+	"rules": {
+		"eqeqeq": ["error", "always", { "null": "ignore" }],
+		"array-callback-return": "error",
+		"no-self-compare": "error",
+		"no-constructor-return": "error",
+
+		"no-unused-vars": [
+			"error",
+			{ "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }
+		]
+
+		// BACKLOG: empty. If a rule of this profile ever has to be relaxed for
+		// existing code, list it here as "warn" with its hit count, never "off".
+	}
+}

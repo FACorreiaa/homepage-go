@@ -59,3 +59,22 @@ jobs:
         with:
           version: v2.15.0
           working-directory: .
+
+  # The site's own JavaScript (assets/static/*.js; vendor/ is ignored). There is
+  # no package.json, so oxlint is run through npx at a pinned version. Keep the
+  # command the same as `task lint:js`.
+  lint-js:
+    name: Lint JS (oxlint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: oxlint
+        run: npx --yes oxlint@1.94.0 -c .oxlintrc.json assets/static
