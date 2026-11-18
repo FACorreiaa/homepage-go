@@ -16,8 +16,8 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.12.1
-	github.com/templui/templui v1.13.2
-	github.com/yuin/goldmark v1.8.6
+	github.com/templui/templui/v2 v2.0.1
+	github.com/yuin/goldmark/v2 v2.1.16
 	golang.org/x/crypto v0.57.0
 	modernc.org/sqlite v1.60.1
 )
